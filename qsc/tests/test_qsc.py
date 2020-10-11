@@ -72,7 +72,7 @@ class QscTests(unittest.TestCase):
         Check that the quasisymmetry helicity number N is correct for
         published examples.
         """
-        for nphi in [15, 50, 111, 200]:
+        for nphi in [15, 20]:
             # Landreman, Sengupta, Plunk (2019), section 5.1:
             stel = Qsc(rc=[1, 0.045], zs=[0, -0.045], nfp=3, nphi=nphi)
             self.assertEqual(stel.helicity, 0)
@@ -105,6 +105,46 @@ class QscTests(unittest.TestCase):
             # Landreman & Sengupta (2019), section 5.5:
             stel = Qsc(rc=[1, 0.3], zs=[0, 0.3], nfp=5, nphi=nphi)
             self.assertEqual(stel.helicity, 1)
+            
+    def test_iota(self):
+        """
+        Solve the sigma equation and verify that the resulting iota matches
+        published examples.
+        """
+        places = 8
+        for nphi in [63]:
+            # Landreman, Sengupta, Plunk (2019), section 5.1:
+            stel = Qsc(rc=[1, 0.045], zs=[0, -0.045], nfp=3, nphi=nphi, etabar=-0.9)
+            self.assertAlmostEqual(stel.iota, 0.418306910215178, places=places)
+            
+            # Landreman, Sengupta, Plunk (2019), section 5.2:
+            stel = Qsc(rc=[1, 0.265], zs=[0, -0.21], nfp=4, nphi=nphi, etabar=-2.25)
+            self.assertAlmostEqual(stel.iota, 1.93109725535729, places=places)
+            
+            # Landreman, Sengupta, Plunk (2019), section 5.3:
+            stel = Qsc(rc=[1, 0.042], zs=[0, -0.042], zc=[0, -0.025], nfp=3, nphi=nphi, etabar=-1.1, sigma0=-0.6)
+            self.assertAlmostEqual(stel.iota, 0.311181373123728, places=places)
+        
+            # Landreman & Sengupta (2019), section 5.1:
+            stel = Qsc(rc=[1, 0.155, 0.0102], zs=[0, 0.154, 0.0111], nfp=2, nphi=nphi, etabar=0.64)
+            self.assertAlmostEqual(stel.iota, -0.420473351810416 , places=places)
+        
+            # Landreman & Sengupta (2019), section 5.2:
+            stel = Qsc(rc=[1, 0.173, 0.0168, 0.00101], zs=[0, 0.159, 0.0165, 0.000985], nfp=2, nphi=nphi, etabar=0.632)
+            self.assertAlmostEqual(stel.iota, -0.423723995700502, places=places)
+            
+            # Landreman & Sengupta (2019), section 5.3:
+            stel = Qsc(rc=[1, 0.09], zs=[0, -0.09], nfp=2, nphi=nphi, etabar=0.95, I2=0.9)
+            self.assertAlmostEqual(stel.iota, 0.959698159859113, places=places)
+            
+            # Landreman & Sengupta (2019), section 5.4:
+            stel = Qsc(rc=[1, 0.17, 0.01804, 0.001409, 5.877e-05],
+                       zs=[0, 0.1581, 0.01820, 0.001548, 7.772e-05], nfp=4, nphi=nphi, etabar=1.569)
+            self.assertAlmostEqual(stel.iota, -1.14413695118515, places=places)
+            
+            # Landreman & Sengupta (2019), section 5.5:
+            stel = Qsc(rc=[1, 0.3], zs=[0, 0.3], nfp=5, nphi=nphi, etabar=2.5, sigma0=0.3, I2=1.6)
+            self.assertAlmostEqual(stel.iota, -0.828885267089981, places=places)
             
 if __name__ == "__main__":
     unittest.main()

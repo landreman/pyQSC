@@ -4,11 +4,16 @@ stellarator construction.
 """
 
 import numpy as np
+import scipy.optimize
+import logging
 from .spectral_diff_matrix import spectral_diff_matrix
 
+#logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 class Qsc():
-    def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1, sigma0=0, B0=0,
-                 I2=0, sG=1, spsi=1, nphi=15):
+    def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
+                 I2=0., sG=1, spsi=1, nphi=15):
         """
         Create a quasisymmetric stellarator.
         """
@@ -44,7 +49,7 @@ class Qsc():
         self.spsi = spsi
         self.nphi = nphi
 
-        self.init_axis()
+        self.calculate()
         
     def init_axis(self):
         """
@@ -132,11 +137,11 @@ class Qsc():
 
         torsion = torsion_numerator / torsion_denominator
 
-        self.B1Squared_over_curvatureSquared = self.etabar * self.etabar / (curvature * curvature)
+        self.etabar_squared_over_curvature_squared = self.etabar * self.etabar / (curvature * curvature)
         
         self.d_d_phi = spectral_diff_matrix(self.nphi, xmax=2 * np.pi / self.nfp)
         self.d_d_varphi = np.zeros((nphi, nphi))
-        for j in range(3):
+        for j in range(nphi):
             self.d_d_varphi[j,:] = self.d_d_phi[j,:] / (B0_over_abs_G0 * d_l_d_phi[j])
 
         # Compute the Boozer toroidal angle:
@@ -203,11 +208,43 @@ class Qsc():
         iota = x[0]
         r = np.matmul(self.d_d_varphi, sigma) \
             + (iota + self.helicity * self.nfp) * \
-            (self.B1Squared_over_curvatureSquared * self.B1Squared_over_curvatureSquared + 1 + sigma * sigma) \
-            - 2 * B1Squared_over_curvatureSquared * (-self.spsi * self.torsion + self.I2 / self.B0) * self.G0 / self.B0
+            (self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma) \
+            - 2 * self.etabar_squared_over_curvature_squared * (-self.spsi * self.torsion + self.I2 / self.B0) * self.G0 / self.B0
+        logger.debug("_residual called with x={}, r={}".format(x, r))
         return r
+
+    def _jacobian(self, x):
+        """
+        Compute the Jacobian matrix for solving the sigma equation. x is
+        the state vector, corresponding to sigma on the phi grid,
+        except that the first element of x is actually iota.
+        """
+        sigma = np.copy(x)
+        sigma[0] = self.sigma0
+        iota = x[0]
+
+        # d (Riccati equation) / d sigma:
+        # For convenience we will fill all the columns now, and re-write the first column in a moment.
+        jac = np.copy(self.d_d_varphi)
+        for j in range(self.nphi):
+            jac[j, j] += (iota + self.helicity * self.nfp) * 2 * sigma[j]
+
+        # d (Riccati equation) / d iota:
+        jac[:, 0] = self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma
+
+        logger.debug("_jacobian called with x={}, jac={}".format(x, jac))
+        return jac
+    
+    def calculate(self):
+        """
+        Driver for the main calculations.
+        """
+        self.init_axis()
+
+        # Solve the sigma equation:
+        x0 = np.full(self.nphi, self.sigma0)
+        soln = scipy.optimize.root(self._residual, x0, jac=self._jacobian)
+        self.iota = soln.x[0]
+        self.sigma = np.copy(soln.x)
+        self.sigma[0] = self.sigma0
         
-    def solve(self, newton_tol=1e-13, newton_maxit=10, linesearch_maxit=5):
-        """
-        Solve the sigma equation
-        """
