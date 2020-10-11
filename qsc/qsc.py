@@ -7,6 +7,7 @@ import numpy as np
 import scipy.optimize
 import logging
 from .spectral_diff_matrix import spectral_diff_matrix
+from .util import fourier_minimum
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -51,6 +52,14 @@ class Qsc():
 
         self.calculate()
         
+    def calculate(self):
+        """
+        Driver for the main calculations.
+        """
+        self.init_axis()
+        self.solve_sigma_equation()
+        self.r1_diagnostics()
+
     def init_axis(self):
         """
         Initialize the curvature, torsion, differentiation matrix, etc.
@@ -156,6 +165,7 @@ class Qsc():
         self.R0 = R0
         self.Z0 = Z0
         self.G0 = G0
+        self.d_l_d_phi = d_l_d_phi
         self.axis_length = axis_length
         self.curvature = curvature
         self.torsion = torsion
@@ -234,17 +244,31 @@ class Qsc():
 
         logger.debug("_jacobian called with x={}, jac={}".format(x, jac))
         return jac
-    
-    def calculate(self):
-        """
-        Driver for the main calculations.
-        """
-        self.init_axis()
 
-        # Solve the sigma equation:
+    def solve_sigma_equation(self):
+        """
+        Solve the sigma equation.
+        """
         x0 = np.full(self.nphi, self.sigma0)
-        soln = scipy.optimize.root(self._residual, x0, jac=self._jacobian)
+        x0[0] = 0 # Initial guess for iota
+        soln = scipy.optimize.root(self._residual, x0, jac=self._jacobian, method='lm')
         self.iota = soln.x[0]
         self.sigma = np.copy(soln.x)
         self.sigma[0] = self.sigma0
-        
+    
+    def r1_diagnostics(self):
+        """
+        Compute various properties of the O(r^1) solution, once sigma and
+        iota are solved for.
+        """
+        self.Y1s = self.sG * self.spsi * self.curvature / self.etabar
+        self.Y1c = self.sG * self.spsi * self.curvature * self.sigma / self.etabar
+
+        # Use (R,Z) for elongation in the (R,Z) plane,
+        # or use (X,Y) for elongation in the plane perpendicular to the magnetic axis.
+        p = self.X1s * self.X1s + self.X1c * self.X1c + self.Y1s * self.Y1s + self.Y1c * self.Y1c
+        q = self.X1s * self.Y1c - self.X1c * self.Y1s
+        self.elongation = (p + np.sqrt(p * p - 4 * q * q)) / (2 * np.abs(q))
+        self.mean_elongation = np.sum(self.elongation * self.d_l_d_phi) / np.sum(self.d_l_d_phi)
+        index = np.argmax(self.elongation)
+        self.max_elongation = -fourier_minimum(-self.elongation)
