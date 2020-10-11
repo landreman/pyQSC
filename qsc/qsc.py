@@ -49,6 +49,7 @@ class Qsc():
         self.sG = sG
         self.spsi = spsi
         self.nphi = nphi
+        self._set_names()
 
         self.calculate()
         
@@ -272,3 +273,38 @@ class Qsc():
         self.mean_elongation = np.sum(self.elongation * self.d_l_d_phi) / np.sum(self.d_l_d_phi)
         index = np.argmax(self.elongation)
         self.max_elongation = -fourier_minimum(-self.elongation)
+
+    def get_dofs(self):
+        """
+        Return a 1D numpy vector of all possible optimizable
+        degrees-of-freedom, for simsopt.
+        """
+        return np.concatenate((self.rc, self.zs, self.rs, self.zc,
+                               np.array([self.etabar, self.sigma0])))
+
+    def set_dofs(self, x):
+        """
+        For interaction with simsopt, set the optimizable degrees of
+        freedom from a 1D numpy vector.
+        """
+        assert len(x) == self.nfourier * 4 + 2
+        self.rc = x[self.nfourier * 0 : self.nfourier * 1]
+        self.zs = x[self.nfourier * 1 : self.nfourier * 2]
+        self.rs = x[self.nfourier * 2 : self.nfourier * 3]
+        self.zc = x[self.nfourier * 3 : self.nfourier * 4]
+        self.etabar = x[self.nfourier * 4 + 0]
+        self.sigma0 = x[self.nfourier * 4 + 1]
+        self.calculate()
+        logger.info('set_dofs called with x={}. Now iota={}, elongation={}'.format(x, self.iota, self.max_elongation))
+        
+    def _set_names(self):
+        """
+        For simsopt, sets the list of names for each degree of freedom.
+        """
+        names = []
+        names += ['rc({})'.format(j) for j in range(self.nfourier)]
+        names += ['zs({})'.format(j) for j in range(self.nfourier)]
+        names += ['rs({})'.format(j) for j in range(self.nfourier)]
+        names += ['zc({})'.format(j) for j in range(self.nfourier)]
+        names += ['etabar', 'sigma0']
+        self.names = names
