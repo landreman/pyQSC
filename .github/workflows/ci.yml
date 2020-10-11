@@ -1,0 +1,50 @@
+# This file is based on examples in
+# https://docs.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8]
+
+    steps:
+    # First print out lots of information. We do this in separate 
+    # "name" blocks because otherwise the output gets mixed together
+    # in the github actions log.
+
+    - name: Print user and group id
+      run: id
+
+    - name: PWD
+      run: pwd
+
+    - uses: actions/checkout@v2
+      # If we want submodules downloaded, uncomment the next 2 lines:
+      #with:
+      #  submodules: true
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: which python after python setup
+      run: python --version
+
+    - name: Install required python packages
+      run: |
+        python -m pip install --upgrade pip
+        pip install wheel numpy jax jaxlib
+    
+    - name: env after adding python
+      run: env
+
+    - name: Run unit tests
+      run: python3 -m unittest -v
