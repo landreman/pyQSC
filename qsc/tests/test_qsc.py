@@ -66,6 +66,45 @@ class QscTests(unittest.TestCase):
         np.testing.assert_allclose(stel.curvature, curvature_fortran, rtol=rtol, atol=atol)
         np.testing.assert_allclose(stel.torsion, torsion_fortran, rtol=rtol, atol=atol)
         np.testing.assert_allclose(stel.varphi, varphi_fortran, rtol=rtol, atol=atol)
-                
+
+    def test_helicity(self):
+        """
+        Check that the quasisymmetry helicity number N is correct for
+        published examples.
+        """
+        for nphi in [15, 50, 111, 200]:
+            # Landreman, Sengupta, Plunk (2019), section 5.1:
+            stel = Qsc(rc=[1, 0.045], zs=[0, -0.045], nfp=3, nphi=nphi)
+            self.assertEqual(stel.helicity, 0)
+            
+            # Landreman, Sengupta, Plunk (2019), section 5.2:
+            stel = Qsc(rc=[1, 0.265], zs=[0, -0.21], nfp=4, nphi=nphi)
+            self.assertEqual(stel.helicity, -1)
+            
+            # Landreman, Sengupta, Plunk (2019), section 5.3:
+            stel = Qsc(rc=[1, 0.042], zs=[0, -0.042], zc=[0, -0.025], nfp=3, nphi=nphi)
+            self.assertEqual(stel.helicity, 0)
+        
+            # Landreman & Sengupta (2019), section 5.1:
+            stel = Qsc(rc=[1, 0.155, 0.0102], zs=[0, 0.154, 0.0111], nfp=2, nphi=nphi)
+            self.assertEqual(stel.helicity, 0)
+        
+            # Landreman & Sengupta (2019), section 5.2:
+            stel = Qsc(rc=[1, 0.173, 0.0168, 0.00101], zs=[0, 0.159, 0.0165, 0.000985], nfp=2, nphi=nphi)
+            self.assertEqual(stel.helicity, 0)
+            
+            # Landreman & Sengupta (2019), section 5.3:
+            stel = Qsc(rc=[1, 0.09], zs=[0, -0.09], nfp=2, nphi=nphi)
+            self.assertEqual(stel.helicity, 0)
+            
+            # Landreman & Sengupta (2019), section 5.4:
+            stel = Qsc(rc=[1, 0.17, 0.01804, 0.001409, 5.877e-05],
+                       zs=[0, 0.1581, 0.01820, 0.001548, 7.772e-05], nfp=4, nphi=nphi)
+            self.assertEqual(stel.helicity, 1)
+            
+            # Landreman & Sengupta (2019), section 5.5:
+            stel = Qsc(rc=[1, 0.3], zs=[0, 0.3], nfp=5, nphi=nphi)
+            self.assertEqual(stel.helicity, 1)
+            
 if __name__ == "__main__":
     unittest.main()

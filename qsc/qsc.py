@@ -25,6 +25,16 @@ class Qsc():
         self.rs[:len(rs)] = rs
         self.zc[:len(zc)] = zc
 
+        # Force nphi to be odd:
+        if np.mod(nphi, 2) == 0:
+            nphi += 1
+
+        if sG != 1 and sG != -1:
+            raise ValueError('sG must be +1 or -1')
+        
+        if spsi != 1 and spsi != -1:
+            raise ValueError('spsi must be +1 or -1')
+
         self.nfp = nfp
         self.etabar = etabar
         self.sigma0 = sigma0
@@ -99,6 +109,8 @@ class Qsc():
         normal_cylindrical = np.zeros((nphi, 3))
         for j in range(3):
             normal_cylindrical[:,j] = d_tangent_d_l_cylindrical[:,j] / curvature
+        self.normal_cylindrical = normal_cylindrical
+        self._determine_helicity()
 
         # b = t x n
         binormal_cylindrical = np.zeros((nphi, 3))
@@ -144,8 +156,43 @@ class Qsc():
         self.torsion = torsion
         self.X1s = np.zeros(nphi)
         self.X1c = self.etabar / curvature
+
+    def _determine_helicity(self):
+        """
+        Determine the integer N associated with the type of quasisymmetry
+        by counting the number of times the normal vector rotates
+        poloidally as you follow the axis around toroidally.
+        """
+        quadrant = np.zeros(self.nphi + 1)
+        for j in range(self.nphi):
+            if self.normal_cylindrical[j,0] >= 0:
+                if self.normal_cylindrical[j,2] >= 0:
+                    quadrant[j] = 1
+                else:
+                    quadrant[j] = 4
+            else:
+                if self.normal_cylindrical[j,2] >= 0:
+                    quadrant[j] = 2
+                else:
+                    quadrant[j] = 3
+        quadrant[self.nphi] = quadrant[0]
         
-    def _residual(x):
+        counter = 0
+        for j in range(self.nphi):
+            if quadrant[j] == 4 and quadrant[j+1] == 1:
+                counter += 1
+            elif quadrant[j] == 1 and quadrant[j+1] == 4:
+                counter -= 1
+            else:
+                counter += quadrant[j+1] - quadrant[j]
+
+        # It is necessary to flip the sign of axis_helicity in order
+        # to maintain "iota_N = iota + axis_helicity" under the parity
+        # transformations.
+        counter *= self.spsi * self.sG
+        self.helicity = counter / 4
+        
+    def _residual(self, x):
         """
         Residual in the sigma equation, used for Newton's method.  x is
         the state vector, corresponding to sigma on the phi grid,
@@ -154,13 +201,13 @@ class Qsc():
         sigma = np.copy(x)
         sigma[0] = self.sigma0
         iota = x[0]
-        r = np.matmul(self.d_d_varphi, x) \
+        r = np.matmul(self.d_d_varphi, sigma) \
             + (iota + self.helicity * self.nfp) * \
             (self.B1Squared_over_curvatureSquared * self.B1Squared_over_curvatureSquared + 1 + sigma * sigma) \
             - 2 * B1Squared_over_curvatureSquared * (-self.spsi * self.torsion + self.I2 / self.B0) * self.G0 / self.B0
         return r
         
-    def solve(newton_tol=1e-13, newton_maxit=10, linesearch_maxit=5):
+    def solve(self, newton_tol=1e-13, newton_maxit=10, linesearch_maxit=5):
         """
         Solve the sigma equation
         """
