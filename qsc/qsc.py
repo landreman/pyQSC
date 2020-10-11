@@ -22,8 +22,8 @@ class Qsc():
         self.zc = np.zeros(nfourier)
         self.rc[:len(rc)] = rc
         self.zs[:len(zs)] = zs
-        self.rc[:len(rs)] = rs
-        self.zs[:len(zc)] = zc
+        self.rs[:len(rs)] = rs
+        self.zc[:len(zc)] = zc
 
         self.nfp = nfp
         self.etabar = etabar
@@ -31,12 +31,12 @@ class Qsc():
         self.B0 = B0
         self.I2 = I2
         self.sG = sG
-        self.sphi = sphi
+        self.spsi = spsi
         self.nphi = nphi
 
         self.init_axis()
         
-    def init_axis():
+    def init_axis(self):
         """
         Initialize the curvature, torsion, differentiation matrix, etc.
         """
@@ -44,7 +44,7 @@ class Qsc():
         nphi = self.nphi
         nfp = self.nfp
         
-        phi = np.linspace(0, 2 * np.pi / nfp, endpoint=False)
+        phi = np.linspace(0, 2 * np.pi / nfp, nphi, endpoint=False)
         d_phi = phi[1] - phi[0]
         R0 = np.zeros(nphi)
         Z0 = np.zeros(nphi)
@@ -63,15 +63,15 @@ class Qsc():
             R0p += self.rc[jn] * (-n * sinangle) + self.rs[jn] * (n * cosangle)
             Z0p += self.zc[jn] * (-n * sinangle) + self.zs[jn] * (n * cosangle)
             R0pp += self.rc[jn] * (-n * n * cosangle) + self.rs[jn] * (-n * n * sinangle)
-            Z0pp += self.zc[jn] * (-n * n * cosangle) + self.zs[jn] * (-n * n * sinalgle)
+            Z0pp += self.zc[jn] * (-n * n * cosangle) + self.zs[jn] * (-n * n * sinangle)
             R0ppp += self.rc[jn] * (n * n * n * sinangle) + self.rs[jn] * (-n * n * n * cosangle)
             Z0ppp += self.zc[jn] * (n * n * n * sinangle) + self.zs[jn] * (-n * n * n * cosangle)
 
         d_l_d_phi = np.sqrt(R0 * R0 + R0p * R0p + Z0p * Z0p)
         d2_l_d_phi2 = (R0 * R0p + R0p * R0pp + Z0p * Z0pp) / d_l_d_phi
-        B0_over_abs_G0 = N_phi / np.sum(d_l_d_phi)
+        B0_over_abs_G0 = nphi / np.sum(d_l_d_phi)
         abs_G0_over_B0 = 1 / B0_over_abs_G0
-        self.G0 = self.sG * abs_G0_over_B0 * self.B0
+        G0 = self.sG * abs_G0_over_B0 * self.B0
 
         # For these next arrays, the first dimension is phi, and the 2nd dimension is (R, phi, Z).
         d_r_d_phi_cylindrical = np.array([R0p, R0, Z0p]).transpose()
@@ -123,12 +123,12 @@ class Qsc():
         self.B1Squared_over_curvatureSquared = self.etabar * self.etabar / (curvature * curvature)
         
         self.d_d_phi = spectral_diff_matrix(self.nphi, xmax=2 * np.pi / self.nfp)
-        self.d_d_zeta = np.zeros((nphi, nphi))
+        self.d_d_varphi = np.zeros((nphi, nphi))
         for j in range(3):
             self.d_d_varphi[j,:] = self.d_d_phi[j,:] / (B0_over_abs_G0 * d_l_d_phi[j])
 
         # Compute the Boozer toroidal angle:
-        self.varphi = np.zeros(phi)
+        self.varphi = np.zeros(nphi)
         for j in range(1, nphi):
             # To get toroidal angle on the full mesh, we need d_l_d_phi on the half mesh.
             self.varphi[j] = self.varphi[j-1] + (d_l_d_phi[j-1] + d_l_d_phi[j])
