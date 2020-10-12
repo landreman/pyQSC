@@ -6,7 +6,7 @@ stellarator construction.
 import numpy as np
 import scipy.optimize
 import logging
-from numba import jit
+#from numba import jit
 from .spectral_diff_matrix import spectral_diff_matrix
 from .util import fourier_minimum
 
