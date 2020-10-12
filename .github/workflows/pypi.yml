@@ -1,0 +1,28 @@
+# This file is based on the instructions in
+# https://packaging.python.org/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
+
+name: Publish python distribution to PyPI
+
+on: push
+
+jobs:
+  build-and-publish:
+    name: Build and publish python distributions to PyPI
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+    
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+	
+    - name: Build a binary wheel and a source tarball
+      run: python3 setup.py sdist bdist_wheel
+
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.pypi_password }}
+
