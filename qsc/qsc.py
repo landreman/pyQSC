@@ -6,6 +6,7 @@ stellarator construction.
 import numpy as np
 import scipy.optimize
 import logging
+from numba import jit
 from .spectral_diff_matrix import spectral_diff_matrix
 from .util import fourier_minimum
 
@@ -221,7 +222,7 @@ class Qsc():
             + (iota + self.helicity * self.nfp) * \
             (self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma) \
             - 2 * self.etabar_squared_over_curvature_squared * (-self.spsi * self.torsion + self.I2 / self.B0) * self.G0 / self.B0
-        logger.debug("_residual called with x={}, r={}".format(x, r))
+        #logger.debug("_residual called with x={}, r={}".format(x, r))
         return r
 
     def _jacobian(self, x):
@@ -243,7 +244,7 @@ class Qsc():
         # d (Riccati equation) / d iota:
         jac[:, 0] = self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma
 
-        logger.debug("_jacobian called with x={}, jac={}".format(x, jac))
+        #logger.debug("_jacobian called with x={}, jac={}".format(x, jac))
         return jac
 
     def solve_sigma_equation(self):
