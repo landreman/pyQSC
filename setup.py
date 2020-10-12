@@ -5,14 +5,14 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="qsc",
-    version="0.0.1",
+    version="0.0.2",
     author="Matt Landreman",
     author_email="matt.landreman@gmail.com",
     description="Quasisymmetric Stellarator Construction",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    packages=setuptools.find_packages(),
     url="https://github.com/landreman/pyQSC",
-    packages=["qsc"],
     install_requires=['numpy', 'scipy'],
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -21,4 +21,4 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
 )
-#    packages=setuptools.find_packages(),
+#    packages=["qsc"],
