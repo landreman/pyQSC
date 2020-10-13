@@ -9,6 +9,7 @@ import logging
 #from numba import jit
 from .spectral_diff_matrix import spectral_diff_matrix
 from .util import fourier_minimum
+from .newton import newton
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -253,11 +254,17 @@ class Qsc():
         """
         x0 = np.full(self.nphi, self.sigma0)
         x0[0] = 0 # Initial guess for iota
+        """
         soln = scipy.optimize.root(self._residual, x0, jac=self._jacobian, method='lm')
         self.iota = soln.x[0]
         self.sigma = np.copy(soln.x)
         self.sigma[0] = self.sigma0
-    
+        """
+        self.sigma = newton(self._residual, x0, jac=self._jacobian)
+        self.iota = self.sigma[0]
+        self.sigma[0] = self.sigma0
+        
+        
     def r1_diagnostics(self):
         """
         Compute various properties of the O(r^1) solution, once sigma and
