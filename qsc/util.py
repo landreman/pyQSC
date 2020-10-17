@@ -17,6 +17,10 @@ def fourier_minimum(y):
     Given uniformly spaced data y on a periodic domain, find the
     minimum of the spectral interpolant.
     """
+    # Handle the case of a constant:
+    if (np.max(y) - np.min(y)) / np.max([1e-14, np.abs(np.mean(y))]) < 1e-14:
+        return y[0]
+    
     n = len(y)
     dx = 2 * np.pi / n
     # Compute a rough guess for the minimum, given by the minimum of

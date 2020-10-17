@@ -10,6 +10,7 @@ import logging
 from .spectral_diff_matrix import spectral_diff_matrix
 from .util import fourier_minimum
 from .newton import newton
+from .grad_B_tensor import grad_B_tensor
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -98,6 +99,7 @@ class Qsc():
         d2_l_d_phi2 = (R0 * R0p + R0p * R0pp + Z0p * Z0pp) / d_l_d_phi
         B0_over_abs_G0 = nphi / np.sum(d_l_d_phi)
         abs_G0_over_B0 = 1 / B0_over_abs_G0
+        self.d_l_d_varphi = abs_G0_over_B0
         G0 = self.sG * abs_G0_over_B0 * self.B0
 
         # For these next arrays, the first dimension is phi, and the 2nd dimension is (R, phi, Z).
@@ -262,6 +264,7 @@ class Qsc():
         """
         self.sigma = newton(self._residual, x0, jac=self._jacobian)
         self.iota = self.sigma[0]
+        self.iotaN = self.iota + self.helicity * self.nfp
         self.sigma[0] = self.sigma0
         
         
@@ -282,6 +285,14 @@ class Qsc():
         index = np.argmax(self.elongation)
         self.max_elongation = -fourier_minimum(-self.elongation)
 
+        self.d_X1c_d_varphi = np.matmul(self.d_d_varphi, self.X1c)
+        self.d_Y1s_d_varphi = np.matmul(self.d_d_varphi, self.Y1s)
+        self.d_Y1c_d_varphi = np.matmul(self.d_d_varphi, self.Y1c)
+
+        self.grad_B_tensor = grad_B_tensor(self)
+        self.L_grad_B = self.grad_B_tensor.L_grad_B
+        self.min_L_grad_B = fourier_minimum(self.L_grad_B)
+        
     def get_dofs(self):
         """
         Return a 1D numpy vector of all possible optimizable

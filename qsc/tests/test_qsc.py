@@ -117,42 +117,50 @@ class QscTests(unittest.TestCase):
             stel = Qsc(rc=[1, 0.045], zs=[0, -0.045], nfp=3, nphi=nphi, etabar=-0.9)
             self.assertAlmostEqual(stel.iota, 0.418306910215178, places=places)
             self.assertAlmostEqual(stel.max_elongation, 2.41373705531443, places=places)
+            self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.52948586064743, places=places)
             
             # Landreman, Sengupta, Plunk (2019), section 5.2:
             stel = Qsc(rc=[1, 0.265], zs=[0, -0.21], nfp=4, nphi=nphi, etabar=-2.25)
             self.assertAlmostEqual(stel.iota, 1.93109725535729, places=places)
             self.assertAlmostEqual(stel.max_elongation, 3.08125973323805, places=places)
+            self.assertAlmostEqual(stel.min_L_grad_B, 1 / 4.73234243198959, places=places)
             
             # Landreman, Sengupta, Plunk (2019), section 5.3:
             stel = Qsc(rc=[1, 0.042], zs=[0, -0.042], zc=[0, -0.025], nfp=3, nphi=nphi, etabar=-1.1, sigma0=-0.6)
             self.assertAlmostEqual(stel.iota, 0.311181373123728, places=places)
             self.assertAlmostEqual(stel.max_elongation, 3.30480616121377, places=places)
+            self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.7014044379421, places=places)
         
             # Landreman & Sengupta (2019), section 5.1:
             stel = Qsc(rc=[1, 0.155, 0.0102], zs=[0, 0.154, 0.0111], nfp=2, nphi=nphi, etabar=0.64)
             self.assertAlmostEqual(stel.iota, -0.420473351810416 , places=places)
             self.assertAlmostEqual(stel.max_elongation, 4.38384260252044, places=places)
+            self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.39153088147691, places=places)
         
             # Landreman & Sengupta (2019), section 5.2:
             stel = Qsc(rc=[1, 0.173, 0.0168, 0.00101], zs=[0, 0.159, 0.0165, 0.000985], nfp=2, nphi=nphi, etabar=0.632)
             self.assertAlmostEqual(stel.iota, -0.423723995700502, places=places)
             self.assertAlmostEqual(stel.max_elongation, 4.86202324600918, places=places)
+            self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.47675199709439, places=places)
             
             # Landreman & Sengupta (2019), section 5.3:
             stel = Qsc(rc=[1, 0.09], zs=[0, -0.09], nfp=2, nphi=nphi, etabar=0.95, I2=0.9)
             self.assertAlmostEqual(stel.iota, 0.959698159859113, places=places)
             self.assertAlmostEqual(stel.max_elongation, 2.20914173760329, places=places)
+            self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.4922510395338, places=places)
             
             # Landreman & Sengupta (2019), section 5.4:
             stel = Qsc(rc=[1, 0.17, 0.01804, 0.001409, 5.877e-05],
                        zs=[0, 0.1581, 0.01820, 0.001548, 7.772e-05], nfp=4, nphi=nphi, etabar=1.569)
             self.assertAlmostEqual(stel.iota, -1.14413695118515, places=places)
             self.assertAlmostEqual(stel.max_elongation, 2.98649978627541, places=places)
+            self.assertAlmostEqual(stel.min_L_grad_B, 1 / 2.64098280647292, places=places)
             
             # Landreman & Sengupta (2019), section 5.5:
             stel = Qsc(rc=[1, 0.3], zs=[0, 0.3], nfp=5, nphi=nphi, etabar=2.5, sigma0=0.3, I2=1.6)
             self.assertAlmostEqual(stel.iota, -0.828885267089981, places=places)
             self.assertAlmostEqual(stel.max_elongation, 3.6226360623368, places=places)
+            self.assertAlmostEqual(stel.min_L_grad_B, 1 / 4.85287603883526, places=places)
             
 if __name__ == "__main__":
     unittest.main()
