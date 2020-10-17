@@ -76,56 +76,56 @@ class QscTests(unittest.TestCase):
         places2 = 3 # For max/min quantities that are less accurate
         for nphi in [50, 63]:
             # Landreman, Sengupta, Plunk (2019), section 5.1:
-            stel = Qsc.r1_section51(nphi=nphi)
+            stel = Qsc.from_paper('r1 section 5.1', nphi=nphi)
             self.assertEqual(stel.helicity, 0)
             self.assertAlmostEqual(stel.iota, 0.418306910215178, places=places)
             self.assertAlmostEqual(stel.max_elongation, 2.41373705531443, places=places2)
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.52948586064743, places=places2)
             
             # Landreman, Sengupta, Plunk (2019), section 5.2:
-            stel = Qsc.r1_section52(nphi=nphi)
+            stel = Qsc.from_paper('r1 section 5.2', nphi=nphi)
             self.assertEqual(stel.helicity, -1)
             self.assertAlmostEqual(stel.iota, 1.93109725535729, places=places)
             self.assertAlmostEqual(stel.max_elongation, 3.08125973323805, places=places2)
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 4.73234243198959, places=places2)
             
             # Landreman, Sengupta, Plunk (2019), section 5.3:
-            stel = Qsc.r1_section53(nphi=nphi)
+            stel = Qsc.from_paper('r1 section 5.3', nphi=nphi)
             self.assertEqual(stel.helicity, 0)
             self.assertAlmostEqual(stel.iota, 0.311181373123728, places=places)
             self.assertAlmostEqual(stel.max_elongation, 3.30480616121377, places=places2)
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.7014044379421, places=places2)
         
             # Landreman & Sengupta (2019), section 5.1:
-            stel = Qsc.r2_section51(nphi=nphi)
+            stel = Qsc.from_paper('r2 section 5.1', nphi=nphi)
             self.assertEqual(stel.helicity, 0)
             self.assertAlmostEqual(stel.iota, -0.420473351810416 , places=places)
             self.assertAlmostEqual(stel.max_elongation, 4.38384260252044, places=places2)
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.39153088147691, places=places2)
         
             # Landreman & Sengupta (2019), section 5.2:
-            stel = Qsc.r2_section52(nphi=nphi)
+            stel = Qsc.from_paper('r2 section 5.2', nphi=nphi)
             self.assertEqual(stel.helicity, 0)
             self.assertAlmostEqual(stel.iota, -0.423723995700502, places=places)
             self.assertAlmostEqual(stel.max_elongation, 4.86202324600918, places=places2)
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.47675199709439, places=places2)
             
             # Landreman & Sengupta (2019), section 5.3:
-            stel = Qsc.r2_section53(nphi=nphi)
+            stel = Qsc.from_paper('r2 section 5.3', nphi=nphi)
             self.assertEqual(stel.helicity, 0)
             self.assertAlmostEqual(stel.iota, 0.959698159859113, places=places)
             self.assertAlmostEqual(stel.max_elongation, 2.20914173760329, places=places2)
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.4922510395338, places=places2)
             
             # Landreman & Sengupta (2019), section 5.4:
-            stel = Qsc.r2_section54(nphi=nphi)
+            stel = Qsc.from_paper('r2 section 5.4', nphi=nphi)
             self.assertEqual(stel.helicity, 1)
             self.assertAlmostEqual(stel.iota, -1.14413695118515, places=places)
             self.assertAlmostEqual(stel.max_elongation, 2.98649978627541, places=places2)
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 2.64098280647292, places=places2)
             
             # Landreman & Sengupta (2019), section 5.5:
-            stel = Qsc.r2_section55(nphi=nphi)
+            stel = Qsc.from_paper('r2 section 5.5', nphi=nphi)
             self.assertEqual(stel.helicity, 1)
             self.assertAlmostEqual(stel.iota, -0.828885267089981, places=places)
             self.assertAlmostEqual(stel.max_elongation, 3.6226360623368, places=places2)
