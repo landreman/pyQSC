@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Qsc():
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
-                 I2=0., sG=1, spsi=1, nphi=15):
+                 I2=0., sG=1, spsi=1, nphi=31):
         """
         Create a quasisymmetric stellarator.
         """
@@ -327,3 +327,45 @@ class Qsc():
         names += ['zc({})'.format(j) for j in range(self.nfourier)]
         names += ['etabar', 'sigma0']
         self.names = names
+
+    @classmethod
+    def r1_section51(cls, **kwargs):
+        """ The configuration from Landreman, Sengupta, Plunk (2019), section 5.1 """
+        return cls(rc=[1, 0.045], zs=[0, -0.045], nfp=3, etabar=-0.9, **kwargs)
+
+    @classmethod
+    def r1_section52(cls, **kwargs):
+        """ The configuration from Landreman, Sengupta, Plunk (2019), section 5.2 """
+        return cls(rc=[1, 0.265], zs=[0, -0.21], nfp=4, etabar=-2.25, **kwargs)
+
+    @classmethod
+    def r1_section53(cls, **kwargs):
+        """ The configuration from Landreman, Sengupta, Plunk (2019), section 5.3 """
+        return cls(rc=[1, 0.042], zs=[0, -0.042], zc=[0, -0.025], nfp=3, etabar=-1.1, sigma0=-0.6, **kwargs)
+
+    @classmethod
+    def r2_section51(cls, **kwargs):
+        """ The configuration from Landreman & Sengupta (2019), section 5.1 """
+        return cls(rc=[1, 0.155, 0.0102], zs=[0, 0.154, 0.0111], nfp=2, etabar=0.64, **kwargs)
+
+    @classmethod
+    def r2_section52(cls, **kwargs):
+        """ The configuration from Landreman & Sengupta (2019), section 5.2 """
+        return cls(rc=[1, 0.173, 0.0168, 0.00101], zs=[0, 0.159, 0.0165, 0.000985], nfp=2, etabar=0.632, **kwargs)
+
+    @classmethod
+    def r2_section53(cls, **kwargs):
+        """ The configuration from Landreman & Sengupta (2019), section 5.3 """
+        return cls(rc=[1, 0.09], zs=[0, -0.09], nfp=2, etabar=0.95, I2=0.9, **kwargs)
+
+    @classmethod
+    def r2_section54(cls, **kwargs):
+        """ The configuration from Landreman & Sengupta (2019), section 5.4 """
+        return cls(rc=[1, 0.17, 0.01804, 0.001409, 5.877e-05],
+                       zs=[0, 0.1581, 0.01820, 0.001548, 7.772e-05], nfp=4, etabar=1.569, **kwargs)
+
+    @classmethod
+    def r2_section55(cls, **kwargs):
+        """ The configuration from Landreman & Sengupta (2019), section 5.5 """
+        return cls(rc=[1, 0.3], zs=[0, 0.3], nfp=5, etabar=2.5, sigma0=0.3, I2=1.6, **kwargs)
+
