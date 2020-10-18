@@ -356,20 +356,20 @@ class Qsc():
             return cls(rc=[1, 0.042], zs=[0, -0.042], zc=[0, -0.025], nfp=3, etabar=-1.1, sigma0=-0.6, **kwargs)
         elif name == "r2 section 5.1":
             """ The configuration from Landreman & Sengupta (2019), section 5.1 """
-            return cls(rc=[1, 0.155, 0.0102], zs=[0, 0.154, 0.0111], nfp=2, etabar=0.64, order='r2', **kwargs)
+            return cls(rc=[1, 0.155, 0.0102], zs=[0, 0.154, 0.0111], nfp=2, etabar=0.64, order='r2', B2c=-0.00322, **kwargs)
         elif name == "r2 section 5.2":
             """ The configuration from Landreman & Sengupta (2019), section 5.2 """
-            return cls(rc=[1, 0.173, 0.0168, 0.00101], zs=[0, 0.159, 0.0165, 0.000985], nfp=2, etabar=0.632, order='r2', **kwargs)
+            return cls(rc=[1, 0.173, 0.0168, 0.00101], zs=[0, 0.159, 0.0165, 0.000985], nfp=2, etabar=0.632, order='r2', B2c=-0.158, **kwargs)
         elif name == "r2 section 5.3":
             """ The configuration from Landreman & Sengupta (2019), section 5.3 """
-            return cls(rc=[1, 0.09], zs=[0, -0.09], nfp=2, etabar=0.95, I2=0.9, order='r2', **kwargs)
+            return cls(rc=[1, 0.09], zs=[0, -0.09], nfp=2, etabar=0.95, I2=0.9, order='r2', B2c=-0.7, p2=-600000., **kwargs)
         elif name == "r2 section 5.4":
             """ The configuration from Landreman & Sengupta (2019), section 5.4 """
             return cls(rc=[1, 0.17, 0.01804, 0.001409, 5.877e-05],
-                       zs=[0, 0.1581, 0.01820, 0.001548, 7.772e-05], nfp=4, etabar=1.569, order='r2', **kwargs)
+                       zs=[0, 0.1581, 0.01820, 0.001548, 7.772e-05], nfp=4, etabar=1.569, order='r2', B2c=0.1348, **kwargs)
         elif name == "r2 section 5.5":
             """ The configuration from Landreman & Sengupta (2019), section 5.5 """
-            return cls(rc=[1, 0.3], zs=[0, 0.3], nfp=5, etabar=2.5, sigma0=0.3, I2=1.6, order='r2', **kwargs)
+            return cls(rc=[1, 0.3], zs=[0, 0.3], nfp=5, etabar=2.5, sigma0=0.3, I2=1.6, order='r2', B2c=1., B2s=3., p2=-0.5e7, **kwargs)
         else:
             raise ValueError('Unrecognized configuration name')
 
@@ -566,6 +566,8 @@ class Qsc():
         self.Z2s = Z2s
         self.Z2c = Z2c
         self.beta_1s = beta_1s
+        self.B20 = B20
+        
         self.mercier()
 
     def mercier(self):
