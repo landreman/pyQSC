@@ -10,7 +10,7 @@ import logging
 from .spectral_diff_matrix import spectral_diff_matrix
 from .util import fourier_minimum, mu0
 from .newton import newton
-from .grad_B_tensor import grad_B_tensor
+from .grad_B_tensor import grad_B_tensor, grad_grad_B_tensor
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -298,6 +298,7 @@ class Qsc():
 
         self.grad_B_tensor = grad_B_tensor(self)
         self.L_grad_B = self.grad_B_tensor.L_grad_B
+        self.inv_L_grad_B = 1.0 / self.L_grad_B
         self.min_L_grad_B = fourier_minimum(self.L_grad_B)
         
     def get_dofs(self):
@@ -354,20 +355,20 @@ class Qsc():
         elif name == "r1 section 5.3":
             """ The configuration from Landreman, Sengupta, Plunk (2019), section 5.3 """
             return cls(rc=[1, 0.042], zs=[0, -0.042], zc=[0, -0.025], nfp=3, etabar=-1.1, sigma0=-0.6, **kwargs)
-        elif name == "r2 section 5.1":
+        elif name == "r2 section 5.1" or name == '5.1' or name == 1:
             """ The configuration from Landreman & Sengupta (2019), section 5.1 """
             return cls(rc=[1, 0.155, 0.0102], zs=[0, 0.154, 0.0111], nfp=2, etabar=0.64, order='r2', B2c=-0.00322, **kwargs)
-        elif name == "r2 section 5.2":
+        elif name == "r2 section 5.2" or name == '5.2' or name == 2:
             """ The configuration from Landreman & Sengupta (2019), section 5.2 """
             return cls(rc=[1, 0.173, 0.0168, 0.00101], zs=[0, 0.159, 0.0165, 0.000985], nfp=2, etabar=0.632, order='r2', B2c=-0.158, **kwargs)
-        elif name == "r2 section 5.3":
+        elif name == "r2 section 5.3" or name == '5.3' or name == 3:
             """ The configuration from Landreman & Sengupta (2019), section 5.3 """
             return cls(rc=[1, 0.09], zs=[0, -0.09], nfp=2, etabar=0.95, I2=0.9, order='r2', B2c=-0.7, p2=-600000., **kwargs)
-        elif name == "r2 section 5.4":
+        elif name == "r2 section 5.4" or name == '5.4' or name == 4:
             """ The configuration from Landreman & Sengupta (2019), section 5.4 """
             return cls(rc=[1, 0.17, 0.01804, 0.001409, 5.877e-05],
                        zs=[0, 0.1581, 0.01820, 0.001548, 7.772e-05], nfp=4, etabar=1.569, order='r2', B2c=0.1348, **kwargs)
-        elif name == "r2 section 5.5":
+        elif name == "r2 section 5.5" or name == '5.5' or name == 5:
             """ The configuration from Landreman & Sengupta (2019), section 5.5 """
             return cls(rc=[1, 0.3], zs=[0, 0.3], nfp=5, etabar=2.5, sigma0=0.3, I2=1.6, order='r2', B2c=1., B2s=3., p2=-0.5e7, **kwargs)
         else:
@@ -567,8 +568,12 @@ class Qsc():
         self.Z2c = Z2c
         self.beta_1s = beta_1s
         self.B20 = B20
-        
+
+        # O(r^2) diagnostics:
         self.mercier()
+        t = grad_grad_B_tensor(self)
+        self.grad_grad_B_inverse_scale_length_vs_varphi = t.grad_grad_B_inverse_scale_length_vs_varphi
+        self.grad_grad_B_inverse_scale_length = t.grad_grad_B_inverse_scale_length
 
     def mercier(self):
         """
