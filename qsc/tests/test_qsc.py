@@ -121,7 +121,7 @@ def compare_to_fortran(name, filename):
         compare_field('DWell_times_r2', py.DWell_times_r2)
         compare_field('DGeod_times_r2', py.DGeod_times_r2)
         compare_field('DMerc_times_r2', py.DMerc_times_r2)
-        compare_field('grad_grad_B_inverse_scale_length_vs_varphi', py.grad_grad_B_inverse_scale_length_vs_varphi)
+        compare_field('grad_grad_B_inverse_scale_length_vs_zeta', py.grad_grad_B_inverse_scale_length_vs_varphi)
         compare_field('grad_grad_B_inverse_scale_length', py.grad_grad_B_inverse_scale_length)
     
     f.close()
