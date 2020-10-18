@@ -8,7 +8,7 @@ import scipy.optimize
 import logging
 #from numba import jit
 from .spectral_diff_matrix import spectral_diff_matrix
-from .util import fourier_minimum
+from .util import fourier_minimum, mu0
 from .newton import newton
 from .grad_B_tensor import grad_B_tensor
 
@@ -355,20 +355,20 @@ class Qsc():
             return cls(rc=[1, 0.042], zs=[0, -0.042], zc=[0, -0.025], nfp=3, etabar=-1.1, sigma0=-0.6, **kwargs)
         elif name == "r2 section 5.1":
             """ The configuration from Landreman & Sengupta (2019), section 5.1 """
-            return cls(rc=[1, 0.155, 0.0102], zs=[0, 0.154, 0.0111], nfp=2, etabar=0.64, **kwargs)
+            return cls(rc=[1, 0.155, 0.0102], zs=[0, 0.154, 0.0111], nfp=2, etabar=0.64, order='r2', **kwargs)
         elif name == "r2 section 5.2":
             """ The configuration from Landreman & Sengupta (2019), section 5.2 """
-            return cls(rc=[1, 0.173, 0.0168, 0.00101], zs=[0, 0.159, 0.0165, 0.000985], nfp=2, etabar=0.632, **kwargs)
+            return cls(rc=[1, 0.173, 0.0168, 0.00101], zs=[0, 0.159, 0.0165, 0.000985], nfp=2, etabar=0.632, order='r2', **kwargs)
         elif name == "r2 section 5.3":
             """ The configuration from Landreman & Sengupta (2019), section 5.3 """
-            return cls(rc=[1, 0.09], zs=[0, -0.09], nfp=2, etabar=0.95, I2=0.9, **kwargs)
+            return cls(rc=[1, 0.09], zs=[0, -0.09], nfp=2, etabar=0.95, I2=0.9, order='r2', **kwargs)
         elif name == "r2 section 5.4":
             """ The configuration from Landreman & Sengupta (2019), section 5.4 """
             return cls(rc=[1, 0.17, 0.01804, 0.001409, 5.877e-05],
-                       zs=[0, 0.1581, 0.01820, 0.001548, 7.772e-05], nfp=4, etabar=1.569, **kwargs)
+                       zs=[0, 0.1581, 0.01820, 0.001548, 7.772e-05], nfp=4, etabar=1.569, order='r2', **kwargs)
         elif name == "r2 section 5.5":
             """ The configuration from Landreman & Sengupta (2019), section 5.5 """
-            return cls(rc=[1, 0.3], zs=[0, 0.3], nfp=5, etabar=2.5, sigma0=0.3, I2=1.6, **kwargs)
+            return cls(rc=[1, 0.3], zs=[0, 0.3], nfp=5, etabar=2.5, sigma0=0.3, I2=1.6, order='r2', **kwargs)
         else:
             raise ValueError('Unrecognized configuration name')
 
@@ -380,9 +380,11 @@ class Qsc():
         # First, some shorthand:
         nphi = self.nphi
         B0_over_abs_G0 = self.B0 / np.abs(self.G0)
+        abs_G0_over_B0 = 1 / B0_over_abs_G0
         X1c = self.X1c
         Y1s = self.Y1s
         Y1c = self.Y1c
+        sigma = self.sigma
         d_d_varphi = self.d_d_varphi
         iota_N = self.iotaN
         curvature = self.curvature
@@ -391,7 +393,11 @@ class Qsc():
         B0 = self.B0
         B2s = self.B2s
         B2c = self.B2c
-
+        p2 = self.p2
+        sG = self.sG
+        spsi = self.spsi
+        I2_over_B0 = self.I2 / self.B0
+        
         if np.abs(iota_N) < 1e-8:
             print('Warning: |iota_N| is very small so O(r^2) solve will be poorly conditioned. iota_N=', iota_N)
         
@@ -414,60 +420,60 @@ class Qsc():
         X2c = B0_over_abs_G0 * (np.matmul(d_d_varphi,Z2c) + 2*iota_N*Z2s - B0_over_abs_G0 * (-abs_G0_over_B0*abs_G0_over_B0*B2c/B0 \
                + abs_G0_over_B0*abs_G0_over_B0*etabar*etabar/2 - (qc * qc - qs * qs + rc * rc - rs * rs)/4)) / curvature
 
-        beta_1s = -4 * sign_psi * sign_G * mu0 * p2 * etabar * abs_G0_over_B0 / (iota_N * B0 * B0)
+        beta_1s = -4 * spsi * sG * mu0 * p2 * etabar * abs_G0_over_B0 / (iota_N * B0 * B0)
 
-        Y2s_from_X20 = -sign_G * sign_psi * curvature * curvature / (etabar * etabar)
-        Y2s_inhomogeneous = sign_G * sign_psi * (-curvature/2 + curvature*curvature/(etabar*etabar)*(-X2c + X2s * sigma))
+        Y2s_from_X20 = -sG * spsi * curvature * curvature / (etabar * etabar)
+        Y2s_inhomogeneous = sG * spsi * (-curvature/2 + curvature*curvature/(etabar*etabar)*(-X2c + X2s * sigma))
 
-        Y2c_from_X20 = -sign_G * sign_psi * curvature * curvature * sigma / (etabar * etabar)
-        Y2c_inhomogeneous = sign_G * sign_psi * curvature * curvature / (etabar * etabar) * (X2s + X2c * sigma)
+        Y2c_from_X20 = -sG * spsi * curvature * curvature * sigma / (etabar * etabar)
+        Y2c_inhomogeneous = sG * spsi * curvature * curvature / (etabar * etabar) * (X2s + X2c * sigma)
 
         # Note: in the fX* and fY* quantities below, I've omitted the
         # contributions from X20 and Y20 to the d/dzeta terms. These
         # contributions are handled later when we assemble the large
         # matrix.
 
-        fX0_from_X20 = -4 * sign_G * sign_psi * abs_G0_over_B0 * (Y2c_from_X20 * Z2s - Y2s_from_X20 * Z2c)
-        fX0_from_Y20 = -torsion * abs_G0_over_B0 - 4 * sign_G * sign_psi * abs_G0_over_B0 * (Z2s) \
-            - sign_psi * I2_over_B0 * (-2) * abs_G0_over_B0
-        fX0_inhomogeneous = curvature * abs_G0_over_B0 * Z20 - 4 * sign_G * sign_psi * abs_G0_over_B0 * (Y2c_inhomogeneous * Z2s - Y2s_inhomogeneous * Z2c) \
-            - sign_psi * I2_over_B0 * (0.5 * curvature * sign_G * sign_psi) * abs_G0_over_B0 + beta_1s * abs_G0_over_B0 / 2 * Y1c
+        fX0_from_X20 = -4 * sG * spsi * abs_G0_over_B0 * (Y2c_from_X20 * Z2s - Y2s_from_X20 * Z2c)
+        fX0_from_Y20 = -torsion * abs_G0_over_B0 - 4 * sG * spsi * abs_G0_over_B0 * (Z2s) \
+            - spsi * I2_over_B0 * (-2) * abs_G0_over_B0
+        fX0_inhomogeneous = curvature * abs_G0_over_B0 * Z20 - 4 * sG * spsi * abs_G0_over_B0 * (Y2c_inhomogeneous * Z2s - Y2s_inhomogeneous * Z2c) \
+            - spsi * I2_over_B0 * (0.5 * curvature * sG * spsi) * abs_G0_over_B0 + beta_1s * abs_G0_over_B0 / 2 * Y1c
 
-        fXs_from_X20 = -torsion * abs_G0_over_B0 * Y2s_from_X20 - 4 * sign_psi * sign_G * abs_G0_over_B0 * (Y2c_from_X20 * Z20) \
-            - sign_psi * I2_over_B0 * (- 2 * Y2s_from_X20) * abs_G0_over_B0
-        fXs_from_Y20 = - 4 * sign_psi * sign_G * abs_G0_over_B0 * (-Z2c + Z20)
+        fXs_from_X20 = -torsion * abs_G0_over_B0 * Y2s_from_X20 - 4 * spsi * sG * abs_G0_over_B0 * (Y2c_from_X20 * Z20) \
+            - spsi * I2_over_B0 * (- 2 * Y2s_from_X20) * abs_G0_over_B0
+        fXs_from_Y20 = - 4 * spsi * sG * abs_G0_over_B0 * (-Z2c + Z20)
         fXs_inhomogeneous = np.matmul(d_d_varphi,X2s) - 2 * iota_N * X2c - torsion * abs_G0_over_B0 * Y2s_inhomogeneous + curvature * abs_G0_over_B0 * Z2s \
-            - 4 * sign_psi * sign_G * abs_G0_over_B0 * (Y2c_inhomogeneous * Z20) \
-            - sign_psi * I2_over_B0 * (0.5 * curvature * sign_psi * sign_G - 2 * Y2s_inhomogeneous) * abs_G0_over_B0 \
+            - 4 * spsi * sG * abs_G0_over_B0 * (Y2c_inhomogeneous * Z20) \
+            - spsi * I2_over_B0 * (0.5 * curvature * spsi * sG - 2 * Y2s_inhomogeneous) * abs_G0_over_B0 \
             - (0.5) * abs_G0_over_B0 * beta_1s * Y1s
 
-        fXc_from_X20 = - torsion * abs_G0_over_B0 * Y2c_from_X20 - 4 * sign_psi * sign_G * abs_G0_over_B0 * (-Y2s_from_X20 * Z20) \
-            - sign_psi * I2_over_B0 * (- 2 * Y2c_from_X20) * abs_G0_over_B0
-        fXc_from_Y20 = - torsion * abs_G0_over_B0 - 4 * sign_psi * sign_G * abs_G0_over_B0 * (Z2s) \
-            - sign_psi * I2_over_B0 * (-2) * abs_G0_over_B0
+        fXc_from_X20 = - torsion * abs_G0_over_B0 * Y2c_from_X20 - 4 * spsi * sG * abs_G0_over_B0 * (-Y2s_from_X20 * Z20) \
+            - spsi * I2_over_B0 * (- 2 * Y2c_from_X20) * abs_G0_over_B0
+        fXc_from_Y20 = - torsion * abs_G0_over_B0 - 4 * spsi * sG * abs_G0_over_B0 * (Z2s) \
+            - spsi * I2_over_B0 * (-2) * abs_G0_over_B0
         fXc_inhomogeneous = np.matmul(d_d_varphi,X2c) + 2 * iota_N * X2s - torsion * abs_G0_over_B0 * Y2c_inhomogeneous + curvature * abs_G0_over_B0 * Z2c \
-            - 4 * sign_psi * sign_G * abs_G0_over_B0 * (-Y2s_inhomogeneous * Z20) \
-            - sign_psi * I2_over_B0 * (0.5 * curvature * sign_G * sign_psi - 2 * Y2c_inhomogeneous) * abs_G0_over_B0 \
+            - 4 * spsi * sG * abs_G0_over_B0 * (-Y2s_inhomogeneous * Z20) \
+            - spsi * I2_over_B0 * (0.5 * curvature * sG * spsi - 2 * Y2c_inhomogeneous) * abs_G0_over_B0 \
             - (0.5) * abs_G0_over_B0 * beta_1s * Y1c
 
-        fY0_from_X20 = torsion * abs_G0_over_B0 - sign_psi * I2_over_B0 * (2) * abs_G0_over_B0
-        fY0_from_Y20 = 0
-        fY0_inhomogeneous = -4 * sign_psi * sign_G * abs_G0_over_B0 * (X2s * Z2c - X2c * Z2s) \
-            - sign_psi * I2_over_B0 * (-0.5 * curvature * X1c * X1c) * abs_G0_over_B0 - (0.5) * abs_G0_over_B0 * beta_1s * X1c
+        fY0_from_X20 = torsion * abs_G0_over_B0 - spsi * I2_over_B0 * (2) * abs_G0_over_B0
+        fY0_from_Y20 = np.zeros(nphi)
+        fY0_inhomogeneous = -4 * spsi * sG * abs_G0_over_B0 * (X2s * Z2c - X2c * Z2s) \
+            - spsi * I2_over_B0 * (-0.5 * curvature * X1c * X1c) * abs_G0_over_B0 - (0.5) * abs_G0_over_B0 * beta_1s * X1c
 
-        fYs_from_X20 = -2 * iota_N * Y2c_from_X20 - 4 * sign_psi * sign_G * abs_G0_over_B0 * (Z2c)
-        fYs_from_Y20 = -2 * iota_N
+        fYs_from_X20 = -2 * iota_N * Y2c_from_X20 - 4 * spsi * sG * abs_G0_over_B0 * (Z2c)
+        fYs_from_Y20 = np.full(nphi, -2 * iota_N)
         fYs_inhomogeneous = np.matmul(d_d_varphi,Y2s_inhomogeneous) - 2 * iota_N * Y2c_inhomogeneous + torsion * abs_G0_over_B0 * X2s \
-            - 4 * sign_psi * sign_G * abs_G0_over_B0 * (-X2c * Z20) - 2 * sign_psi * I2_over_B0 * X2s * abs_G0_over_B0
+            - 4 * spsi * sG * abs_G0_over_B0 * (-X2c * Z20) - 2 * spsi * I2_over_B0 * X2s * abs_G0_over_B0
 
-        fYc_from_X20 = 2 * iota_N * Y2s_from_X20 - 4 * sign_psi * sign_G * abs_G0_over_B0 * (-Z2s)
-        fYc_from_Y20 = 0
+        fYc_from_X20 = 2 * iota_N * Y2s_from_X20 - 4 * spsi * sG * abs_G0_over_B0 * (-Z2s)
+        fYc_from_Y20 = np.zeros(nphi)
         fYc_inhomogeneous = np.matmul(d_d_varphi,Y2c_inhomogeneous) + 2 * iota_N * Y2s_inhomogeneous + torsion * abs_G0_over_B0 * X2c \
-            - 4 * sign_psi * sign_G * abs_G0_over_B0 * (X2s * Z20) \
-            - sign_psi * I2_over_B0 * (-0.5 * curvature * X1c * X1c + 2 * X2c) * abs_G0_over_B0 + 0.5 * abs_G0_over_B0 * beta_1s * X1c
+            - 4 * spsi * sG * abs_G0_over_B0 * (X2s * Z20) \
+            - spsi * I2_over_B0 * (-0.5 * curvature * X1c * X1c + 2 * X2c) * abs_G0_over_B0 + 0.5 * abs_G0_over_B0 * beta_1s * X1c
 
-        matrix = np.zeros((nphi, nphi))
-        right_hand_side = np.zeros(nphi)
+        matrix = np.zeros((2 * nphi, 2 * nphi))
+        right_hand_side = np.zeros(2 * nphi)
         for j in range(nphi):
             # Handle the terms involving d X_0 / d zeta and d Y_0 / d zeta:
             # ----------------------------------------------------------------

@@ -12,6 +12,8 @@ from qsc.fourier_interpolation import fourier_interpolation
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+mu0 = 4 * np.pi * 1e-7
+
 def fourier_minimum(y):
     """
     Given uniformly spaced data y on a periodic domain, find the
