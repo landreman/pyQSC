@@ -173,6 +173,7 @@ class Qsc():
             
         # Add all results to self:
         self.phi = phi
+        self.d_phi = d_phi
         self.R0 = R0
         self.Z0 = Z0
         self.G0 = G0
@@ -387,10 +388,13 @@ class Qsc():
         sigma = self.sigma
         d_d_varphi = self.d_d_varphi
         iota_N = self.iotaN
+        iota = self.iota
         curvature = self.curvature
         torsion = self.torsion
         etabar = self.etabar
         B0 = self.B0
+        G0 = self.G0
+        I2 = self.I2
         B2s = self.B2s
         B2c = self.B2c
         p2 = self.p2
@@ -517,6 +521,36 @@ class Qsc():
         B20 = B0 * (curvature * X20 - B0_over_abs_G0 * np.matmul(d_d_varphi,Z20) + (0.5) * etabar * etabar - mu0 * p2 / (B0 * B0) \
                     - 0.25 * B0_over_abs_G0 * B0_over_abs_G0 * (qc * qc + qs * qs + rc * rc + rs * rs))
 
+        d_l_d_phi = self.d_l_d_phi
+        normalizer = 1 / np.sum(d_l_d_phi)
+        self.B20_mean = np.sum(B20 * d_l_d_phi) * normalizer
+        self.B20_residual = np.sqrt(np.sum((B20 - self.B20_mean) * (B20 - self.B20_mean) * d_l_d_phi) * normalizer) / B0
+        self.B20_variation = np.max(B20) - np.min(B20)
+
+        self.N_helicity = - self.helicity * self.nfp
+        self.Bbar = spsi * B0
+        self.G2 = -mu0 * p2 * G0 / (B0 * B0) - iota * I2
+
+        self.d_curvature_d_varphi = np.matmul(d_d_varphi, curvature)
+        self.d_torsion_d_varphi = np.matmul(d_d_varphi, torsion)
+        self.d_X20_d_varphi = np.matmul(d_d_varphi, X20)
+        self.d_X2s_d_varphi = np.matmul(d_d_varphi, X2s)
+        self.d_X2c_d_varphi = np.matmul(d_d_varphi, X2c)
+        self.d_Y20_d_varphi = np.matmul(d_d_varphi, Y20)
+        self.d_Y2s_d_varphi = np.matmul(d_d_varphi, Y2s)
+        self.d_Y2c_d_varphi = np.matmul(d_d_varphi, Y2c)
+        self.d_Z20_d_varphi = np.matmul(d_d_varphi, Z20)
+        self.d_Z2s_d_varphi = np.matmul(d_d_varphi, Z2s)
+        self.d_Z2c_d_varphi = np.matmul(d_d_varphi, Z2c)
+        self.d2_X1c_d_varphi2 = np.matmul(d_d_varphi, self.d_X1c_d_varphi)
+        self.d2_Y1c_d_varphi2 = np.matmul(d_d_varphi, self.d_Y1c_d_varphi)
+        self.d2_Y1s_d_varphi2 = np.matmul(d_d_varphi, self.d_Y1s_d_varphi)
+
+        self.B0_order_a_squared_to_cancel = -sG * B0 * B0 * (self.G2 + I2 * self.N_helicity) * abs_G0_over_B0 / (2*G0*G0) \
+            -sG * spsi * B0 * 2 * (X2c * Y2s - X2s * Y2c) \
+            -sG * B0 * B0 / (2*G0) * (abs_G0_over_B0 * X20 * curvature - self.d_Z20_d_varphi) \
+            -sG * spsi * B0 * I2 / (4*G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1c*Y1c + Y1s*Y1s) + Y1c * self.d_X1c_d_varphi - X1c * self.d_Y1c_d_varphi)
+        
         # Store all important results in self:
         self.V1 = V1
         self.V2 = V2
@@ -532,3 +566,42 @@ class Qsc():
         self.Z2s = Z2s
         self.Z2c = Z2c
         self.beta_1s = beta_1s
+        self.mercier()
+
+    def mercier(self):
+        """
+        Compute the terms in Mercier's criterion.
+        """
+
+        # See Overleaf note "Mercier criterion near the magnetic axis- detailed notes".
+        # See also "20200604-02 Checking sign in Mercier DGeod near axis.docx"
+
+        # Shorthand:
+        d_l_d_phi = self.d_l_d_phi
+        B0 = self.B0
+        G0 = self.G0
+        p2 = self.p2
+        etabar = self.etabar
+        curvature = self.curvature
+        sigma = self.sigma
+        iotaN = self.iotaN
+        iota = self.iota
+        pi = np.pi
+        
+        #integrand = d_l_d_phi * (Y1c * Y1c + X1c * (X1c + Y1s)) / (Y1c * Y1c + (X1c + Y1s) * (X1c + Y1s))
+        integrand = d_l_d_phi * (etabar*etabar*etabar*etabar + curvature*curvature*curvature*curvature*sigma*sigma + etabar*etabar*curvature*curvature) \
+            / (etabar*etabar*etabar*etabar + curvature*curvature*curvature*curvature*(1+sigma*sigma) + 2*etabar*etabar*curvature*curvature)
+
+        integral = np.sum(integrand) * self.d_phi * self.nfp * 2 * pi / self.axis_length
+
+        #DGeod_times_r2 = -(2 * sG * spsi * mu0 * mu0 * p2 * p2 * G0 * G0 * G0 * G0 * etabar * etabar &
+        self.DGeod_times_r2 = -(2 * mu0 * mu0 * p2 * p2 * G0 * G0 * G0 * G0 * etabar * etabar \
+                           / (pi * pi * pi * B0 * B0 * B0 * B0 * B0 * B0 * B0 * B0 * B0 * B0 * iotaN * iotaN)) \
+                           * integral
+
+        self.d2_volume_d_psi2 = 4*pi*pi*abs(G0)/(B0*B0*B0)*(3*etabar*etabar - 4*self.B20_mean/B0 + 2 * (self.G2 + iota * self.I2)/G0)
+
+        self.DWell_times_r2 = (mu0 * p2 * abs(G0) / (8 * pi * pi * pi * pi * B0 * B0 * B0)) * \
+            (self.d2_volume_d_psi2 - 8 * pi * pi * mu0 * p2 * abs(G0) / (B0 * B0 * B0 * B0 * B0))
+
+        self.DMerc_times_r2 = self.DWell_times_r2 + self.DGeod_times_r2
