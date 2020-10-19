@@ -525,6 +525,7 @@ class Qsc():
         d_l_d_phi = self.d_l_d_phi
         normalizer = 1 / np.sum(d_l_d_phi)
         self.B20_mean = np.sum(B20 * d_l_d_phi) * normalizer
+        self.B20_anomaly = B20 - self.B20_mean
         self.B20_residual = np.sqrt(np.sum((B20 - self.B20_mean) * (B20 - self.B20_mean) * d_l_d_phi) * normalizer) / B0
         self.B20_variation = np.max(B20) - np.min(B20)
 

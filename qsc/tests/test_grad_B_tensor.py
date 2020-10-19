@@ -40,15 +40,28 @@ class GradBTensorTests(unittest.TestCase):
                         
 class GradGradBTensorTests(unittest.TestCase):
 
-    def test_alternate_derivation(self):
+    def test_alternate_derivation_and_symmetry(self):
         """
-        Compare Rogerio's derivation to mine to ensure the results coincide.
+        Compare Rogerio's derivation to mine to ensure the results
+        coincide.  Also verify symmetry in the first two components.
         """
-        for config in [1, 2, 3, 4, 5]:
-            s = Qsc.from_paper(config, nphi=65)
-            t = grad_grad_B_tensor(s, two_ways=True)
-            logger.info("Max difference between Matt and Rogerio's derivation for config {} is {}".format(config, np.max(np.abs(t.grad_grad_B - t.grad_grad_B_alt))))
-            np.testing.assert_allclose(t.grad_grad_B, t.grad_grad_B_alt, rtol=1e-8, atol=1e-8)
+        for sG in [-1, 1]:
+            for spsi in [-1, 1]:
+                for config in [1, 2, 3, 4, 5]:
+                    B0 = np.random.rand() * 0.4 + 0.8
+                    nphi = int(np.random.rand() * 50 + 61)
+                    s = Qsc.from_paper(config, sG=sG, spsi=spsi, B0=B0, nphi=65)
+                    t = grad_grad_B_tensor(s, two_ways=True)
+                    logger.info("Max difference between Matt and Rogerio's derivation for config {} is {}".format(config, np.max(np.abs(t.grad_grad_B - t.grad_grad_B_alt))))
+                    np.testing.assert_allclose(t.grad_grad_B, t.grad_grad_B_alt, rtol=1e-8, atol=1e-8)
+                    for i in range(3):
+                        for j in range(3):
+                            for k in range(3):
+                                # For all configs, the tensor should be symmetric in the 1st 2 indices:
+                                np.testing.assert_allclose(t.grad_grad_B[:, i, j, k], t.grad_grad_B[:, j, i, k], rtol=1e-8, atol=1e-8)
+                                # For curl-free fields, the tensor should also be symmetric in the last 2 indices:
+                                if config in {1, 2, 4}:
+                                    np.testing.assert_allclose(t.grad_grad_B[:, i, j, k], t.grad_grad_B[:, i, k, j], rtol=1e-8, atol=1e-8)
             
     def test_axisymmetry(self):
         """
