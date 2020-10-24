@@ -268,5 +268,34 @@ class QscTests(unittest.TestCase):
         compare_to_fortran("r2 section 5.4", "quasisymmetry_out.LandremanSengupta2019_section5.4.nc")
         compare_to_fortran("r2 section 5.5", "quasisymmetry_out.LandremanSengupta2019_section5.5.nc")
 
+    def test_change_nfourier(self):
+        """
+        Test the change_nfourier() method.
+        """
+        rtol = 1e-13
+        atol = 1e-13
+        s1 = Qsc.from_paper('r2 section 5.2')
+        m = s1.nfourier
+        for n in range(1, 7):
+            s2 = Qsc.from_paper('r2 section 5.2')
+            s2.change_nfourier(n)
+            if n <= m:
+                # We lowered nfourier
+                np.testing.assert_allclose(s1.rc[:n], s2.rc, rtol=rtol, atol=atol)
+                np.testing.assert_allclose(s1.rs[:n], s2.rs, rtol=rtol, atol=atol)
+                np.testing.assert_allclose(s1.zc[:n], s2.zc, rtol=rtol, atol=atol)
+                np.testing.assert_allclose(s1.zs[:n], s2.zs, rtol=rtol, atol=atol)
+            else:
+                # We increased nfourier
+                np.testing.assert_allclose(s1.rc, s2.rc[:m], rtol=rtol, atol=atol)
+                np.testing.assert_allclose(s1.rs, s2.rs[:m], rtol=rtol, atol=atol)
+                np.testing.assert_allclose(s1.zc, s2.zc[:m], rtol=rtol, atol=atol)
+                np.testing.assert_allclose(s1.zs, s2.zs[:m], rtol=rtol, atol=atol)
+                z = np.zeros(n - s1.nfourier)
+                np.testing.assert_allclose(z, s2.rc[m:], rtol=rtol, atol=atol)
+                np.testing.assert_allclose(z, s2.rs[m:], rtol=rtol, atol=atol)
+                np.testing.assert_allclose(z, s2.zc[m:], rtol=rtol, atol=atol)
+                np.testing.assert_allclose(z, s2.zs[m:], rtol=rtol, atol=atol)
+                
 if __name__ == "__main__":
     unittest.main()

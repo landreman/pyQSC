@@ -34,13 +34,20 @@ def fourier_minimum(y):
         logger.debug('fourier_minimum.func called at x={}, y={}'.format(x, interp[0]))
         return interp[0]
 
-    # In case two adjacent points in the y grid are extremely close,
-    # use an initial bracket that is wider than 2 grid points, if
-    # there are enough grid points.
-    if n > 5:
-        bracket = np.array([index - 2, index, index + 2]) * dx
-    else:
-        bracket = np.array([index - 1, index, index + 1]) * dx
+    # Try to find a bracketing interval, using successively wider
+    # intervals.
+    f0 = func(index * dx)
+    found_bracket = False
+    for j in range(1, 4):
+        bracket = np.array([index - j, index, index + j]) * dx
+        fm = func(bracket[0])
+        fp = func(bracket[2])
+        if f0 < fm and f0 < fp:
+            found_bracket = True
+            break
+    if not found_bracket:
+        # We could throw an exception, though scipy will do that anyway
+        pass
 
     logger.info('bracket={}, f(bracket)={}'.format(bracket, [func(bracket[0]), func(bracket[1]), func(bracket[2])]))
     #solution = scipy.optimize.minimize_scalar(func, bracket=bracket, options={"disp": True})

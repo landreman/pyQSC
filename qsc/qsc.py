@@ -59,6 +59,31 @@ class Qsc():
         self._set_names()
 
         self.calculate()
+
+    def change_nfourier(self, nfourier_new):
+        """
+        Resize the arrays of Fourier amplitudes. You can either increase
+        or decrease nfourier.
+        """
+        rc_old = self.rc
+        rs_old = self.rs
+        zc_old = self.zc
+        zs_old = self.zs
+        index = np.min((self.nfourier, nfourier_new))
+        self.rc = np.zeros(nfourier_new)
+        self.rs = np.zeros(nfourier_new)
+        self.zc = np.zeros(nfourier_new)
+        self.zs = np.zeros(nfourier_new)
+        self.rc[:index] = rc_old[:index]
+        self.rs[:index] = rs_old[:index]
+        self.zc[:index] = zc_old[:index]
+        self.zs[:index] = zs_old[:index]
+        nfourier_old = self.nfourier
+        self.nfourier = nfourier_new
+        # No need to recalculate if we increased the Fourier
+        # resolution, only if we decreased it.
+        if nfourier_new < nfourier_old:
+            self.calculate()
         
     def calculate(self):
         """
