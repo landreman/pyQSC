@@ -56,6 +56,7 @@ class Qsc():
         self.B2c = B2c
         self.p2 = p2
         self.order = order
+        self.min_R0_threshold = 0.3
         self._set_names()
 
         self.calculate()
@@ -80,10 +81,18 @@ class Qsc():
         self.zs[:index] = zs_old[:index]
         nfourier_old = self.nfourier
         self.nfourier = nfourier_new
+        self._set_names()
         # No need to recalculate if we increased the Fourier
         # resolution, only if we decreased it.
         if nfourier_new < nfourier_old:
             self.calculate()
+
+    def min_R0_penalty(self):
+        """
+        This function can be used in optimization to penalize situations
+        in which min(R0) < min_R0_constraint.
+        """
+        return np.max((0, self.min_R0_threshold - self.min_R0)) ** 2
         
     def calculate(self):
         """
@@ -208,6 +217,7 @@ class Qsc():
         self.torsion = torsion
         self.X1s = np.zeros(nphi)
         self.X1c = self.etabar / curvature
+        self.min_R0 = fourier_minimum(self.R0)
 
     def _determine_helicity(self):
         """
