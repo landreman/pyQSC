@@ -6,39 +6,42 @@ Functions for computing the grad B tensor and grad grad B tensor.
 
 import numpy as np
 import logging
+from .util import Struct, fourier_minimum
 
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class grad_B_tensor():
+def calculate_grad_B_tensor(self):
     """
-    Class representing the grad B tensor.
+    Compute the components of the grad B tensor, and the scale
+    length L_{\nabla B} associated with the Frobenius norm of this
+    tensor.
+
+    self should be an instance of Qsc with X1c, Y1s etc populated.
     """
-    def __init__(self, s):
-        """
-        Compute the components of the grad B tensor, and the scale
-        length L_{\nabla B} associated with the Frobenius norm of this
-        tensor.
+    s = self # Shorthand
+    tensor = Struct()
+    
+    factor = s.spsi * s.B0 / s.d_l_d_varphi
+    tensor.tn = s.sG * s.B0 * s.curvature
+    tensor.nt = tensor.tn
+    tensor.bb = factor * (s.X1c * s.d_Y1s_d_varphi - s.iotaN * s.X1c * s.Y1c)
+    tensor.nn = factor * (s.d_X1c_d_varphi * s.Y1s + s.iotaN * s.X1c * s.Y1c)
+    tensor.bn = factor * (-s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
+                        - s.iotaN * s.X1c * s.X1c)
+    tensor.nb = factor * (s.d_Y1c_d_varphi * s.Y1s - s.d_Y1s_d_varphi * s.Y1c \
+                        + s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
+                        + s.iotaN * (s.Y1s * s.Y1s + s.Y1c * s.Y1c))
 
-        s should be an instance of Qsc with X1c, Y1s etc populated.
-        """
-        factor = s.spsi * s.B0 / s.d_l_d_varphi
-        self.tn = s.sG * s.B0 * s.curvature
-        self.nt = self.tn
-        self.bb = factor * (s.X1c * s.d_Y1s_d_varphi - s.iotaN * s.X1c * s.Y1c)
-        self.nn = factor * (s.d_X1c_d_varphi * s.Y1s + s.iotaN * s.X1c * s.Y1c)
-        self.bn = factor * (-s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
-                            - s.iotaN * s.X1c * s.X1c)
-        self.nb = factor * (s.d_Y1c_d_varphi * s.Y1s - s.d_Y1s_d_varphi * s.Y1c \
-                            + s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
-                            + s.iotaN * (s.Y1s * s.Y1s + s.Y1c * s.Y1c))
-        
-        self.grad_B_colon_grad_B = self.tn * self.tn + self.nt * self.nt \
-            + self.bb * self.bb + self.nn * self.nn \
-            + self.nb * self.nb + self.bn * self.bn
+    self.grad_B_tensor = tensor
+    self.grad_B_colon_grad_B = tensor.tn * tensor.tn + tensor.nt * tensor.nt \
+        + tensor.bb * tensor.bb + tensor.nn * tensor.nn \
+        + tensor.nb * tensor.nb + tensor.bn * tensor.bn
 
-        self.L_grad_B = s.B0 * np.sqrt(2 / self.grad_B_colon_grad_B)
-
+    self.L_grad_B = s.B0 * np.sqrt(2 / self.grad_B_colon_grad_B)
+    self.inv_L_grad_B = 1.0 / self.L_grad_B
+    self.min_L_grad_B = fourier_minimum(self.L_grad_B)
+    
 class grad_grad_B_tensor():
     """
     Class representing the grad grad B tensor.

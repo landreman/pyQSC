@@ -4,13 +4,8 @@ stellarator construction.
 """
 
 import numpy as np
-import scipy.optimize
 import logging
 #from numba import jit
-from .spectral_diff_matrix import spectral_diff_matrix
-from .util import fourier_minimum, mu0
-from .newton import newton
-from .grad_B_tensor import grad_B_tensor, grad_grad_B_tensor
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -25,6 +20,7 @@ class Qsc():
     from .init_axis import init_axis
     from .calculate_r1 import _residual, _jacobian, solve_sigma_equation, \
         _determine_helicity, r1_diagnostics
+    from .grad_B_tensor import calculate_grad_B_tensor
     from .calculate_r2 import calculate_r2
     from .mercier import mercier
     

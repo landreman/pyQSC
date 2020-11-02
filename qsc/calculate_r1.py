@@ -7,7 +7,6 @@ import numpy as np
 import logging
 from .util import fourier_minimum
 from .newton import newton
-from .grad_B_tensor import grad_B_tensor
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -123,8 +122,5 @@ def r1_diagnostics(self):
     self.d_Y1s_d_varphi = np.matmul(self.d_d_varphi, self.Y1s)
     self.d_Y1c_d_varphi = np.matmul(self.d_d_varphi, self.Y1c)
 
-    self.grad_B_tensor = grad_B_tensor(self)
-    self.L_grad_B = self.grad_B_tensor.L_grad_B
-    self.inv_L_grad_B = 1.0 / self.L_grad_B
-    self.min_L_grad_B = fourier_minimum(self.L_grad_B)
+    self.calculate_grad_B_tensor()
 

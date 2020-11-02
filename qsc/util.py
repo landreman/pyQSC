@@ -14,6 +14,13 @@ logger = logging.getLogger(__name__)
 
 mu0 = 4 * np.pi * 1e-7
 
+class Struct():
+    """
+    This class is just an empty mutable object to which we can attach
+    attributes.
+    """
+    pass
+
 def fourier_minimum(y):
     """
     Given uniformly spaced data y on a periodic domain, find the
