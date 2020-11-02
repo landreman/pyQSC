@@ -5,7 +5,6 @@ This module contains the calculation for the O(r^2) solution
 import numpy as np
 import logging
 from .util import mu0
-from .grad_B_tensor import grad_grad_B_tensor
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -208,7 +207,7 @@ def calculate_r2(self):
 
     # O(r^2) diagnostics:
     self.mercier()
-    t = grad_grad_B_tensor(self)
-    self.grad_grad_B_inverse_scale_length_vs_varphi = t.grad_grad_B_inverse_scale_length_vs_varphi
-    self.grad_grad_B_inverse_scale_length = t.grad_grad_B_inverse_scale_length
+    self.calculate_grad_grad_B_tensor()
+    #self.grad_grad_B_inverse_scale_length_vs_varphi = t.grad_grad_B_inverse_scale_length_vs_varphi
+    #self.grad_grad_B_inverse_scale_length = t.grad_grad_B_inverse_scale_length
 
