@@ -13,7 +13,7 @@
 #python -m unittest -v qsc.tests.test_newton
 
 # Example of running a specific test that matches a pattern:
-#python -m unittest -v -k test_sin
+#python -m unittest -v qsc.tests.test_grad_B_tensor.GradGradBTensorTests -k axisymm
 
 # Run all tests:
 python -m unittest -v

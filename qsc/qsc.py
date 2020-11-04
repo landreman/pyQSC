@@ -23,6 +23,7 @@ class Qsc():
     from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor
     from .calculate_r2 import calculate_r2
     from .mercier import mercier
+    from .r_singularity import calculate_r_singularity
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
                  I2=0., sG=1, spsi=1, nphi=31, B2s=0., B2c=0., p2=0., order="r1"):

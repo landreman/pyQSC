@@ -66,14 +66,28 @@ class GradGradBTensorTests(unittest.TestCase):
         """
         Test that the grad grad B tensor is correct for an axisymmetric vacuum field
         """
+        B0_vals = [0.9, 1.1]
+        R0_vals = [0.85, 1.0, 1.2]
+        nphi_vals = [3, 5, 7, 9, 11]
+        etabar_vals = [0.55, 0.65, 0.95, 1.0, 1.09, 1.3, 1.4]
+        index = 0
         for sG in [-1, 1]:
             for spsi in [-1, 1]:
                 for nfp in range(1, 4):
                     for j in range(3):
+                        """
                         R0 = np.random.rand() * 2 + 0.3
                         B0 = np.random.rand() * 2 + 0.3
                         nphi = int(np.random.rand() * 10 + 3)
                         etabar = (np.random.rand() - 0.5) * 4
+                        """
+                        # Try many combinations of values, in a deterministic way:
+                        R0 = R0_vals[np.mod(index, len(R0_vals))]
+                        B0 = B0_vals[np.mod(index, len(B0_vals))]
+                        nphi = nphi_vals[np.mod(index, len(nphi_vals))]
+                        etabar = etabar_vals[np.mod(index, len(etabar_vals))]
+                        index += 1
+                        
                         s = Qsc(rc=[R0], zs=[0], nfp=nfp, nphi=nphi, sG=sG, \
                                    spsi=spsi, B0=B0, etabar=etabar, I2=1.e-8, order='r2')
                         # The O(r^2) solve fails if iota is exactly 0,

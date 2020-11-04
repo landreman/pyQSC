@@ -123,6 +123,8 @@ def compare_to_fortran(name, filename):
         compare_field('DMerc_times_r2', py.DMerc_times_r2)
         compare_field('grad_grad_B_inverse_scale_length_vs_zeta', py.grad_grad_B_inverse_scale_length_vs_varphi)
         compare_field('grad_grad_B_inverse_scale_length', py.grad_grad_B_inverse_scale_length)
+        #compare_field('r_singularity', py.r_singularity) # Could be different if Newton refinement was on in 1 but not the other
+        compare_field('r_singularity_basic_vs_zeta', py.r_singularity_basic_vs_varphi)
     
     f.close()
     
@@ -276,7 +278,7 @@ class QscTests(unittest.TestCase):
         atol = 1e-13
         s1 = Qsc.from_paper('r2 section 5.2')
         m = s1.nfourier
-        for n in range(1, 7):
+        for n in range(2, 7):
             s2 = Qsc.from_paper('r2 section 5.2')
             s2.change_nfourier(n)
             if n <= m:
