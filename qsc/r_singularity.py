@@ -7,6 +7,7 @@ become singular.
 
 import numpy as np
 import logging
+import warnings
 #from .util import Struct, fourier_minimum
 
 #logging.basicConfig(level=logging.DEBUG)
@@ -352,8 +353,8 @@ def calculate_r_singularity(self, high_order=False):
                 logger.debug("    varsigma={}  costheta={}  sintheta={}".format(varsigma, costheta, sintheta))
 
                 # Sanity test
-                if np.abs(costheta*costheta + sintheta*sintheta - 1) > 1e-4:
-                    msg = "Error! sintheta={} costheta={} j={} jr={} sin2theta={} cos2theta={} abs(costheta*costheta + sintheta*sintheta - 1)={}".format(sintheta, costheta, j, jr, sin2theta, cos2theta, np.abs(costheta*costheta + sintheta*sintheta - 1))
+                if np.abs(costheta*costheta + sintheta*sintheta - 1) > 1e-3:
+                    msg = "Error! sintheta={} costheta={} jphi={} jr={} sin2theta={} cos2theta={} abs(costheta*costheta + sintheta*sintheta - 1)={}".format(sintheta, costheta, jphi, jr, sin2theta, cos2theta, np.abs(costheta*costheta + sintheta*sintheta - 1))
                     logger.error(msg)
                     raise RuntimeError(msg)
 
@@ -433,8 +434,12 @@ def calculate_r_singularity(self, high_order=False):
                     
                 # If both methods find a solution, check that they agree:
                 if len(linear_solutions) > 0 and len(quadratic_solutions) > 0:
-                    logger.debug("  linear solution={}  quadratic solution={}  diff={}".format(linear_solutions[0], quadratic_solutions[0], linear_solutions[0] - quadratic_solutions[0]))
-                    assert np.abs(linear_solutions[0] - quadratic_solutions[0]) < 1e-5, "Difference between linear solution {} and quadratic solution {} is {}".format(linear_solutions[0], quadratic_solutions[0], linear_solutions[0] - quadratic_solutions[0])
+                    diff = np.abs(linear_solutions[0] - quadratic_solutions[0])
+                    logger.debug("  linear solution={}  quadratic solution={}  diff={}".format(linear_solutions[0], quadratic_solutions[0], diff))
+                    if diff > 1e-5:
+                        warnings.warn("  Difference between linear solution {} and quadratic solution {} is {}".format(linear_solutions[0], quadratic_solutions[0], diff))
+                        
+                    #assert np.abs(linear_solutions[0] - quadratic_solutions[0]) < 1e-5, "Difference between linear solution {} and quadratic solution {} is {}".format(linear_solutions[0], quadratic_solutions[0], linear_solutions[0] - quadratic_solutions[0])
                     
                 # Prefer the quadratic solution
                 rr = -1
@@ -457,6 +462,7 @@ def calculate_r_singularity(self, high_order=False):
         r_singularity_theta_vs_varphi[jphi] = 0 # theta FIX ME!!
 
     self.r_singularity_vs_varphi = r_singularity_vs_varphi
+    self.inv_r_singularity_vs_varphi = 1 / r_singularity_vs_varphi
     self.r_singularity_basic_vs_varphi = r_singularity_basic_vs_varphi
     self.r_singularity = np.min(r_singularity_vs_varphi)    
     self.r_singularity_theta_vs_varphi = r_singularity_theta_vs_varphi

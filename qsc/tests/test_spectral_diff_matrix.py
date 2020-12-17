@@ -6,6 +6,23 @@ from qsc.spectral_diff_matrix import spectral_diff_matrix
 
 class SpectralDiffMatrixTests(unittest.TestCase):
 
+    def test_Fourier(self):
+        """
+        Confirm that the derivative of a sin/cos is computed exactly.
+        """
+        xmin = -3.4
+        xmax = -0.7
+        L = xmax - xmin
+        for nphi in range(11, 21, 2):
+            D = spectral_diff_matrix(nphi, xmin=xmin, xmax=xmax)
+            for n in range(0, int(np.floor(nphi/2)) - 1):
+                for phase in [0, 0.3]:
+                    phi = np.linspace(xmin, xmax, nphi, endpoint=False)
+                    x = np.sin(n * phi * 2 * np.pi / L + phase)
+                    dx = (n * 2 * np.pi / L) * np.cos(n * phi * 2 * np.pi / L + phase)
+                    np.testing.assert_allclose(np.matmul(D, x), dx,
+                                               rtol = 1e-12, atol = 1e-12)
+
     def test_random(self):
         """
         Do a bunch of tests for random xmin and xmax.
