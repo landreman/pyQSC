@@ -345,15 +345,26 @@ def calculate_r_singularity(self, high_order=False):
             #varpi = nint(varpi) ! Ensure varpi is exactly either +1 or -1.
             #cos2theta = varpi * sqrt(1 - sin2theta*sin2theta)
 
-            abs_costheta = np.sqrt(0.5*(1 + cos2theta))
+            # To get (sin theta, cos theta) from (sin 2 theta, cos 2 theta), we consider two cases to
+            # avoid precision loss when cos2theta is added to or subtracted from 1:
+            get_cos_from_cos2 = cos2theta > 0
+            if get_cos_from_cos2:
+                abs_costheta = np.sqrt(0.5*(1 + cos2theta))
+            else:
+                abs_sintheta = np.sqrt(0.5 * (1 - cos2theta))
+                
             logger.debug("  jr={}  sin2theta={}  cos2theta={}".format(jr, sin2theta, cos2theta))
             for varsigma in [-1, 1]:
-                costheta = varsigma * abs_costheta
-                sintheta = sin2theta / (2 * costheta)
+                if get_cos_from_cos2:
+                    costheta = varsigma * abs_costheta
+                    sintheta = sin2theta / (2 * costheta)
+                else:
+                    sintheta = varsigma * abs_sintheta
+                    costheta = sin2theta / (2 * sintheta)
                 logger.debug("    varsigma={}  costheta={}  sintheta={}".format(varsigma, costheta, sintheta))
 
                 # Sanity test
-                if np.abs(costheta*costheta + sintheta*sintheta - 1) > 1e-3:
+                if np.abs(costheta*costheta + sintheta*sintheta - 1) > 1e-13:
                     msg = "Error! sintheta={} costheta={} jphi={} jr={} sin2theta={} cos2theta={} abs(costheta*costheta + sintheta*sintheta - 1)={}".format(sintheta, costheta, jphi, jr, sin2theta, cos2theta, np.abs(costheta*costheta + sintheta*sintheta - 1))
                     logger.error(msg)
                     raise RuntimeError(msg)
