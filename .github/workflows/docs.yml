@@ -26,6 +26,11 @@ jobs:
     - name: ls
       run: ls -l
 
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
     - name: Get python and pip information
       run: |
         python --version
