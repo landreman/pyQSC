@@ -13,6 +13,14 @@ except that pyQSC is written in pure python. This makes pyQSC user-friendly,
 with no need for compilation, though it is slower.
 
 
+Requirements
+^^^^^^^^^^^^
+
+pyQSC has minimal dependencies - it requires only python3, numpy, and scipy. If you don't already have numpy and scipy,
+they will be installed automatically by the ``pip install`` step described in the next section.
+
+
+
 Installation
 ^^^^^^^^^^^^
 
