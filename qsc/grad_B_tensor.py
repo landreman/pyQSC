@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def calculate_grad_B_tensor(self):
     """
     Compute the components of the grad B tensor, and the scale
-    length L_{\nabla B} associated with the Frobenius norm of this
+    length L grad B associated with the Frobenius norm of this
     tensor.
 
     self should be an instance of Qsc with X1c, Y1s etc populated.
@@ -45,9 +45,8 @@ def calculate_grad_B_tensor(self):
 def calculate_grad_grad_B_tensor(self, two_ways=False):
     """
     Compute the components of the grad grad B tensor, and the scale
-    length L_{\nabla \nabla B} associated with the Frobenius norm of this
+    length L grad grad B associated with the Frobenius norm of this
     tensor.
-
     self should be an instance of Qsc with X1c, Y1s etc populated.
     """
 
