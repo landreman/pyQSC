@@ -38,7 +38,7 @@ jobs:
 
     - name: Install python dependencies for sphinx
       run: |
-        pip install sphinx-autodoc-typehints sphinx-rtd-theme
+        pip install sphinx-autodoc-typehints sphinx-rtd-theme numpy scipy
 
     - name: Execute script to build our documentation and update pages
       env:
