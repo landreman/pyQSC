@@ -125,3 +125,6 @@ def init_axis(self):
     self.X1s = np.zeros(nphi)
     self.X1c = self.etabar / curvature
     self.min_R0 = fourier_minimum(self.R0)
+    self.tangent_cylindrical = tangent_cylindrical
+    self.normal_cylindrical = normal_cylindrical 
+    self.binormal_cylindrical = binormal_cylindrical
