@@ -1,0 +1,327 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>API Reference &mdash; pyQsc 0.0.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Source code on GitHub" href="source.html" />
+    <link rel="prev" title="Getting started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pyQsc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installation">Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qsc-qsc-class">qsc.Qsc class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source.html">Source code on GitHub</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyQsc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>API Reference</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
+<p>All of the functionality of pyQSC is contained
+in a single class, <code class="docutils literal notranslate"><span class="pre">qsc.Qsc</span></code>.
+For many applications, all that is needed is the constructor
+of this class, which drives the individual steps of the calculation.</p>
+<div class="section" id="qsc-qsc-class">
+<h2>qsc.Qsc class<a class="headerlink" href="#qsc-qsc-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="qsc.Qsc">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">qsc.</span></code><code class="sig-name descname"><span class="pre">Qsc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">etabar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sG</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spsi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">31</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B2s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B2c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r1'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This is the main class for representing the quasisymmetric
+stellarator construction.</p>
+<dl class="py method">
+<dt id="qsc.Qsc.calculate">
+<code class="sig-name descname"><span class="pre">calculate</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Driver for the main calculations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.calculate_grad_B_tensor">
+<code class="sig-name descname"><span class="pre">calculate_grad_B_tensor</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate_grad_B_tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the components of the grad B tensor, and the scale
+length L grad B associated with the Frobenius norm of this
+tensor.</p>
+<p>self should be an instance of Qsc with X1c, Y1s etc populated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.calculate_grad_grad_B_tensor">
+<code class="sig-name descname"><span class="pre">calculate_grad_grad_B_tensor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">two_ways</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate_grad_grad_B_tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the components of the grad grad B tensor, and the scale
+length L grad grad B associated with the Frobenius norm of this
+tensor.
+self should be an instance of Qsc with X1c, Y1s etc populated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.calculate_r2">
+<code class="sig-name descname"><span class="pre">calculate_r2</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate_r2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the O(r^2) quantities.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.calculate_r_singularity">
+<code class="sig-name descname"><span class="pre">calculate_r_singularity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">high_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate_r_singularity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.change_nfourier">
+<code class="sig-name descname"><span class="pre">change_nfourier</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nfourier_new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.change_nfourier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resize the arrays of Fourier amplitudes. You can either increase
+or decrease nfourier.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.from_paper">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_paper</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.from_paper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get one of the configurations that has been used in our papers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.get_dofs">
+<code class="sig-name descname"><span class="pre">get_dofs</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.get_dofs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a 1D numpy vector of all possible optimizable
+degrees-of-freedom, for simsopt.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.init_axis">
+<code class="sig-name descname"><span class="pre">init_axis</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.init_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the curvature, torsion, differentiation matrix, etc.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.mercier">
+<code class="sig-name descname"><span class="pre">mercier</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.mercier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the terms in Mercier’s criterion.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.min_R0_penalty">
+<code class="sig-name descname"><span class="pre">min_R0_penalty</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.min_R0_penalty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function can be used in optimization to penalize situations
+in which min(R0) &lt; min_R0_constraint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.r1_diagnostics">
+<code class="sig-name descname"><span class="pre">r1_diagnostics</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.r1_diagnostics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute various properties of the O(r^1) solution, once sigma and
+iota are solved for.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.set_dofs">
+<code class="sig-name descname"><span class="pre">set_dofs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.set_dofs" title="Permalink to this definition">¶</a></dt>
+<dd><p>For interaction with simsopt, set the optimizable degrees of
+freedom from a 1D numpy vector.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="qsc.Qsc.solve_sigma_equation">
+<code class="sig-name descname"><span class="pre">solve_sigma_equation</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.solve_sigma_equation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve the sigma equation.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="source.html" class="btn btn-neutral float-right" title="Source code on GitHub" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Matt Landreman.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
