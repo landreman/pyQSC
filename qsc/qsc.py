@@ -24,6 +24,7 @@ class Qsc():
     from .calculate_r2 import calculate_r2
     from .mercier import mercier
     from .r_singularity import calculate_r_singularity
+    from .plot import plot_qsc
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
                  I2=0., sG=1, spsi=1, nphi=31, B2s=0., B2c=0., p2=0., order="r1"):
@@ -105,6 +106,12 @@ class Qsc():
         self.r1_diagnostics()
         if self.order == 'r2':
             self.calculate_r2()
+
+    def plot(self,rPlot=0.1,nphi=60,ntheta=40,nphiRZ=9,saveFile=[]):
+        """
+        Shows a boundary with r=rPlot
+        """
+        self.plot_qsc(rPlot,nphi,ntheta,nphiRZ,saveFile)
        
     def get_dofs(self):
         """
