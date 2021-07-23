@@ -1,0 +1,20 @@
+Metadata-Version: 2.1
+Name: qsc
+Version: 0.0.5
+Summary: Quasisymmetric Stellarator Construction
+Home-page: https://github.com/landreman/pyQSC
+Author: Matt Landreman
+Author-email: matt.landreman@gmail.com
+License: UNKNOWN
+Description: # pyQSC
+        Python implementation of the Quasisymmetric Stellarator Construction method
+        
+        This code implements the equations derived by Garren and Boozer (1991) for MHD equilibrium near the magnetic axis.
+        
+        View the [main documentation here](https://landreman.github.io/pyQSC/)
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown

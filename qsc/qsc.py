@@ -24,6 +24,7 @@ class Qsc():
     from .calculate_r2 import calculate_r2
     from .mercier import mercier
     from .r_singularity import calculate_r_singularity
+    from .write_vmec_input import write_vmec_input
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
                  I2=0., sG=1, spsi=1, nphi=31, B2s=0., B2c=0., p2=0., order="r1"):
@@ -69,6 +70,11 @@ class Qsc():
         self._set_names()
 
         self.calculate()
+
+    def to_vmec(self, filename, rVMEC=0.1, vmec_template_filename=[]):
+        self.rVMEC = rVMEC
+        self.vmec_template_filename = vmec_template_filename
+        self.write_vmec_input(rVMEC, filename, vmec_template_filename)
 
     def change_nfourier(self, nfourier_new):
         """

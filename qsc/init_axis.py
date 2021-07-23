@@ -128,3 +128,4 @@ def init_axis(self):
     self.tangent_cylindrical = tangent_cylindrical
     self.normal_cylindrical = normal_cylindrical 
     self.binormal_cylindrical = binormal_cylindrical
+    self.Bbar = self.spsi * self.B0
