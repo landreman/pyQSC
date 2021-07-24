@@ -36,17 +36,26 @@ def plot(self,r=0.1,nphi=60,ntheta=40,nsections=4,save=None,**kwargs):
     def tangentR(phi):
         sp=spline(self.phi, self.tangent_cylindrical[:,0], k=3, s=0)
         return sp(np.mod(phi,2*np.pi/self.nfp))
+    def tangentphi(phi):
+        sp=spline(self.phi, self.tangent_cylindrical[:,1], k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
     def tangentZ(phi):
         sp=spline(self.phi, self.tangent_cylindrical[:,2], k=3, s=0)
         return sp(np.mod(phi,2*np.pi/self.nfp))
     def normalR(phi):
         sp=spline(self.phi, self.normal_cylindrical[:,0], k=3, s=0)
         return sp(np.mod(phi,2*np.pi/self.nfp))
+    def normalphi(phi):
+        sp=spline(self.phi, self.normal_cylindrical[:,1], k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
     def normalZ(phi):
         sp=spline(self.phi, self.normal_cylindrical[:,2], k=3, s=0)
         return sp(np.mod(phi,2*np.pi/self.nfp))
     def binormalR(phi):
         sp=spline(self.phi, self.binormal_cylindrical[:,0], k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def binormalphi(phi):
+        sp=spline(self.phi, self.binormal_cylindrical[:,1], k=3, s=0)
         return sp(np.mod(phi,2*np.pi/self.nfp))
     def binormalZ(phi):
         sp=spline(self.phi, self.binormal_cylindrical[:,2], k=3, s=0)
@@ -107,6 +116,18 @@ def plot(self,r=0.1,nphi=60,ntheta=40,nsections=4,save=None,**kwargs):
         else:
             r2 = 0
         return r0+r*r1+r**2*r2
+    def phiSurf(r,phi,theta):
+        thetaN = theta-(self.iota-self.iotaN)*phi
+        phi0 = Raxisf(phi)
+        phi1 = (X1cF(phi)*np.cos(thetaN)+X1sF(phi)*np.sin(thetaN))*normalphi(phi)\
+              +(Y1cF(phi)*np.cos(thetaN)+Y1sF(phi)*np.sin(thetaN))*binormalphi(phi)
+        if self.order!='r1':
+            phi2 = (X20F(phi)+X2cF(phi)*np.cos(2*thetaN)+X2sF(phi)*np.sin(2*thetaN))*normalphi(phi)\
+                  +(Y20F(phi)+Y2cF(phi)*np.cos(2*thetaN)+Y2sF(phi)*np.sin(2*thetaN))*binormalphi(phi)\
+                  +(Z20F(phi)+Z2cF(phi)*np.cos(2*thetaN)+Z2sF(phi)*np.sin(2*thetaN))*tangentphi(phi)
+        else:
+            phi2 = 0
+        return phi0+r*phi1+r**2*phi2
     def zSurf(r,phi,theta):
         thetaN = theta-(self.iota-self.iotaN)*phi
         z0 = Zaxisf(phi)
@@ -162,9 +183,10 @@ def plot(self,r=0.1,nphi=60,ntheta=40,nsections=4,save=None,**kwargs):
     phi1d   = np.linspace(0, 2 * np.pi, nphi)
     phi2D, theta2D = np.meshgrid(phi1d, theta1d)
     rs=rSurf(r,phi2D,theta2D)
+    phis=phiSurf(r,phi2D,theta2D)
     Zsurf=zSurf(r,phi2D,theta2D)
-    Xsurf=rs*np.cos(phi2D)
-    Ysurf=rs*np.sin(phi2D)
+    Xsurf=rs*np.cos(phi2D)-phis*np.sin(phi2D)
+    Ysurf=rs*np.sin(phi2D)+phis*np.cos(phi2D)
     Bmag=Bf(r,phi2D,theta2D)
     B_rescaled = (Bmag - Bmag.min()) / (Bmag.max() - Bmag.min())
     ax.plot_surface(Xsurf, Ysurf, Zsurf, facecolors = cm.jet(B_rescaled), rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=0.25, **kwargs)
