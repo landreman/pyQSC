@@ -6,7 +6,7 @@ from qsc.Frenet_to_cylindrical import Frenet_to_cylindrical
 import numpy as np
 from .util import mu0
 
-def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol1d, ntord, lasym):
+def to_Fourier(self, R_2D, Z_2D, nfp, ntheta, mpol1d, ntord, lasym):
     nphi_conversion = np.array(R_2D).shape[1]
     theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
     phi_conversion = np.linspace(0,2*np.pi/nfp,nphi_conversion,endpoint=False)
@@ -44,7 +44,7 @@ def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol1d, ntord, lasym):
 
     return RBC, RBS, ZBC, ZBS
 
-def to_vmec(self, filename, r=0.1, input_template=None, ntheta=20, ntorMax=30):
+def to_vmec(self, filename, r=0.1, input_template=None, ntheta=20, ntorMax=40):
     """
     Output a near-axis boundary to a VMEC input file
     """
@@ -85,7 +85,7 @@ def to_vmec(self, filename, r=0.1, input_template=None, ntheta=20, ntorMax=30):
     
     # Fourier transform the result.
     # This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.
-    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, ntheta, mpol1d, ntord, lasym)
+    RBC, RBS, ZBC, ZBS = self.to_Fourier(R_2D, Z_2D, self.nfp, ntheta, mpol1d, ntord, lasym)
 
     # Write to VMEC file
     file_object = open(filename,"w+")
@@ -124,7 +124,7 @@ def to_vmec(self, filename, r=0.1, input_template=None, ntheta=20, ntorMax=30):
         file_object.write('  ZAXIS_CC = '+str(self.zc)[1:-1]+'\n')
     file_object.write('  ZAXIS_CS = '+str(-self.zs)[1:-1]+'\n')
     file_object.write('!----- Boundary Parameters -----\n')
-    for m in range(mpol):
+    for m in range(mpol+1):
         for n in range(-ntor,ntor+1):
             if RBC[n,m]!=0 or ZBS[n,m]!=0:
                 file_object.write(    '  RBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBC[n,m]:+.16e}"+',    ZBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBS[n,m]:+.16e}"+'\n')
