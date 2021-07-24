@@ -69,12 +69,12 @@ def Frenet_to_cylindrical_1_point(phi0, X_spline, Y_spline,\
     return total_R, total_z
 
 def Frenet_to_cylindrical(self, r, ntheta=20):
-    N_phi_conversion = self.nphi
+    nphi_conversion = self.nphi
     theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
-    phi_conversion = np.linspace(0,2*np.pi/self.nfp,N_phi_conversion,endpoint=False)
-    R_2D = np.zeros((ntheta,N_phi_conversion))
-    Z_2D = np.zeros((ntheta,N_phi_conversion))
-    phi0_2D = np.zeros((ntheta,N_phi_conversion))
+    phi_conversion = np.linspace(0,2*np.pi/self.nfp,nphi_conversion,endpoint=False)
+    R_2D = np.zeros((ntheta,nphi_conversion))
+    Z_2D = np.zeros((ntheta,nphi_conversion))
+    phi0_2D = np.zeros((ntheta,nphi_conversion))
     for j_theta in range(ntheta):
         costheta = np.cos(theta[j_theta])
         sintheta = np.sin(theta[j_theta])
@@ -82,7 +82,7 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
         Y_at_this_theta = r * (self.Y1c_untwisted * costheta + self.Y1s_untwisted * sintheta)
         def X_spline(phi): return self.convert_to_spline(phi,X_at_this_theta)
         def Y_spline(phi): return self.convert_to_spline(phi,Y_at_this_theta)
-        for j_phi in range(N_phi_conversion):
+        for j_phi in range(nphi_conversion):
             # Solve for the phi0 such that r0 + X1 n + Y1 b has the desired phi
             phi_target = phi_conversion[j_phi]
             phi0_rootSolve_min = phi_target - 1.0 / self.nfp

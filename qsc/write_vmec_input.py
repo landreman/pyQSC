@@ -7,18 +7,18 @@ import numpy as np
 from .util import mu0
 
 def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol1d, ntord, lasym):
-    N_phi_conversion = np.array(R_2D).shape[1]
+    nphi_conversion = np.array(R_2D).shape[1]
     theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
-    phi_conversion = np.linspace(0,2*np.pi/nfp,N_phi_conversion,endpoint=False)
+    phi_conversion = np.linspace(0,2*np.pi/nfp,nphi_conversion,endpoint=False)
     ntheta = np.array(theta).shape[0]
     mpol = int(min(ntheta          / 2, mpol1d))
-    ntor = int(min(N_phi_conversion / 2, ntord))
+    ntor = int(min(nphi_conversion / 2, ntord))
     RBC = np.zeros((int(2*ntor+1),int(mpol+1)))
     RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
     ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
     ZBS = np.zeros((int(2*ntor+1),int(mpol+1)))
-    factor = 2 / (ntheta * N_phi_conversion)
-    for j_phi in range(N_phi_conversion):
+    factor = 2 / (ntheta * nphi_conversion)
+    for j_phi in range(nphi_conversion):
         for j_theta in range(ntheta):
             for m in range(mpol+1):
                 nmin = -ntor
@@ -30,13 +30,13 @@ def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol1d, ntord, lasym):
                     factor2 = factor
                     # The next 2 lines ensure inverse Fourier transform(Fourier transform) = identity
                     if np.mod(ntheta,2) == 0 and m  == (ntheta/2): factor2 = factor2 / 2
-                    if np.mod(N_phi_conversion,2) == 0 and abs(n) == (N_phi_conversion/2): factor2 = factor2 / 2
+                    if np.mod(nphi_conversion,2) == 0 and abs(n) == (nphi_conversion/2): factor2 = factor2 / 2
                     RBC[n,m] = RBC[n,m] + R_2D[j_theta, j_phi] * cosangle * factor2
                     RBS[n,m] = RBS[n,m] + R_2D[j_theta, j_phi] * sinangle * factor2
                     ZBC[n,m] = ZBC[n,m] + Z_2D[j_theta, j_phi] * cosangle * factor2
                     ZBS[n,m] = ZBS[n,m] + Z_2D[j_theta, j_phi] * sinangle * factor2
-    RBC[0,0] = np.sum(R_2D) / (ntheta * N_phi_conversion)
-    ZBC[0,0] = np.sum(Z_2D) / (ntheta * N_phi_conversion)
+    RBC[0,0] = np.sum(R_2D) / (ntheta * nphi_conversion)
+    ZBC[0,0] = np.sum(Z_2D) / (ntheta * nphi_conversion)
 
     if lasym == False:
         RBS = 0
@@ -44,7 +44,7 @@ def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol1d, ntord, lasym):
 
     return RBC, RBS, ZBC, ZBS
 
-def to_vmec(self, filename, r=0.1, input_template=None, ntheta=20):
+def to_vmec(self, filename, r=0.1, input_template=None, ntheta=20, ntorMax=30):
     """
     Output a near-axis boundary to a VMEC input file
     """
@@ -53,7 +53,6 @@ def to_vmec(self, filename, r=0.1, input_template=None, ntheta=20):
         nstep=200
         tcon0=2.
         mpol=10
-        ntorMax=14
         ns_array=[16,49,101]
         ftol_array=[1e-13,1e-12,1e-11]
         niter_array=[1000,1000,1500]
