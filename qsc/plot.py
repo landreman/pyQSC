@@ -7,7 +7,7 @@ from scipy.interpolate import UnivariateSpline as spline
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-def plot(self,rPlot=0.1,nphi=60,ntheta=40,nphiRZ=9,saveFile=[]):
+def plot(self,rPlot=0.1,nphi=60,ntheta=40,nsections=9,saveFile=None):
 
     # Create splines interpolants for the quantities used in the plots
     def Raxisf(phi): return sum([self.rc[i]*np.cos(i*self.nfp*phi) for i in range(len(self.rc))])
@@ -97,7 +97,7 @@ def plot(self,rPlot=0.1,nphi=60,ntheta=40,nphiRZ=9,saveFile=[]):
     fig = plt.figure(figsize=(6, 6), dpi=80)
     ax  = plt.gca()
     theta = np.linspace(0,2*np.pi,ntheta)
-    phi1D = np.linspace(0,2*np.pi/self.nfp,nphiRZ)
+    phi1D = np.linspace(0,2*np.pi/self.nfp,nsections)
     for phi in phi1D:
         rSurfi=rSurf(rPlot,phi,theta)
         zSurfi=zSurf(rPlot,phi,theta)
@@ -121,7 +121,7 @@ def plot(self,rPlot=0.1,nphi=60,ntheta=40,nphiRZ=9,saveFile=[]):
     plt.legend()
     plt.tight_layout()
     ax.set_aspect('equal')
-    if saveFile!=[]:
+    if saveFile!=None:
         fig.savefig(saveFile+'_poloidal.pdf')
 
     # Create 3D plot
@@ -132,20 +132,15 @@ def plot(self,rPlot=0.1,nphi=60,ntheta=40,nphiRZ=9,saveFile=[]):
             return self.B0*(1+r*self.etabar*np.cos(theta-(self.iota-self.iotaN)*phi))
         else:
             return self.B0*(1+r*self.etabar*np.cos(theta-(self.iota-self.iotaN)*phi))+r*r*(B20F(phi)+self.B2c*np.cos(theta-(self.iota-self.iotaN)*phi)+self.B2s*np.sin(theta-(self.iota-self.iotaN)*phi))
-    theta1D = np.linspace(0,2*np.pi,ntheta)
-    phi1D   = np.linspace(0,2*np.pi,nphi)
-    Xsurf = np.zeros((ntheta,nphi))
-    Ysurf = np.zeros((ntheta,nphi))
-    Zsurf = np.zeros((ntheta,nphi))
-    Bmag  = np.zeros((ntheta,nphi))
-    for countT,th in enumerate(theta1D):
-        for countP,ph in enumerate(phi1D):
-            rs=rSurf(rPlot,ph,th)
-            zs=zSurf(rPlot,ph,th)
-            Xsurf[countT,countP]=rs*np.cos(ph)
-            Ysurf[countT,countP]=rs*np.sin(ph)
-            Zsurf[countT,countP]=zs
-            Bmag[countT,countP] =Bf(rPlot,ph,th)
+    theta1d = np.linspace(0, 2 * np.pi, ntheta)
+    phi1d   = np.linspace(0, 2 * np.pi, nphi)
+    phi2D, theta2D = np.meshgrid(phi1d, theta1d)
+    rs=rSurf(rPlot,phi2D,theta2D)
+    zs=zSurf(rPlot,phi2D,theta2D)
+    Xsurf=rs*np.cos(phi2D)
+    Ysurf=rs*np.sin(phi2D)
+    Zsurf=zs
+    Bmag=Bf(rPlot,phi2D,theta2D)
     B_rescaled = (Bmag - Bmag.min()) / (Bmag.max() - Bmag.min())
     ax.plot_surface(Xsurf, Ysurf, Zsurf, facecolors = cm.jet(B_rescaled), rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=0.25)
     ax.auto_scale_xyz([Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()])   
@@ -158,7 +153,7 @@ def plot(self,rPlot=0.1,nphi=60,ntheta=40,nphiRZ=9,saveFile=[]):
     ax.set_ylabel('Y (meters)')
     ax.set_zlabel('Z (meters)')
     plt.tight_layout()
-    if saveFile!=[]:
+    if saveFile!=None:
         fig.savefig(saveFile+'3D.pdf')
 
     plt.show()
