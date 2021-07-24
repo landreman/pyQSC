@@ -13,7 +13,6 @@ def to_vmec(self, filename, rVMEC=0.1, vmec_template_filename=None):
     """
     if vmec_template_filename==None:
         delt=0.9
-        niter=2500
         nstep=200
         tcon0=2.
         mpol=10
@@ -239,7 +238,6 @@ def to_vmec(self, filename, rVMEC=0.1, vmec_template_filename=None):
     File_object.write('!----- Runtime Parameters -----\n')
     File_object.write('&INDATA\n')
     File_object.write('  DELT = '+str(delt)+'\n')
-    File_object.write('  NITER = '+str(niter)+'\n')
     File_object.write('  NSTEP = '+str(nstep)+'\n')
     File_object.write('  TCON0 = '+str(tcon0)+'\n')
     File_object.write('  NS_ARRAY = '+str(ns_array)[1:-1]+'\n')
