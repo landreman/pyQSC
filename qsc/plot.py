@@ -3,7 +3,7 @@ This module contains a function to plot a near-axis surface.
 """
 
 import numpy as np
-from scipy.interpolate import UnivariateSpline as spline
+from scipy.interpolate import CubicSpline as spline
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import Normalize
@@ -33,78 +33,35 @@ def plot(self,r=0.14,nphi=80,ntheta=50,nsections=4,save=None,azim_default=None,*
        :width: 200
     """
 
-    # Create splines interpolants for the quantities used in the plots
+    # Create periodic spline interpolants for the quantities used in the plots
     def Raxisf(phi): return sum([self.rc[i]*np.cos(i*self.nfp*phi) for i in range(len(self.rc))])
     def Zaxisf(phi): return sum([self.zs[i]*np.sin(i*self.nfp*phi) for i in range(len(self.zs))])
-    def tangentR(phi):
-        sp=spline(self.phi, self.tangent_cylindrical[:,0], k=3, s=0)
+    def convert_to_spline(phi,array):
+        sp=spline(np.append(self.phi,2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
         return sp(np.mod(phi,2*np.pi/self.nfp))
-    def tangentphi(phi):
-        sp=spline(self.phi, self.tangent_cylindrical[:,1], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def tangentZ(phi):
-        sp=spline(self.phi, self.tangent_cylindrical[:,2], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def normalR(phi):
-        sp=spline(self.phi, self.normal_cylindrical[:,0], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def normalphi(phi):
-        sp=spline(self.phi, self.normal_cylindrical[:,1], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def normalZ(phi):
-        sp=spline(self.phi, self.normal_cylindrical[:,2], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def binormalR(phi):
-        sp=spline(self.phi, self.binormal_cylindrical[:,0], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def binormalphi(phi):
-        sp=spline(self.phi, self.binormal_cylindrical[:,1], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def binormalZ(phi):
-        sp=spline(self.phi, self.binormal_cylindrical[:,2], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def X1cF(phi):
-        sp=spline(self.phi, self.X1c, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def X1sF(phi):
-        sp=spline(self.phi, self.X1s, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def Y1cF(phi):
-        sp=spline(self.phi, self.Y1c, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def Y1sF(phi):
-        sp=spline(self.phi, self.Y1s, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def X20F(phi):
-        sp=spline(self.phi, self.X20, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def X2cF(phi):
-        sp=spline(self.phi, self.X2c, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def X2sF(phi):
-        sp=spline(self.phi, self.X2s, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def Y20F(phi):
-        sp=spline(self.phi, self.Y20, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def Y2cF(phi):
-        sp=spline(self.phi, self.Y2c, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def Y2sF(phi):
-        sp=spline(self.phi, self.Y2s, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def Z20F(phi):
-        sp=spline(self.phi, self.Z20, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def Z2cF(phi):
-        sp=spline(self.phi, self.Z2c, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def Z2sF(phi):
-        sp=spline(self.phi, self.Z2s, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def B20F(phi):
-        sp=spline(self.phi, self.B20, k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def tangentR(phi):    return convert_to_spline(phi,self.tangent_cylindrical[:,0])
+    def tangentphi(phi):  return convert_to_spline(phi,self.tangent_cylindrical[:,1])
+    def tangentZ(phi):    return convert_to_spline(phi,self.tangent_cylindrical[:,2])
+    def normalR(phi):     return convert_to_spline(phi,self.normal_cylindrical[:,0])
+    def normalphi(phi):   return convert_to_spline(phi,self.normal_cylindrical[:,1])
+    def normalZ(phi):     return convert_to_spline(phi,self.normal_cylindrical[:,2])
+    def binormalR(phi):   return convert_to_spline(phi,self.binormal_cylindrical[:,0])
+    def binormalphi(phi): return convert_to_spline(phi,self.binormal_cylindrical[:,1])
+    def binormalZ(phi):   return convert_to_spline(phi,self.binormal_cylindrical[:,2])
+    def X1cF(phi): return convert_to_spline(phi,self.X1c)
+    def X1sF(phi): return convert_to_spline(phi,self.X1s)
+    def Y1cF(phi): return convert_to_spline(phi,self.Y1c)
+    def Y1sF(phi): return convert_to_spline(phi,self.Y1s)
+    def X20F(phi): return convert_to_spline(phi,self.X20)
+    def X2cF(phi): return convert_to_spline(phi,self.X2c)
+    def X2sF(phi): return convert_to_spline(phi,self.X2s)
+    def Y20F(phi): return convert_to_spline(phi,self.Y20)
+    def Y2cF(phi): return convert_to_spline(phi,self.Y2c)
+    def Y2sF(phi): return convert_to_spline(phi,self.Y2s)
+    def Z20F(phi): return convert_to_spline(phi,self.Z20)
+    def Z2cF(phi): return convert_to_spline(phi,self.Z2c)
+    def Z2sF(phi): return convert_to_spline(phi,self.Z2s)
+    def B20F(phi): return convert_to_spline(phi,self.B20)
     # Perform the transformation from a near-axis position vector
     # to cylindrical coordinates
     def rSurf(r,phi,theta):
