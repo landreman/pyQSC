@@ -245,7 +245,6 @@ def write_vmec_input(self, rVMEC, filename, vmec_template_filename):
     File_object.write('  NS_ARRAY = '+str(ns_array)[1:-1]+'\n')
     File_object.write('  FTOL_ARRAY = '+str(ftol_array)[1:-1]+'\n')
     File_object.write('  NITER_ARRAY = '+str(niter_array)[1:-1]+'\n')
-    File_object.write('  FTOL_ARRAY = '+str(ftol_array)[1:-1]+'\n')
     File_object.write('!----- Grid Parameters -----\n')
     File_object.write('  LASYM = '+str(lasym)+'\n')
     File_object.write('  NFP = '+str(self.nfp)+'\n')
