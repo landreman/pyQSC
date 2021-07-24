@@ -31,12 +31,12 @@ def to_Fourier(self, R_2D, Z_2D, nfp, ntheta, mpol1d, ntord, lasym):
                     # The next 2 lines ensure inverse Fourier transform(Fourier transform) = identity
                     if np.mod(ntheta,2) == 0 and m  == (ntheta/2): factor2 = factor2 / 2
                     if np.mod(nphi_conversion,2) == 0 and abs(n) == (nphi_conversion/2): factor2 = factor2 / 2
-                    RBC[n,m] = RBC[n,m] + R_2D[j_theta, j_phi] * cosangle * factor2
-                    RBS[n,m] = RBS[n,m] + R_2D[j_theta, j_phi] * sinangle * factor2
-                    ZBC[n,m] = ZBC[n,m] + Z_2D[j_theta, j_phi] * cosangle * factor2
-                    ZBS[n,m] = ZBS[n,m] + Z_2D[j_theta, j_phi] * sinangle * factor2
-    RBC[0,0] = np.sum(R_2D) / (ntheta * nphi_conversion)
-    ZBC[0,0] = np.sum(Z_2D) / (ntheta * nphi_conversion)
+                    RBC[n+ntor,m] = RBC[n+ntor,m] + R_2D[j_theta, j_phi] * cosangle * factor2
+                    RBS[n+ntor,m] = RBS[n+ntor,m] + R_2D[j_theta, j_phi] * sinangle * factor2
+                    ZBC[n+ntor,m] = ZBC[n+ntor,m] + Z_2D[j_theta, j_phi] * cosangle * factor2
+                    ZBS[n+ntor,m] = ZBS[n+ntor,m] + Z_2D[j_theta, j_phi] * sinangle * factor2
+    RBC[ntor,0] = np.sum(R_2D) / (ntheta * nphi_conversion)
+    ZBC[ntor,0] = np.sum(Z_2D) / (ntheta * nphi_conversion)
 
     if not lasym:
         RBS = 0
@@ -126,10 +126,10 @@ def to_vmec(self, filename, r=0.1, input_template=None, ntheta=20, ntorMax=40):
     file_object.write('!----- Boundary Parameters -----\n')
     for m in range(mpol+1):
         for n in range(-ntor,ntor+1):
-            if RBC[n,m]!=0 or ZBS[n,m]!=0:
-                file_object.write(    '  RBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBC[n,m]:+.16e}"+',    ZBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBS[n,m]:+.16e}"+'\n')
+            if RBC[n+ntor,m]!=0 or ZBS[n+ntor,m]!=0:
+                file_object.write(    '  RBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBC[n+ntor,m]:+.16e}"+',    ZBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBS[n+ntor,m]:+.16e}"+'\n')
                 if lasym:
-                    file_object.write('  RBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBS[n,m]:+.16e}"+',    ZBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBC[n,m]:+.16e}"+'\n')
+                    file_object.write('  RBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBS[n+ntor,m]:+.16e}"+',    ZBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBC[n+ntor,m]:+.16e}"+'\n')
     file_object.write('/\n')
     file_object.close()
 

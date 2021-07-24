@@ -87,12 +87,11 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
             phi_target = phi_conversion[j_phi]
             phi0_rootSolve_min = phi_target - 1.0 / self.nfp
             phi0_rootSolve_max = phi_target + 1.0 / self.nfp
-            res = root_scalar(Frenet_to_cylindrical_residual_func,\
+            res = root_scalar(Frenet_to_cylindrical_residual_func, xtol=1e-15, rtol=1e-15, maxiter=1000,\
                               args=(X_spline,Y_spline,phi_target, self.R0_func, self.normal_R_spline,\
                                     self.normal_phi_spline, self.binormal_R_spline, self.binormal_phi_spline),\
                               bracket=[phi0_rootSolve_min, phi0_rootSolve_max], x0=phi_target)
             phi0_solution = res.root
-
             final_R, final_z = Frenet_to_cylindrical_1_point(phi0_solution,X_spline,Y_spline,\
                                                             self.R0_func, self.Z0_func,\
                                                             self.normal_R_spline, self.normal_phi_spline, self.normal_z_spline,\
