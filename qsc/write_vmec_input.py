@@ -4,7 +4,7 @@ near-axis boundary to a VMEC input file
 """
 import numpy as np
 from .util import mu0
-from scipy.interpolate import UnivariateSpline as spline
+from scipy.interpolate import CubicSpline as spline
 from scipy.optimize import root_scalar
 
 def to_vmec(self, filename, r=0.1, input_template=None):
@@ -40,7 +40,7 @@ def to_vmec(self, filename, r=0.1, input_template=None):
 
     # We should be able to resolve (N_phi-1)/2 modes (note integer division!), but in case N_phi is very large, don't attempt more than the vmec arrays can handle.
     ntord = 100 # maximum number of mode numbers VMEC can handle
-    ntor = min((self.nphi - 1) / 2, ntord)
+    ntor = int(min((self.nphi - 1) / 2, ntord))
     mpold = 101
     mpol1d = mpold - 1
     ntor1d = 1 + ntord
@@ -60,26 +60,17 @@ def to_vmec(self, filename, r=0.1, input_template=None):
     theta = np.linspace(0,2*np.pi,N_theta,endpoint=False)
     phi_conversion = np.linspace(0,2*np.pi/self.nfp,N_phi_conversion,endpoint=False)
 
-    def R0_spline(phi): return sum([self.rc[i]*np.cos(i*self.nfp*phi) for i in range(len(self.rc))])
-    def z0_spline(phi): return sum([self.zs[i]*np.sin(i*self.nfp*phi) for i in range(len(self.zs))])
-    def normal_R_spline(phi):
-        sp=spline(self.phi, self.normal_cylindrical[:,0], k=3, s=0)
+    def R0_func(phi): return sum([self.rc[i]*np.cos(i*self.nfp*phi) for i in range(len(self.rc))])
+    def Z0_func(phi): return sum([self.zs[i]*np.sin(i*self.nfp*phi) for i in range(len(self.zs))])
+    def convert_to_spline(phi,array):
+        sp=spline(np.append(self.phi,2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
         return sp(np.mod(phi,2*np.pi/self.nfp))
-    def normal_phi_spline(phi):
-        sp=spline(self.phi, self.normal_cylindrical[:,1], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def normal_z_spline(phi):
-        sp=spline(self.phi, self.normal_cylindrical[:,2], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def binormal_R_spline(phi):
-        sp=spline(self.phi, self.binormal_cylindrical[:,0], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def binormal_phi_spline(phi):
-        sp=spline(self.phi, self.binormal_cylindrical[:,1], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def binormal_z_spline(phi):
-        sp=spline(self.phi, self.binormal_cylindrical[:,2], k=3, s=0)
-        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def normal_R_spline(phi):     return convert_to_spline(phi,self.normal_cylindrical[:,0])
+    def normal_phi_spline(phi):   return convert_to_spline(phi,self.normal_cylindrical[:,1])
+    def normal_z_spline(phi):     return convert_to_spline(phi,self.normal_cylindrical[:,2])
+    def binormal_R_spline(phi):   return convert_to_spline(phi,self.binormal_cylindrical[:,0])
+    def binormal_phi_spline(phi): return convert_to_spline(phi,self.binormal_cylindrical[:,1])
+    def binormal_z_spline(phi):   return convert_to_spline(phi,self.binormal_cylindrical[:,2])
 
     rootSolve_abserr = 1.0e-30
     rootSolve_relerr = 1.0e-30
@@ -107,7 +98,7 @@ def to_vmec(self, filename, r=0.1, input_template=None):
 
         sinphi0 = np.sin(phi0)
         cosphi0 = np.cos(phi0)
-        R0_at_phi0   = R0_spline(phi0)
+        R0_at_phi0   = R0_func(phi0)
         X_at_phi0    = X_spline(phi0)
         Y_at_phi0    = Y_spline(phi0)
         normal_R     = normal_R_spline(phi0)
@@ -134,8 +125,8 @@ def to_vmec(self, filename, r=0.1, input_template=None):
  
         sinphi0 = np.sin(phi0)
         cosphi0 = np.cos(phi0)
-        R0_at_phi0   = R0_spline(phi0)
-        z0_at_phi0   = z0_spline(phi0)
+        R0_at_phi0   = R0_func(phi0)
+        z0_at_phi0   = Z0_func(phi0)
         X_at_phi0    = X_spline(phi0)
         Y_at_phi0    = Y_spline(phi0)
         normal_R     = normal_R_spline(phi0)
@@ -166,12 +157,8 @@ def to_vmec(self, filename, r=0.1, input_template=None):
        sintheta = np.sin(theta[j_theta])
        X_at_this_theta = r * (X1c_untwisted * costheta + X1s_untwisted * sintheta)
        Y_at_this_theta = r * (Y1c_untwisted * costheta + Y1s_untwisted * sintheta)
-       def X_spline(phi):
-          sp=spline(self.phi, X_at_this_theta, k=3, s=0)
-          return sp(np.mod(phi,2*np.pi/self.nfp))
-       def Y_spline(phi):
-          sp=spline(self.phi, Y_at_this_theta, k=3, s=0)
-          return sp(np.mod(phi,2*np.pi/self.nfp))
+       def X_spline(phi): return convert_to_spline(phi,X_at_this_theta)
+       def Y_spline(phi): return convert_to_spline(phi,Y_at_this_theta)
        for j_phi in range(N_phi_conversion):
           # Solve for the phi0 such that r0 + X1 n + Y1 b has the desired phi
           phi_target = phi_conversion[j_phi]
