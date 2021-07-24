@@ -208,10 +208,10 @@ def to_vmec(self, filename, rVMEC=0.1, vmec_template_filename=None):
     factor = 2 / (N_theta * N_phi_conversion)
     for j_phi in range(N_phi_conversion):
         for j_theta in range(N_theta):
-            for m in range(mpol):
+            for m in range(mpol+1):
                 nmin = -ntor
                 if m==0: nmin = 1
-                for n in range(nmin, ntor):
+                for n in range(nmin, ntor+1):
                     angle = m * theta[j_theta] - n * self.nfp * phi_conversion[j_phi]
                     sinangle = np.sin(angle)
                     cosangle = np.cos(angle)
@@ -265,8 +265,8 @@ def to_vmec(self, filename, rVMEC=0.1, vmec_template_filename=None):
         File_object.write('  ZAXIS_CC = '+str(zaxis_cc)[1:-1]+'\n')
     File_object.write('  ZAXIS_CS = '+str(zaxis_cs)[1:-1]+'\n')
     File_object.write('!----- Boundary Parameters -----\n')
-    for m in range(mpol - 1):
-        for n in range(-ntor,ntor):
+    for m in range(mpol):
+        for n in range(-ntor,ntor+1):
             if RBC[n,m]!=0 or ZBS[n,m]!=0:
                 File_object.write(    '  RBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBC[n,m]:+.16e}"+',    ZBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBS[n,m]:+.16e}"+'\n')
                 if lasym == True:
