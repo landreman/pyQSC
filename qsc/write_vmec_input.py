@@ -38,7 +38,7 @@ def to_Fourier(self, R_2D, Z_2D, nfp, ntheta, mpol1d, ntord, lasym):
     RBC[0,0] = np.sum(R_2D) / (ntheta * nphi_conversion)
     ZBC[0,0] = np.sum(Z_2D) / (ntheta * nphi_conversion)
 
-    if lasym == False:
+    if not lasym:
         RBS = 0
         ZBC = 0
 
@@ -128,7 +128,7 @@ def to_vmec(self, filename, r=0.1, input_template=None, ntheta=20, ntorMax=40):
         for n in range(-ntor,ntor+1):
             if RBC[n,m]!=0 or ZBS[n,m]!=0:
                 file_object.write(    '  RBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBC[n,m]:+.16e}"+',    ZBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBS[n,m]:+.16e}"+'\n')
-                if lasym == True:
+                if lasym:
                     file_object.write('  RBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBS[n,m]:+.16e}"+',    ZBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBC[n,m]:+.16e}"+'\n')
     file_object.write('/\n')
     file_object.close()
