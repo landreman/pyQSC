@@ -189,7 +189,7 @@ def plot(self,r=0.1,nphi=60,ntheta=40,nsections=4,save=None,**kwargs):
     Ysurf=rs*np.sin(phi2D)+phis*np.cos(phi2D)
     Bmag=Bf(r,phi2D,theta2D)
     B_rescaled = (Bmag - Bmag.min()) / (Bmag.max() - Bmag.min())
-    ax.plot_surface(Xsurf, Ysurf, Zsurf, facecolors = cm.jet(B_rescaled), rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=0.25, **kwargs)
+    ax.plot_surface(Xsurf, Ysurf, Zsurf, facecolors = cm.jet(B_rescaled), rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=0.4, **kwargs)
     ax.auto_scale_xyz([Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()])   
     # make the grid lines transparent
     ax.xaxis._axinfo["grid"]['color'] =  (1,1,1,0)

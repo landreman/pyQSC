@@ -11,6 +11,10 @@ class PlotTests(unittest.TestCase):
         """
         stel=Qsc.from_paper("r1 section 5.1")
         stel.plot()
+        stel=Qsc.from_paper(2)
+        stel.plot()
+        stel=Qsc.from_paper(4)
+        stel.plot()
                 
 if __name__ == "__main__":
     unittest.main()
