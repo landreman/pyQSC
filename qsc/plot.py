@@ -7,7 +7,28 @@ from scipy.interpolate import UnivariateSpline as spline
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-def plot(self,rPlot=0.1,nphi=60,ntheta=40,nsections=9,saveFile=None):
+def plot(self,r=0.1,nphi=60,ntheta=40,nsections=4,save=None,**kwargs):
+    """
+    Creates 2 matplotlib figures:
+        - A plot with several poloidal planes at the specified radius r with the
+         corresponding location of the magnetic axis and label using plt.plot
+        - A 3D plot with the flux surface and the magnetic field strength
+         on the surface using plot_surface
+    Args:
+      r (float): near-axis radius r where to create the surface
+      nphi   (int): Number of grid points in the toroidal angle.
+      ntheta (int): Number of grid points in the poloidal angle.
+      nsections (int): Number of poloidal planes to show.
+      save (str): Filename prefix for the png files to save
+      kwargs: Any additional key-value pairs to pass to matplotlib's plot_surface.
+    This function can generate figures like this:
+
+    .. image:: 3dplot.png
+       :width: 270
+
+    .. image:: poloidalplot.png
+       :width: 200
+    """
 
     # Create splines interpolants for the quantities used in the plots
     def Raxisf(phi): return sum([self.rc[i]*np.cos(i*self.nfp*phi) for i in range(len(self.rc))])
@@ -97,10 +118,10 @@ def plot(self,rPlot=0.1,nphi=60,ntheta=40,nsections=9,saveFile=None):
     fig = plt.figure(figsize=(6, 6), dpi=80)
     ax  = plt.gca()
     theta = np.linspace(0,2*np.pi,ntheta)
-    phi1D = np.linspace(0,2*np.pi/self.nfp,nsections)
+    phi1D = np.linspace(0,2*np.pi/self.nfp,nsections,endpoint=False)
     for phi in phi1D:
-        rSurfi=rSurf(rPlot,phi,theta)
-        zSurfi=zSurf(rPlot,phi,theta)
+        rSurfi=rSurf(r,phi,theta)
+        zSurfi=zSurf(r,phi,theta)
         if phi*self.nfp/(2*np.pi)==0:
             label = r'$\phi$=0'
         elif phi*self.nfp/(2*np.pi)==0.25:
@@ -109,8 +130,6 @@ def plot(self,rPlot=0.1,nphi=60,ntheta=40,nsections=9,saveFile=None):
             label = r'$\phi=\pi/$'+str(self.nfp)
         elif phi*self.nfp/(2*np.pi)==0.75:
             label = r'$\phi={3\pi}/$'+str(2*self.nfp)
-        elif phi*self.nfp/(2*np.pi)==1.0:
-            continue
         else:
             label = '_nolegend_'
         color = next(ax._get_lines.prop_cycler)['color']
@@ -121,8 +140,8 @@ def plot(self,rPlot=0.1,nphi=60,ntheta=40,nsections=9,saveFile=None):
     plt.legend()
     plt.tight_layout()
     ax.set_aspect('equal')
-    if saveFile!=None:
-        fig.savefig(saveFile+'_poloidal.pdf')
+    if save!=None:
+        fig.savefig(save+'_poloidal.png')
 
     # Create 3D plot
     fig = plt.figure()
@@ -136,14 +155,13 @@ def plot(self,rPlot=0.1,nphi=60,ntheta=40,nsections=9,saveFile=None):
     theta1d = np.linspace(0, 2 * np.pi, ntheta)
     phi1d   = np.linspace(0, 2 * np.pi, nphi)
     phi2D, theta2D = np.meshgrid(phi1d, theta1d)
-    rs=rSurf(rPlot,phi2D,theta2D)
-    zs=zSurf(rPlot,phi2D,theta2D)
+    rs=rSurf(r,phi2D,theta2D)
+    Zsurf=zSurf(r,phi2D,theta2D)
     Xsurf=rs*np.cos(phi2D)
     Ysurf=rs*np.sin(phi2D)
-    Zsurf=zs
-    Bmag=Bf(rPlot,phi2D,theta2D)
+    Bmag=Bf(r,phi2D,theta2D)
     B_rescaled = (Bmag - Bmag.min()) / (Bmag.max() - Bmag.min())
-    ax.plot_surface(Xsurf, Ysurf, Zsurf, facecolors = cm.jet(B_rescaled), rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=0.25)
+    ax.plot_surface(Xsurf, Ysurf, Zsurf, facecolors = cm.jet(B_rescaled), rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=0.25, **kwargs)
     ax.auto_scale_xyz([Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()])   
     # make the grid lines transparent
     ax.xaxis._axinfo["grid"]['color'] =  (1,1,1,0)
@@ -154,7 +172,7 @@ def plot(self,rPlot=0.1,nphi=60,ntheta=40,nsections=9,saveFile=None):
     ax.set_ylabel('Y (meters)')
     ax.set_zlabel('Z (meters)')
     plt.tight_layout()
-    if saveFile!=None:
-        fig.savefig(saveFile+'3D.pdf')
+    if save!=None:
+        fig.savefig(save+'3D.png')
 
     plt.show()
