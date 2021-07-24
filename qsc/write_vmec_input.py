@@ -4,7 +4,6 @@ near-axis boundary to a VMEC input file
 """
 import numpy as np
 from .util import mu0
-from scipy.interpolate import CubicSpline as spline
 from scipy.optimize import root_scalar
 
 def to_vmec(self, filename, r=0.1, input_template=None):
@@ -60,51 +59,19 @@ def to_vmec(self, filename, r=0.1, input_template=None):
     theta = np.linspace(0,2*np.pi,N_theta,endpoint=False)
     phi_conversion = np.linspace(0,2*np.pi/self.nfp,N_phi_conversion,endpoint=False)
 
-    def R0_func(phi): return sum([self.rc[i]*np.cos(i*self.nfp*phi) for i in range(len(self.rc))])
-    def Z0_func(phi): return sum([self.zs[i]*np.sin(i*self.nfp*phi) for i in range(len(self.zs))])
-    def convert_to_spline(phi,array):
-        sp=spline(np.append(self.phi,2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def normal_R_spline(phi):     return convert_to_spline(phi,self.normal_cylindrical[:,0])
-    def normal_phi_spline(phi):   return convert_to_spline(phi,self.normal_cylindrical[:,1])
-    def normal_z_spline(phi):     return convert_to_spline(phi,self.normal_cylindrical[:,2])
-    def binormal_R_spline(phi):   return convert_to_spline(phi,self.binormal_cylindrical[:,0])
-    def binormal_phi_spline(phi): return convert_to_spline(phi,self.binormal_cylindrical[:,1])
-    def binormal_z_spline(phi):   return convert_to_spline(phi,self.binormal_cylindrical[:,2])
-
-    rootSolve_abserr = 1.0e-30
-    rootSolve_relerr = 1.0e-30
-
-    # If helicity is nonzero, then the original X1s/X1c/Y1s/Y1c variables are defined with respect to a "poloidal" angle that
-    # is actually helical, with the theta=0 curve wrapping around the magnetic axis as you follow phi around toroidally. Therefore
-    # here we convert to an untwisted poloidal angle, such that the theta=0 curve does not wrap around the axis.
-    if self.helicity == 0:
-        X1s_untwisted = 0
-        X1c_untwisted = self.X1c
-        Y1s_untwisted = self.Y1s
-        Y1c_untwisted = self.Y1c
-    else:
-        angle = -self.helicity * self.nfp * self.varphi
-        sinangle = np.sin(angle)
-        cosangle = np.cos(angle)
-        X1s_untwisted = self.X1s *   cosangle  + self.X1c * sinangle
-        X1c_untwisted = self.X1s * (-sinangle) + self.X1c * cosangle
-        Y1s_untwisted = self.Y1s *   cosangle  + self.Y1c * sinangle
-        Y1c_untwisted = self.Y1s * (-sinangle) + self.Y1c * cosangle
-
     def Frenet_to_cylindrical_residual_func(phi0):
         # Given a point on the axis with toroidal angle phi0, compute phi for the associated point at r>0,
         # and find the difference between this phi and the target value of phi.
 
         sinphi0 = np.sin(phi0)
         cosphi0 = np.cos(phi0)
-        R0_at_phi0   = R0_func(phi0)
+        R0_at_phi0   = self.R0_func(phi0)
         X_at_phi0    = X_spline(phi0)
         Y_at_phi0    = Y_spline(phi0)
-        normal_R     = normal_R_spline(phi0)
-        normal_phi   = normal_phi_spline(phi0)
-        binormal_R   = binormal_R_spline(phi0)
-        binormal_phi = binormal_phi_spline(phi0)
+        normal_R     = self.normal_R_spline(phi0)
+        normal_phi   = self.normal_phi_spline(phi0)
+        binormal_R   = self.binormal_R_spline(phi0)
+        binormal_phi = self.binormal_phi_spline(phi0)
 
         normal_x   =   normal_R * cosphi0 -   normal_phi * sinphi0
         normal_y   =   normal_R * sinphi0 +   normal_phi * cosphi0
@@ -125,16 +92,16 @@ def to_vmec(self, filename, r=0.1, input_template=None):
  
         sinphi0 = np.sin(phi0)
         cosphi0 = np.cos(phi0)
-        R0_at_phi0   = R0_func(phi0)
-        z0_at_phi0   = Z0_func(phi0)
+        R0_at_phi0   = self.R0_func(phi0)
+        z0_at_phi0   = self.Z0_func(phi0)
         X_at_phi0    = X_spline(phi0)
         Y_at_phi0    = Y_spline(phi0)
-        normal_R     = normal_R_spline(phi0)
-        normal_phi   = normal_phi_spline(phi0)
-        normal_z     = normal_z_spline(phi0)
-        binormal_R   = binormal_R_spline(phi0)
-        binormal_phi = binormal_phi_spline(phi0)
-        binormal_z   = binormal_z_spline(phi0)
+        normal_R     = self.normal_R_spline(phi0)
+        normal_phi   = self.normal_phi_spline(phi0)
+        normal_z     = self.normal_z_spline(phi0)
+        binormal_R   = self.binormal_R_spline(phi0)
+        binormal_phi = self.binormal_phi_spline(phi0)
+        binormal_z   = self.binormal_z_spline(phi0)
 
         normal_x   =   normal_R * cosphi0 -   normal_phi * sinphi0
         normal_y   =   normal_R * sinphi0 +   normal_phi * cosphi0
@@ -155,10 +122,10 @@ def to_vmec(self, filename, r=0.1, input_template=None):
     for j_theta in range(N_theta):
        costheta = np.cos(theta[j_theta])
        sintheta = np.sin(theta[j_theta])
-       X_at_this_theta = r * (X1c_untwisted * costheta + X1s_untwisted * sintheta)
-       Y_at_this_theta = r * (Y1c_untwisted * costheta + Y1s_untwisted * sintheta)
-       def X_spline(phi): return convert_to_spline(phi,X_at_this_theta)
-       def Y_spline(phi): return convert_to_spline(phi,Y_at_this_theta)
+       X_at_this_theta = r * (self.X1c_untwisted * costheta + self.X1s_untwisted * sintheta)
+       Y_at_this_theta = r * (self.Y1c_untwisted * costheta + self.Y1s_untwisted * sintheta)
+       def X_spline(phi): return self.convert_to_spline(phi,X_at_this_theta)
+       def Y_spline(phi): return self.convert_to_spline(phi,Y_at_this_theta)
        for j_phi in range(N_phi_conversion):
           # Solve for the phi0 such that r0 + X1 n + Y1 b has the desired phi
           phi_target = phi_conversion[j_phi]

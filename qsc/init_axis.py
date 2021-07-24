@@ -7,9 +7,26 @@ import numpy as np
 import logging
 from .spectral_diff_matrix import spectral_diff_matrix
 from .util import fourier_minimum
+from scipy.interpolate import CubicSpline as spline
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+# Define periodic spline interpolants used in several scripts and plotting
+def R0_func(self,phi): return sum([self.rc[i]*np.cos(i*self.nfp*phi) for i in range(len(self.rc))])
+def Z0_func(self,phi): return sum([self.zs[i]*np.sin(i*self.nfp*phi) for i in range(len(self.zs))])
+def convert_to_spline(self,phi,array):
+    sp=spline(np.append(self.phi,2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
+    return sp(np.mod(phi,2*np.pi/self.nfp))
+def normal_R_spline(self,phi):     return self.convert_to_spline(phi,self.normal_cylindrical[:,0])
+def normal_phi_spline(self,phi):   return self.convert_to_spline(phi,self.normal_cylindrical[:,1])
+def normal_z_spline(self,phi):     return self.convert_to_spline(phi,self.normal_cylindrical[:,2])
+def binormal_R_spline(self,phi):   return self.convert_to_spline(phi,self.binormal_cylindrical[:,0])
+def binormal_phi_spline(self,phi): return self.convert_to_spline(phi,self.binormal_cylindrical[:,1])
+def binormal_z_spline(self,phi):   return self.convert_to_spline(phi,self.binormal_cylindrical[:,2])
+def tangent_R_spline(self,phi):    return self.convert_to_spline(phi,self.tangent_cylindrical[:,0])
+def tangent_phi_spline(self,phi):  return self.convert_to_spline(phi,self.tangent_cylindrical[:,1])
+def tangent_z_spline(self,phi):    return self.convert_to_spline(phi,self.tangent_cylindrical[:,2])
 
 def init_axis(self):
     """
