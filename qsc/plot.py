@@ -98,18 +98,24 @@ def plot(self,r=0.1,nphi=60,ntheta=40,nsections=4,save=None,**kwargs):
     def rSurf(r,phi,theta):
         thetaN = theta-(self.iota-self.iotaN)*phi
         r0 = Raxisf(phi)
-        r1 = (X1cF(phi)*np.cos(thetaN)+X1sF(phi)*np.sin(thetaN))*normalR(phi)+(Y1cF(phi)*np.cos(thetaN)+Y1sF(phi)*np.sin(thetaN))*binormalR(phi)
+        r1 = (X1cF(phi)*np.cos(thetaN)+X1sF(phi)*np.sin(thetaN))*normalR(phi)\
+            +(Y1cF(phi)*np.cos(thetaN)+Y1sF(phi)*np.sin(thetaN))*binormalR(phi)
         if self.order!='r1':
-            r2 = (X20F(phi)+X2cF(phi)*np.cos(2*thetaN)+X2sF(phi)*np.sin(2*thetaN))*normalR(phi)+(Y20F(phi)+Y2cF(phi)*np.cos(2*thetaN)+Y2sF(phi)*np.sin(2*thetaN))*binormalR(phi)+(Z20F(phi)+Z2cF(phi)*np.cos(2*thetaN)+Z2sF(phi)*np.sin(2*thetaN))*tangentR(phi)
+            r2 = (X20F(phi)+X2cF(phi)*np.cos(2*thetaN)+X2sF(phi)*np.sin(2*thetaN))*normalR(phi)\
+                +(Y20F(phi)+Y2cF(phi)*np.cos(2*thetaN)+Y2sF(phi)*np.sin(2*thetaN))*binormalR(phi)\
+                +(Z20F(phi)+Z2cF(phi)*np.cos(2*thetaN)+Z2sF(phi)*np.sin(2*thetaN))*tangentR(phi)
         else:
             r2 = 0
         return r0+r*r1+r**2*r2
     def zSurf(r,phi,theta):
         thetaN = theta-(self.iota-self.iotaN)*phi
         z0 = Zaxisf(phi)
-        z1 = (X1cF(phi)*np.cos(thetaN)+X1sF(phi)*np.sin(thetaN))*normalZ(phi)+(Y1cF(phi)*np.cos(thetaN)+Y1sF(phi)*np.sin(thetaN))*binormalZ(phi)
+        z1 = (X1cF(phi)*np.cos(thetaN)+X1sF(phi)*np.sin(thetaN))*normalZ(phi)\
+            +(Y1cF(phi)*np.cos(thetaN)+Y1sF(phi)*np.sin(thetaN))*binormalZ(phi)
         if self.order!='r1':
-            z2 = (X20F(phi)+X2cF(phi)*np.cos(2*thetaN)+X2sF(phi)*np.sin(2*thetaN))*normalZ(phi)+(Y20F(phi)+Y2cF(phi)*np.cos(2*thetaN)+Y2sF(phi)*np.sin(2*thetaN))*binormalZ(phi)+(Z20F(phi)+Z2cF(phi)*np.cos(2*thetaN)+Z2sF(phi)*np.sin(2*thetaN))*tangentZ(phi)
+            z2 = (X20F(phi)+X2cF(phi)*np.cos(2*thetaN)+X2sF(phi)*np.sin(2*thetaN))*normalZ(phi)\
+                +(Y20F(phi)+Y2cF(phi)*np.cos(2*thetaN)+Y2sF(phi)*np.sin(2*thetaN))*binormalZ(phi)\
+                +(Z20F(phi)+Z2cF(phi)*np.cos(2*thetaN)+Z2sF(phi)*np.sin(2*thetaN))*tangentZ(phi)
         else:
             z2 = 0
         return z0+r*z1+r**2*z2
