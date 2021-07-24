@@ -128,10 +128,11 @@ def plot(self,rPlot=0.1,nphi=60,ntheta=40,nsections=9,saveFile=None):
     fig = plt.figure()
     ax  = plt.axes(projection='3d')
     def Bf(r,phi,theta):
+        thetaN = theta-(self.iota-self.iotaN)*phi
         if self.order=='r1':
-            return self.B0*(1+r*self.etabar*np.cos(theta-(self.iota-self.iotaN)*phi))
+            return self.B0*(1+r*self.etabar*np.cos(thetaN))
         else:
-            return self.B0*(1+r*self.etabar*np.cos(theta-(self.iota-self.iotaN)*phi))+r*r*(B20F(phi)+self.B2c*np.cos(theta-(self.iota-self.iotaN)*phi)+self.B2s*np.sin(theta-(self.iota-self.iotaN)*phi))
+            return self.B0*(1+r*self.etabar*np.cos(thetaN))+r*r*(B20F(phi)+self.B2c*np.cos(thetaN)+self.B2s*np.sin(thetaN))
     theta1d = np.linspace(0, 2 * np.pi, ntheta)
     phi1d   = np.linspace(0, 2 * np.pi, nphi)
     phi2D, theta2D = np.meshgrid(phi1d, theta1d)
