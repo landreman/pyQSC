@@ -260,7 +260,7 @@ def to_vmec(self, filename, rVMEC=0.1, vmec_template_filename=None):
     File_object.write('  AC = '+str(ac)[1:-1]+'\n')
     File_object.write('!----- Axis Parameters -----\n')
     File_object.write('  RAXIS_CC = '+str(raxis_cc)[1:-1]+'\n')
-    if lasym==True:
+    if lasym:
         File_object.write('  RAXIS_CS = '+str(raxis_cs)[1:-1]+'\n')
         File_object.write('  ZAXIS_CC = '+str(zaxis_cc)[1:-1]+'\n')
     File_object.write('  ZAXIS_CS = '+str(zaxis_cs)[1:-1]+'\n')
