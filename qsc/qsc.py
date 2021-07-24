@@ -27,6 +27,7 @@ class Qsc():
     from .calculate_r2 import calculate_r2
     from .mercier import mercier
     from .r_singularity import calculate_r_singularity
+    from .Frenet_to_cylindrical import Frenet_to_cylindrical
     from .write_vmec_input import to_vmec
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
