@@ -6,8 +6,9 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from matplotlib.colors import Normalize
 
-def plot(self,r=0.1,nphi=60,ntheta=40,nsections=4,save=None,**kwargs):
+def plot(self,r=0.14,nphi=80,ntheta=50,nsections=4,save=None,azim_default=None,**kwargs):
     """
     Creates 2 matplotlib figures:
         - A plot with several poloidal planes at the specified radius r with the
@@ -20,6 +21,8 @@ def plot(self,r=0.1,nphi=60,ntheta=40,nsections=4,save=None,**kwargs):
       ntheta (int): Number of grid points in the poloidal angle.
       nsections (int): Number of poloidal planes to show.
       save (str): Filename prefix for the png files to save
+      azim_default: Default azimuthal angle for the three subplots
+       in the 3D surface plot
       kwargs: Any additional key-value pairs to pass to matplotlib's plot_surface.
     This function can generate figures like this:
 
@@ -171,8 +174,6 @@ def plot(self,r=0.1,nphi=60,ntheta=40,nsections=4,save=None,**kwargs):
         fig.savefig(save+'_poloidal.png')
 
     # Create 3D plot
-    fig = plt.figure()
-    ax  = plt.axes(projection='3d')
     def Bf(r,phi,theta):
         thetaN = theta-(self.iota-self.iotaN)*phi
         if self.order=='r1':
@@ -188,18 +189,34 @@ def plot(self,r=0.1,nphi=60,ntheta=40,nsections=4,save=None,**kwargs):
     Xsurf=rs*np.cos(phi2D)-phis*np.sin(phi2D)
     Ysurf=rs*np.sin(phi2D)+phis*np.cos(phi2D)
     Bmag=Bf(r,phi2D,theta2D)
-    B_rescaled = (Bmag - Bmag.min()) / (Bmag.max() - Bmag.min())
-    ax.plot_surface(Xsurf, Ysurf, Zsurf, facecolors = cm.jet(B_rescaled), rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=0.4, **kwargs)
-    ax.auto_scale_xyz([Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()])   
-    # make the grid lines transparent
-    ax.xaxis._axinfo["grid"]['color'] =  (1,1,1,0)
-    ax.yaxis._axinfo["grid"]['color'] =  (1,1,1,0)
-    ax.zaxis._axinfo["grid"]['color'] =  (1,1,1,0)
-
-    ax.set_xlabel('X (meters)')
-    ax.set_ylabel('Y (meters)')
-    ax.set_zlabel('Z (meters)')
-    plt.tight_layout()
+    norm = Normalize(vmin=Bmag.min(), vmax=Bmag.max())
+    def create_subplot(elev=90,azim=45,dist=7):
+        ax.plot_surface(Xsurf, Ysurf, Zsurf, facecolors = cm.plasma(norm(Bmag)), rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=1, **kwargs)
+        ax.auto_scale_xyz([Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()])
+        ax.set_axis_off()
+        ax.dist = dist
+        ax.elev = elev
+        ax.azim = azim
+    if azim_default == None:
+        if self.helicity == 0:
+            azim_default = 135
+        else:
+            azim_default = 0
+    fig = plt.figure(constrained_layout=False, figsize=(4.5, 8))
+    gs1 = fig.add_gridspec(nrows=3, ncols=1, top=1.02, bottom=-0.3, left=0., right=0.85, hspace=0.0, wspace=0.0)
+    ax = fig.add_subplot(gs1[0, 0], projection='3d')
+    create_subplot(90,azim_default)
+    gs2 = fig.add_gridspec(nrows=3, ncols=1, top=1.09, bottom=-0.3, left=0., right=0.85, hspace=0.0, wspace=0.0)
+    ax = fig.add_subplot(gs2[1, 0], projection='3d')
+    create_subplot(30,azim_default)
+    gs3 = fig.add_gridspec(nrows=3, ncols=1, top=1.12, bottom=-0.15, left=0., right=0.85, hspace=0.0, wspace=0.0)
+    ax = fig.add_subplot(gs3[2, 0], projection='3d')
+    create_subplot(0,azim_default)
+    cbar_ax = fig.add_axes([0.85, 0.2, 0.03, 0.6])
+    m = cm.ScalarMappable(cmap=plt.cm.plasma, norm=norm)
+    m.set_array([])
+    cbar = plt.colorbar(m, cax=cbar_ax)
+    cbar.ax.set_title(r'$|B| [T]$')
     if save!=None:
         fig.savefig(save+'3D.png')
 
