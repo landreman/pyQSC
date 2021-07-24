@@ -7,7 +7,7 @@ from scipy.interpolate import UnivariateSpline as spline
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-def plot_qsc(self,rPlot,nphi,ntheta,nphiRZ,saveFile):
+def plot(self,rPlot=0.1,nphi=60,ntheta=40,nphiRZ=9,saveFile=[]):
 
     # Create splines interpolants for the quantities used in the plots
     def Raxisf(phi): return sum([self.rc[i]*np.cos(i*self.nfp*phi) for i in range(len(self.rc))])
@@ -42,37 +42,36 @@ def plot_qsc(self,rPlot,nphi,ntheta,nphiRZ,saveFile):
     def Y1sF(phi):
         sp=spline(self.phi, self.Y1s, k=3, s=0)
         return sp(np.mod(phi,2*np.pi/self.nfp))
-    if self.order!='r1':
-        def X20F(phi):
-            sp=spline(self.phi, self.X20, k=3, s=0)
-            return sp(np.mod(phi,2*np.pi/self.nfp))
-        def X2cF(phi):
-            sp=spline(self.phi, self.X2c, k=3, s=0)
-            return sp(np.mod(phi,2*np.pi/self.nfp))
-        def X2sF(phi):
-            sp=spline(self.phi, self.X2s, k=3, s=0)
-            return sp(np.mod(phi,2*np.pi/self.nfp))
-        def Y20F(phi):
-            sp=spline(self.phi, self.Y20, k=3, s=0)
-            return sp(np.mod(phi,2*np.pi/self.nfp))
-        def Y2cF(phi):
-            sp=spline(self.phi, self.Y2c, k=3, s=0)
-            return sp(np.mod(phi,2*np.pi/self.nfp))
-        def Y2sF(phi):
-            sp=spline(self.phi, self.Y2s, k=3, s=0)
-            return sp(np.mod(phi,2*np.pi/self.nfp))
-        def Z20F(phi):
-            sp=spline(self.phi, self.Z20, k=3, s=0)
-            return sp(np.mod(phi,2*np.pi/self.nfp))
-        def Z2cF(phi):
-            sp=spline(self.phi, self.Z2c, k=3, s=0)
-            return sp(np.mod(phi,2*np.pi/self.nfp))
-        def Z2sF(phi):
-            sp=spline(self.phi, self.Z2s, k=3, s=0)
-            return sp(np.mod(phi,2*np.pi/self.nfp))
-        def B20F(phi):
-            sp=spline(self.phi, self.B20, k=3, s=0)
-            return sp(np.mod(phi,2*np.pi/self.nfp))
+    def X20F(phi):
+        sp=spline(self.phi, self.X20, k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def X2cF(phi):
+        sp=spline(self.phi, self.X2c, k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def X2sF(phi):
+        sp=spline(self.phi, self.X2s, k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def Y20F(phi):
+        sp=spline(self.phi, self.Y20, k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def Y2cF(phi):
+        sp=spline(self.phi, self.Y2c, k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def Y2sF(phi):
+        sp=spline(self.phi, self.Y2s, k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def Z20F(phi):
+        sp=spline(self.phi, self.Z20, k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def Z2cF(phi):
+        sp=spline(self.phi, self.Z2c, k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def Z2sF(phi):
+        sp=spline(self.phi, self.Z2s, k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
+    def B20F(phi):
+        sp=spline(self.phi, self.B20, k=3, s=0)
+        return sp(np.mod(phi,2*np.pi/self.nfp))
     # Perform the transformation from a near-axis position vector
     # to cylindrical coordinates
     def rSurf(r,phi,theta):
