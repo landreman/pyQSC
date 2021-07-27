@@ -10,7 +10,6 @@ def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol, ntor, lasym):
     nphi_conversion = np.array(R_2D).shape[1]
     theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
     phi_conversion = np.linspace(0,2*np.pi/nfp,nphi_conversion,endpoint=False)
-    ntheta = np.array(theta).shape[0]
     RBC = np.zeros((int(2*ntor+1),int(mpol+1)))
     RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
     ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
@@ -42,7 +41,7 @@ def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol, ntor, lasym):
 
     return RBC, RBS, ZBC, ZBS
 
-def to_vmec(self, filename, r=0.1, params=dict(), ntheta=18, ntorMax=14):
+def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     """
     Output a near-axis boundary to a VMEC input file
     """
