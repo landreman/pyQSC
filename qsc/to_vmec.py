@@ -2,11 +2,26 @@
 This module contains the routines to output a
 near-axis boundary to a VMEC input file
 """
-from qsc.Frenet_to_cylindrical import Frenet_to_cylindrical
+from .Frenet_to_cylindrical import Frenet_to_cylindrical
 import numpy as np
 from .util import mu0
 
 def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol, ntor, lasym):
+    """
+    This function takes two 2D arrays (R_2D and Z_2D), which contain
+    the values of the radius R and vertical coordinate Z in cylindrical
+    coordinates of a given surface and Fourier transform it, outputing
+    the resulting cos(theta) and sin(theta) Fourier coefficients
+
+    Args:
+        R_2D: 2D array of the radial coordinate R(theta,phi) of a given surface
+        Z_2D: 2D array of the vertical coordinate Z(theta,phi) of a given surface
+        nfp: number of field periods of the surface
+        ntheta: poloidal resolution
+        mpol: resolution in poloidal Fourier space
+        ntor: resolution in toroidal Fourier space
+        lasym: False if stellarator-symmetric, True if not
+    """
     nphi_conversion = np.array(R_2D).shape[1]
     theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
     phi_conversion = np.linspace(0,2*np.pi/nfp,nphi_conversion,endpoint=False)
@@ -43,7 +58,16 @@ def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol, ntor, lasym):
 
 def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     """
-    Output a near-axis boundary to a VMEC input file
+    Outputs the near-axis configuration calculated with pyQSC to
+    a text file that is able to be read by VMEC.
+
+    Args:
+        filename: name of the text file to be created
+        r:  near-axis radius r of the desired boundary surface
+        params: a Python dict() instance containing one/several of the following parameters: mpol,
+        delt, nstep, tcon0, ns_array, ftol_array, niter_array
+        ntheta: resolution in the poloidal angle theta for the Frenet_to_cylindrical and VMEC calculations
+        ntorMax: maximum number of NTOR in the resulting VMEC input file
     """
     if "mpol" not in params.keys():
         mpol1d = 100 # maximum number of mode numbers VMEC can handle

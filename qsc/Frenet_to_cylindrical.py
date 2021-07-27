@@ -10,9 +10,24 @@ from scipy.optimize import root_scalar
 def Frenet_to_cylindrical_residual_func(phi0, X_spline, Y_spline, phi_target,\
                                         R0_func, normal_R_spline, normal_phi_spline,\
                                         binormal_R_spline, binormal_phi_spline):
-    # Given a point on the axis with toroidal angle phi0, compute phi for the associated point at r>0,
-    # and find the difference between this phi and the target value of phi.
+    """
+    This function takes a point on the magnetic axis with a given
+    toroidal angle phi0, computes the actual toroidal angle phi
+    for an associated point at r>0 and finds the difference between
+    this phi and the target value of phi
 
+    Args:
+        phi0: toroidal angle on the axis
+        X_spline: spline interpolant for X
+        Y_spline: spline interpolant for X
+        phi_target: target toroidal angle phi
+        R0_func: radial coordinate R0(phi0) of the axis shape
+        Z0_func: vertical coordinate R0(phi0) of the axis shape
+        normal_R_spline: spline interpolant for the R component of the axis normal vector
+        normal_phi_spline: spline interpolant for the phi component of the axis normal vector
+        binormal_R_spline: spline interpolant for the R component of the axis binormal vector
+        binormal_phi_spline: spline interpolant for the phi component of the axis binormal vector
+    """
     sinphi0 = np.sin(phi0)
     cosphi0 = np.cos(phi0)
     R0_at_phi0   = R0_func(phi0)
@@ -41,8 +56,24 @@ def Frenet_to_cylindrical_1_point(phi0, X_spline, Y_spline,\
                                   R0_func, Z0_func,\
                                   normal_R_spline, normal_phi_spline, normal_z_spline,\
                                   binormal_R_spline, binormal_phi_spline, binormal_z_spline):
-    # Given a point on the axis with toroidal angle phi0, compute R and z for the associated point at r>0.
+    """
+    This function takes a point on the magnetic axis with a given
+    toroidal angle phi0 and computes the cylindrical coordinate
+    components R and Z for an associated point at r>0
 
+    Args:
+        phi0: toroidal angle on the axis
+        X_spline: spline interpolant for X
+        Y_spline: spline interpolant for X
+        R0_func: radial coordinate R0(phi0) of the axis shape
+        Z0_func: vertical coordinate R0(phi0) of the axis shape
+        normal_R_spline: spline interpolant for the R component of the axis normal vector
+        normal_phi_spline: spline interpolant for the phi component of the axis normal vector
+        normal_Z_spline: spline interpolant for the Z component of the axis normal vector
+        binormal_R_spline: spline interpolant for the R component of the axis binormal vector
+        binormal_phi_spline: spline interpolant for the phi component of the axis binormal vector
+        binormal_Z_spline: spline interpolant for the Z component of the axis binormal vector
+    """
     sinphi0 = np.sin(phi0)
     cosphi0 = np.cos(phi0)
     R0_at_phi0   = R0_func(phi0)
@@ -69,6 +100,17 @@ def Frenet_to_cylindrical_1_point(phi0, X_spline, Y_spline,\
     return total_R, total_z
 
 def Frenet_to_cylindrical(self, r, ntheta=20):
+    """
+    Function to convert the near-axis coordinate system to
+    a cylindrical one for a surface at a particular radius,
+    outputing the following arrays: R(theta,varphi),
+    phi(theta,varphi) and Z(theta,varphi) with R,phi,Z cylindrical
+    coordinates and theta and varphi Boozer coordinates
+
+    Args:
+        r:  near-axis radius r of the desired boundary surface
+        ntheta: resolution in the poloidal angle theta
+    """
     nphi_conversion = self.nphi
     theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
     phi_conversion = np.linspace(0,2*np.pi/self.nfp,nphi_conversion,endpoint=False)
