@@ -136,6 +136,9 @@ def init_axis(self):
     self.binormal_cylindrical = binormal_cylindrical
     self.Bbar = self.spsi * self.B0
 
+    # The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero
+    self.lasym = np.max(np.abs(self.rs))>0 or np.max(np.abs(self.zc))>0 or np.abs(self.sigma0)>0
+
     # Functions that converts a toroidal angle phi0 on the axis to the axis radial and vertical coordinates
     self.R0_func = self.convert_to_spline(sum([self.rc[i]*np.cos(i*self.nfp*self.phi) +\
                                                self.rs[i]*np.sin(i*self.nfp*self.phi) \

@@ -108,15 +108,12 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     ac = [1]
     curtor = 2 * np.pi / mu0 * self.I2 * r * r
 
-    # The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero
-    lasym = np.max(np.abs(self.rs))>0 or np.max(np.abs(self.zc))>0 or np.abs(self.sigma0)>0
-
     # Get surface shape at fixed off-axis toroidal angle phi
     R_2D, Z_2D, phi0_2D = self.Frenet_to_cylindrical(r, ntheta)
     
     # Fourier transform the result.
     # This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.
-    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, ntheta, mpol, ntor, lasym)
+    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, ntheta, mpol, ntor, self.lasym)
 
     # Write to VMEC file
     file_object = open(filename,"w+")
@@ -134,7 +131,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     file_object.write('  FTOL_ARRAY = '+str(params["ftol_array"])[1:-1]+'\n')
     file_object.write('  NITER_ARRAY = '+str(params["niter_array"])[1:-1]+'\n')
     file_object.write('!----- Grid Parameters -----\n')
-    file_object.write('  LASYM = '+str(lasym)+'\n')
+    file_object.write('  LASYM = '+str(self.lasym)+'\n')
     file_object.write('  NFP = '+str(self.nfp)+'\n')
     file_object.write('  MPOL = '+str(mpol)+'\n')
     file_object.write('  NTOR = '+str(min(ntor,ntorMax))+'\n')
@@ -152,7 +149,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     # To convert sin(...) modes to vmec, we introduce a minus sign. This is because in vmec,
     # R and Z ~ sin(m theta - n phi), which for m=0 is sin(-n phi) = -sin(n phi).
     file_object.write('  RAXIS_CC = '+str(self.rc)[1:-1]+'\n')
-    if lasym:
+    if self.lasym:
         file_object.write('  RAXIS_CS = '+str(-self.rs)[1:-1]+'\n')
         file_object.write('  ZAXIS_CC = '+str(self.zc)[1:-1]+'\n')
     file_object.write('  ZAXIS_CS = '+str(-self.zs)[1:-1]+'\n')
@@ -161,14 +158,14 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
         for n in range(-ntor,ntor+1):
             if RBC[n+ntor,m]!=0 or ZBS[n+ntor,m]!=0:
                 file_object.write(    '  RBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBC[n+ntor,m]:+.16e}"+',    ZBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBS[n+ntor,m]:+.16e}"+'\n')
-                if lasym:
+                if self.lasym:
                     file_object.write('  RBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBS[n+ntor,m]:+.16e}"+',    ZBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBC[n+ntor,m]:+.16e}"+'\n')
     file_object.write('/\n')
     file_object.close()
 
     self.RBC = RBC.transpose()
     self.ZBS = ZBS.transpose()
-    if lasym:
+    if self.lasym:
         self.RBS = RBS.transpose()
         self.ZBC = ZBC.transpose()
     else:

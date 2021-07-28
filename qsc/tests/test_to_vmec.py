@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from qsc.to_vmec import to_Fourier
 import unittest
 import os
 from scipy.io import netcdf
@@ -64,10 +65,10 @@ def compare_to_vmec(name, r=0.01, nphi=101):
     woutFile="wout_"+str(name).replace(" ","")+".nc"
     f = netcdf.netcdf_file(woutFile, 'r')
     # Compare the results
-    print('pyQSC iota on axis =',py.iota)
-    print('VMEC iota on axis =',-f.variables['iotaf'][()][0])
-    print('pyQSC field on axis =',py.B0)
-    print('VMEC bmnc[1][0] =',f.variables['bmnc'][()][1][0])
+    logger.info('pyQSC iota on axis = '+str(py.iota))
+    logger.info('VMEC iota on axis = '+str(-f.variables['iotaf'][()][0]))
+    logger.info('pyQSC field on axis = '+str(py.B0))
+    logger.info('VMEC bmnc[1][0] = '+str(f.variables['bmnc'][()][1][0]))
     assert np.isclose(py.iota,-f.variables['iotaf'][()][0],rtol=1e-2)
     assert np.isclose(py.B0,f.variables['bmnc'][()][1][0],rtol=1e-2)
     vmec.cleanup(True)
@@ -94,11 +95,19 @@ class ToVmecTests(unittest.TestCase):
         compare_to_vmec("r1 section 5.2")
         compare_to_vmec("r1 section 5.3")
 
-    def test_3(self):
+    def test_Fourier(self):
         """
-        Transforming with to_Fourier and then un-transforming should give the identity,
+        Check that transforming with to_Fourier and then un-transforming gives the identity,
         for both even and odd ntheta and phi, and for lasym True or False.
         """
+        # r      = 0.1
+        # ntheta = 10
+        # nphi   = 31
+        # mpol   = 10
+        # ntor   = 30
+        # py = Qsc.from_paper("r1 section 5.1", nphi=nphi)
+        # R_2D, Z_2D, phi0_2D = py.Frenet_to_cylindrical(r, ntheta)
+        # RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, py.nfp, ntheta, mpol, ntor, py.lasym)
 
 if __name__ == "__main__":
     unittest.main()
