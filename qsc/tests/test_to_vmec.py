@@ -120,8 +120,9 @@ class ToVmecTests(unittest.TestCase):
         for the 3 O(r^1) examples in LandremanSenguptaPlunk. When the second order
         is successfully added to to_vmec, these tests might go to test_qsc.py
         """
-        cases=["r1 section 5.1","r1 section 5.2","r1 section 5.2"]
+        cases=["r1 section 5.1","r1 section 5.2","r1 section 5.3"]
         for case in cases:
+            logger.info('Going through case '+case)
             compare_to_fortran(case, "quasisymmetry_out."+str(case).replace(" ","")+".nc")
 
     def test_vmec(self):
@@ -129,8 +130,9 @@ class ToVmecTests(unittest.TestCase):
         Verify that vmec can actually read the generated input files
         and that vmec's Bfield and iota on axis match the predicted values.
         """
-        cases=["r1 section 5.1","r1 section 5.2","r1 section 5.2"]
+        cases=["r1 section 5.1","r1 section 5.2","r1 section 5.3"]
         for case in cases:
+            logger.info('Going through case '+case)
             compare_to_vmec(case)
 
     def test_Fourier(self):
@@ -138,8 +140,9 @@ class ToVmecTests(unittest.TestCase):
         Check that transforming with to_Fourier and then un-transforming gives the identity,
         for both even and odd ntheta and phi, and for lasym True or False.
         """
-        cases=["r1 section 5.1","r1 section 5.2","r1 section 5.2"]
+        cases=["r1 section 5.1","r1 section 5.2","r1 section 5.3"]
         for case in cases:
+            logger.info('Going through case '+case)
             Fourier_Inverse(case, atol=1e-9, rtol=1e-9)
 
 if __name__ == "__main__":
