@@ -137,8 +137,12 @@ def init_axis(self):
     self.Bbar = self.spsi * self.B0
 
     # Functions that converts a toroidal angle phi0 on the axis to the axis radial and vertical coordinates
-    self.R0_func = self.convert_to_spline(sum([self.rc[i]*np.cos(i*self.nfp*self.phi) for i in range(len(self.rc))]))
-    self.Z0_func = self.convert_to_spline(sum([self.zs[i]*np.sin(i*self.nfp*self.phi) for i in range(len(self.zs))]))
+    self.R0_func = self.convert_to_spline(sum([self.rc[i]*np.cos(i*self.nfp*self.phi) +\
+                                               self.rs[i]*np.sin(i*self.nfp*self.phi) \
+                                              for i in range(len(self.rc))]))
+    self.Z0_func = self.convert_to_spline(sum([self.zs[i]*np.sin(i*self.nfp*self.phi) +\
+                                               self.zc[i]*np.cos(i*self.nfp*self.phi) \
+                                              for i in range(len(self.zs))]))
 
     # Spline interpolants for the cylindrical components of the Frenet-Serret frame
     self.normal_R_spline = self.convert_to_spline(self.normal_cylindrical[:,0])

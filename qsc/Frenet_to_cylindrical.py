@@ -52,10 +52,7 @@ def Frenet_to_cylindrical_residual_func(phi0, X_spline, Y_spline, phi_target,\
     if (Frenet_to_cylindrical_residual < -np.pi): Frenet_to_cylindrical_residual = Frenet_to_cylindrical_residual + 2*np.pi
     return Frenet_to_cylindrical_residual
 
-def Frenet_to_cylindrical_1_point(phi0, X_spline, Y_spline,\
-                                  R0_func, Z0_func,\
-                                  normal_R_spline, normal_phi_spline, normal_z_spline,\
-                                  binormal_R_spline, binormal_phi_spline, binormal_z_spline):
+def Frenet_to_cylindrical_1_point(phi0, arr):
     """
     This function takes a point on the magnetic axis with a given
     toroidal angle phi0 and computes the cylindrical coordinate
@@ -65,27 +62,21 @@ def Frenet_to_cylindrical_1_point(phi0, X_spline, Y_spline,\
         phi0: toroidal angle on the axis
         X_spline: spline interpolant for X
         Y_spline: spline interpolant for X
-        R0_func: radial coordinate R0(phi0) of the axis shape
-        Z0_func: vertical coordinate R0(phi0) of the axis shape
-        normal_R_spline: spline interpolant for the R component of the axis normal vector
-        normal_phi_spline: spline interpolant for the phi component of the axis normal vector
-        normal_Z_spline: spline interpolant for the Z component of the axis normal vector
-        binormal_R_spline: spline interpolant for the R component of the axis binormal vector
-        binormal_phi_spline: spline interpolant for the phi component of the axis binormal vector
-        binormal_Z_spline: spline interpolant for the Z component of the axis binormal vector
+        arr: Array with 8 entries corresponding to
+            R0_func: radial coordinate R0(phi0) of the axis shape
+            Z0_func: vertical coordinate R0(phi0) of the axis shape
+            normal_R_spline: spline interpolant for the R component of the axis normal vector
+            normal_phi_spline: spline interpolant for the phi component of the axis normal vector
+            normal_Z_spline: spline interpolant for the Z component of the axis normal vector
+            binormal_R_spline: spline interpolant for the R component of the axis binormal vector
+            binormal_phi_spline: spline interpolant for the phi component of the axis binormal vector
+            binormal_Z_spline: spline interpolant for the Z component of the axis binormal vector
     """
     sinphi0 = np.sin(phi0)
     cosphi0 = np.cos(phi0)
-    R0_at_phi0   = R0_func(phi0)
-    z0_at_phi0   = Z0_func(phi0)
-    X_at_phi0    = X_spline(phi0)
-    Y_at_phi0    = Y_spline(phi0)
-    normal_R     = normal_R_spline(phi0)
-    normal_phi   = normal_phi_spline(phi0)
-    normal_z     = normal_z_spline(phi0)
-    binormal_R   = binormal_R_spline(phi0)
-    binormal_phi = binormal_phi_spline(phi0)
-    binormal_z   = binormal_z_spline(phi0)
+    X_at_phi0, Y_at_phi0, R0_at_phi0, z0_at_phi0,\
+    normal_R, normal_phi, normal_z,\
+    binormal_R, binormal_phi, binormal_z = arr
 
     normal_x   =   normal_R * cosphi0 -   normal_phi * sinphi0
     normal_y   =   normal_R * sinphi0 +   normal_phi * cosphi0
@@ -134,10 +125,10 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
                                     self.normal_phi_spline, self.binormal_R_spline, self.binormal_phi_spline),\
                               bracket=[phi0_rootSolve_min, phi0_rootSolve_max], x0=phi_target)
             phi0_solution = res.root
-            final_R, final_z = Frenet_to_cylindrical_1_point(phi0_solution,X_spline,Y_spline,\
-                                                            self.R0_func, self.Z0_func,\
-                                                            self.normal_R_spline, self.normal_phi_spline, self.normal_z_spline,\
-                                                            self.binormal_R_spline, self.binormal_phi_spline, self.binormal_z_spline)
+            arr = [X_spline(phi0_solution), Y_spline(phi0_solution), self.R0_func(phi0_solution), self.Z0_func(phi0_solution),\
+                   self.normal_R_spline(phi0_solution), self.normal_phi_spline(phi0_solution), self.normal_z_spline(phi0_solution),\
+                   self.binormal_R_spline(phi0_solution), self.binormal_phi_spline(phi0_solution), self.binormal_z_spline(phi0_solution)]
+            final_R, final_z = Frenet_to_cylindrical_1_point(phi0_solution, arr)
             R_2D[j_theta,j_phi] = final_R
             Z_2D[j_theta,j_phi] = final_z
             phi0_2D[j_theta,j_phi] = phi0_solution
