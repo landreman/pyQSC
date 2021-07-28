@@ -74,7 +74,45 @@ def compare_to_vmec(name, r=0.01, nphi=101):
     vmec.cleanup(True)
     f.close()
 
+def Fourier_Inverse(name, r = 0.1, ntheta = 25, nphi = 51, mpol = 12, ntor = 22, atol=1e-5, rtol=1e-3):
+    """
+    Compute the Fourier transform of a boundary surface and then
+    inverse Fourier transform it to find that it arrives
+    at the same surface
+    """
+    logger.info('Creating pyQSC configuration')
+    py = Qsc.from_paper(name, nphi=nphi)
+
+    logger.info('Calculating old R_2D and Z_2D')
+    R_2D, Z_2D, phi0_2D = py.Frenet_to_cylindrical(r, ntheta)
+
+    logger.info('Calculating corresponding RBC, RBS, ZBC, ZBS')
+    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, py.nfp, ntheta, mpol, ntor, py.lasym)
+    if not py.lasym:
+        RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
+        ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
+
+    logger.info('Inverse Fourier transform')
+    nphi_conversion = py.nphi
+    theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
+    phi_conversion = np.linspace(0,2*np.pi/py.nfp,nphi_conversion,endpoint=False)
+    R_2Dnew = np.zeros((ntheta,nphi_conversion))
+    Z_2Dnew = np.zeros((ntheta,nphi_conversion))
+    for j_phi in range(nphi_conversion):
+        for j_theta in range(ntheta):
+            for m in range(mpol+1):
+                for n in range(-ntor, ntor+1):
+                    angle = m * theta[j_theta] - n * py.nfp * phi_conversion[j_phi]
+                    R_2Dnew[j_theta,j_phi] += RBC[n+ntor,m] * np.cos(angle) + RBS[n+ntor,m] * np.sin(angle)
+                    Z_2Dnew[j_theta,j_phi] += ZBC[n+ntor,m] * np.cos(angle) + ZBS[n+ntor,m] * np.sin(angle)
+
+    logger.info('Check the old and the new match')
+    np.testing.assert_allclose(R_2D, R_2Dnew, atol=atol, rtol=rtol)
+    np.testing.assert_allclose(Z_2D, Z_2Dnew, atol=atol, rtol=rtol)
+
+
 class ToVmecTests(unittest.TestCase):
+
 
     def test_boundary(self):
         """
@@ -82,32 +120,27 @@ class ToVmecTests(unittest.TestCase):
         for the 3 O(r^1) examples in LandremanSenguptaPlunk. When the second order
         is successfully added to to_vmec, these tests might go to test_qsc.py
         """
-        compare_to_fortran("r1 section 5.1", "quasisymmetry_out.LandremanSenguptaPlunk_section5.1_order_r1_finite_r_nonlinear.reference.nc")
-        compare_to_fortran("r1 section 5.2", "quasisymmetry_out.LandremanSenguptaPlunk_section5.2_order_r1_finite_r_nonlinear.reference.nc")
-        compare_to_fortran("r1 section 5.3", "quasisymmetry_out.LandremanSenguptaPlunk_section5.3_order_r1_finite_r_nonlinear.reference.nc")
+        cases=["r1 section 5.1","r1 section 5.2","r1 section 5.2"]
+        for case in cases:
+            compare_to_fortran(case, "quasisymmetry_out."+str(case).replace(" ","")+".nc")
 
     def test_vmec(self):
         """
         Verify that vmec can actually read the generated input files
         and that vmec's Bfield and iota on axis match the predicted values.
         """
-        compare_to_vmec("r1 section 5.1")
-        compare_to_vmec("r1 section 5.2")
-        compare_to_vmec("r1 section 5.3")
+        cases=["r1 section 5.1","r1 section 5.2","r1 section 5.2"]
+        for case in cases:
+            compare_to_vmec(case)
 
     def test_Fourier(self):
         """
         Check that transforming with to_Fourier and then un-transforming gives the identity,
         for both even and odd ntheta and phi, and for lasym True or False.
         """
-        # r      = 0.1
-        # ntheta = 10
-        # nphi   = 31
-        # mpol   = 10
-        # ntor   = 30
-        # py = Qsc.from_paper("r1 section 5.1", nphi=nphi)
-        # R_2D, Z_2D, phi0_2D = py.Frenet_to_cylindrical(r, ntheta)
-        # RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, py.nfp, ntheta, mpol, ntor, py.lasym)
+        cases=["r1 section 5.1","r1 section 5.2","r1 section 5.2"]
+        for case in cases:
+            Fourier_Inverse(case, atol=1e-9, rtol=1e-9)
 
 if __name__ == "__main__":
     unittest.main()
