@@ -12,21 +12,10 @@ from scipy.interpolate import CubicSpline as spline
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Define periodic spline interpolants used in several scripts and plotting
-def R0_func(self,phi): return sum([self.rc[i]*np.cos(i*self.nfp*phi) for i in range(len(self.rc))])
-def Z0_func(self,phi): return sum([self.zs[i]*np.sin(i*self.nfp*phi) for i in range(len(self.zs))])
-def convert_to_spline(self,phi,array):
+# Define periodic spline interpolant conversion used in several scripts and plotting
+def convert_to_spline(self,array):
     sp=spline(np.append(self.phi,2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
-    return sp(np.mod(phi,2*np.pi/self.nfp))
-def normal_R_spline(self,phi):     return self.convert_to_spline(phi,self.normal_cylindrical[:,0])
-def normal_phi_spline(self,phi):   return self.convert_to_spline(phi,self.normal_cylindrical[:,1])
-def normal_z_spline(self,phi):     return self.convert_to_spline(phi,self.normal_cylindrical[:,2])
-def binormal_R_spline(self,phi):   return self.convert_to_spline(phi,self.binormal_cylindrical[:,0])
-def binormal_phi_spline(self,phi): return self.convert_to_spline(phi,self.binormal_cylindrical[:,1])
-def binormal_z_spline(self,phi):   return self.convert_to_spline(phi,self.binormal_cylindrical[:,2])
-def tangent_R_spline(self,phi):    return self.convert_to_spline(phi,self.tangent_cylindrical[:,0])
-def tangent_phi_spline(self,phi):  return self.convert_to_spline(phi,self.tangent_cylindrical[:,1])
-def tangent_z_spline(self,phi):    return self.convert_to_spline(phi,self.tangent_cylindrical[:,2])
+    return sp
 
 def init_axis(self):
     """
@@ -146,3 +135,18 @@ def init_axis(self):
     self.normal_cylindrical = normal_cylindrical 
     self.binormal_cylindrical = binormal_cylindrical
     self.Bbar = self.spsi * self.B0
+
+    # Functions that converts a toroidal angle phi0 on the axis to the axis radial and vertical coordinates
+    self.R0_func = self.convert_to_spline(sum([self.rc[i]*np.cos(i*self.nfp*self.phi) for i in range(len(self.rc))]))
+    self.Z0_func = self.convert_to_spline(sum([self.zs[i]*np.sin(i*self.nfp*self.phi) for i in range(len(self.zs))]))
+
+    # Spline interpolants for the cylindrical components of the Frenet-Serret frame
+    self.normal_R_spline = self.convert_to_spline(self.normal_cylindrical[:,0])
+    self.normal_phi_spline = self.convert_to_spline(self.normal_cylindrical[:,1])
+    self.normal_z_spline = self.convert_to_spline(self.normal_cylindrical[:,2])
+    self.binormal_R_spline = self.convert_to_spline(self.binormal_cylindrical[:,0])
+    self.binormal_phi_spline = self.convert_to_spline(self.binormal_cylindrical[:,1])
+    self.binormal_z_spline = self.convert_to_spline(self.binormal_cylindrical[:,2])
+    self.tangent_R_spline = self.convert_to_spline(self.tangent_cylindrical[:,0])
+    self.tangent_phi_spline = self.convert_to_spline(self.tangent_cylindrical[:,1])
+    self.tangent_z_spline = self.convert_to_spline(self.tangent_cylindrical[:,2])

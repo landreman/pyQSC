@@ -17,10 +17,7 @@ class Qsc():
     """
     
     # Import methods that are defined in separate files:
-    from .init_axis import init_axis, R0_func, Z0_func, convert_to_spline, \
-        normal_R_spline, normal_phi_spline, normal_z_spline, \
-        binormal_R_spline, binormal_phi_spline, binormal_z_spline, \
-        tangent_R_spline, tangent_phi_spline, tangent_z_spline
+    from .init_axis import init_axis, convert_to_spline
     from .calculate_r1 import _residual, _jacobian, solve_sigma_equation, \
         _determine_helicity, r1_diagnostics
     from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor
