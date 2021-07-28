@@ -74,7 +74,7 @@ def compare_to_vmec(name, r=0.01, nphi=101):
     vmec.cleanup(True)
     f.close()
 
-def Fourier_Inverse(name, r = 0.1, ntheta = 25, nphi = 51, mpol = 12, ntor = 22, atol=1e-5, rtol=1e-3):
+def Fourier_Inverse(name, r = 0.1, ntheta = 25, nphi = 51, mpol = 12, ntor = 22, atol=1e-9, rtol=1e-9):
     """
     Compute the Fourier transform of a boundary surface and then
     inverse Fourier transform it to find that it arrives
