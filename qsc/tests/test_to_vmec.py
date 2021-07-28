@@ -62,11 +62,11 @@ def compare_to_vmec(name, r=0.01, nphi=101):
     vmec.runvmec(np.array([15,0,0,0,0], dtype=np.int32), inputFile, True, fcomm, '')
     # Open VMEC output file
     woutFile="wout_"+str(name).replace(" ","")+".nc"
-    abs_filename_VMEC = os.path.join(os.path.dirname(__file__), woutFile)
+    # abs_filename_VMEC = os.path.join(os.path.dirname(__file__), woutFile)
     logger.info("This is what is inside this directory now")
     logger.info(os.listdir('.'))
     logger.info("-----------------------------------------")
-    f = netcdf.netcdf_file(abs_filename_VMEC, 'r')
+    f = netcdf.netcdf_file(woutFile, 'r')
     # Compare the results
     print('pyQSC iota on axis =',py.iota)
     print('VMEC iota on axis =',-f.variables['iotaf'][()][0])
