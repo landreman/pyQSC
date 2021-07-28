@@ -62,10 +62,6 @@ def compare_to_vmec(name, r=0.01, nphi=101):
     vmec.runvmec(np.array([15,0,0,0,0], dtype=np.int32), inputFile, True, fcomm, '')
     # Open VMEC output file
     woutFile="wout_"+str(name).replace(" ","")+".nc"
-    # abs_filename_VMEC = os.path.join(os.path.dirname(__file__), woutFile)
-    logger.info("This is what is inside this directory now")
-    logger.info(os.listdir('.'))
-    logger.info("-----------------------------------------")
     f = netcdf.netcdf_file(woutFile, 'r')
     # Compare the results
     print('pyQSC iota on axis =',py.iota)
@@ -85,9 +81,9 @@ class ToVmecTests(unittest.TestCase):
         for the 3 O(r^1) examples in LandremanSenguptaPlunk. When the second order
         is successfully added to to_vmec, these tests might go to test_qsc.py
         """
-        # compare_to_fortran("r1 section 5.1", "quasisymmetry_out.LandremanSenguptaPlunk_section5.1_order_r1_finite_r_nonlinear.reference.nc")
-        # compare_to_fortran("r1 section 5.2", "quasisymmetry_out.LandremanSenguptaPlunk_section5.2_order_r1_finite_r_nonlinear.reference.nc")
-        # compare_to_fortran("r1 section 5.3", "quasisymmetry_out.LandremanSenguptaPlunk_section5.3_order_r1_finite_r_nonlinear.reference.nc")
+        compare_to_fortran("r1 section 5.1", "quasisymmetry_out.LandremanSenguptaPlunk_section5.1_order_r1_finite_r_nonlinear.reference.nc")
+        compare_to_fortran("r1 section 5.2", "quasisymmetry_out.LandremanSenguptaPlunk_section5.2_order_r1_finite_r_nonlinear.reference.nc")
+        compare_to_fortran("r1 section 5.3", "quasisymmetry_out.LandremanSenguptaPlunk_section5.3_order_r1_finite_r_nonlinear.reference.nc")
 
     def test_vmec(self):
         """
