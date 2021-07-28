@@ -75,6 +75,12 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
         mpol = int(np.floor(min(ntheta / 2, mpol1d)))
     else:
         mpol = int(params["mpol"])
+    if "ntor" not in params.keys():
+        # We should be able to resolve (N_phi-1)/2 modes (note integer division!), but in case N_phi is very large, don't attempt more than the vmec arrays can handle.
+        ntord = 100 # maximum number of mode numbers VMEC can handle
+        ntor = int(min(self.nphi / 2 + 1, ntord))
+    else:
+        ntor = int(params["ntor"])
     if "delt" not in params.keys():
         params["delt"] = 0.9
     if "nstep" not in params.keys():
@@ -104,10 +110,6 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
 
     # The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero
     lasym = np.max(np.abs(self.rs))>0 or np.max(np.abs(self.zc))>0 or np.abs(self.sigma0)>0
-
-    # We should be able to resolve (N_phi-1)/2 modes (note integer division!), but in case N_phi is very large, don't attempt more than the vmec arrays can handle.
-    ntord = 100 # maximum number of mode numbers VMEC can handle
-    ntor = int(min(self.nphi / 2 + 1, ntord))
 
     # Get surface shape at fixed off-axis toroidal angle phi
     R_2D, Z_2D, phi0_2D = self.Frenet_to_cylindrical(r, ntheta)
@@ -164,7 +166,11 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     file_object.write('/\n')
     file_object.close()
 
-    self.RBC = RBC
-    self.RBS = RBS
-    self.ZBC = ZBC
-    self.ZBS = ZBS
+    self.RBC = RBC.transpose()
+    self.ZBS = ZBS.transpose()
+    if lasym:
+        self.RBS = RBS.transpose()
+        self.ZBC = ZBC.transpose()
+    else:
+        self.RBS = RBS
+        self.ZBC = ZBC
