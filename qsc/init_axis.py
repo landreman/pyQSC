@@ -140,8 +140,8 @@ def init_axis(self):
     self.R0_func = self.convert_to_spline(sum([self.rc[i]*np.cos(i*self.nfp*self.phi) +\
                                                self.rs[i]*np.sin(i*self.nfp*self.phi) \
                                               for i in range(len(self.rc))]))
-    self.Z0_func = self.convert_to_spline(sum([self.zs[i]*np.sin(i*self.nfp*self.phi) +\
-                                               self.zc[i]*np.cos(i*self.nfp*self.phi) \
+    self.Z0_func = self.convert_to_spline(sum([self.zc[i]*np.cos(i*self.nfp*self.phi) +\
+                                               self.zs[i]*np.sin(i*self.nfp*self.phi) \
                                               for i in range(len(self.zs))]))
 
     # Spline interpolants for the cylindrical components of the Frenet-Serret frame
