@@ -38,8 +38,8 @@ def calculate_r2(self):
     spsi = self.spsi
     I2_over_B0 = self.I2 / self.B0
 
-    if np.abs(iota_N) < 1e-8:
-        print('Warning: |iota_N| is very small so O(r^2) solve will be poorly conditioned. iota_N=', iota_N)
+    # if np.abs(iota_N) < 1e-8:
+    #     print('Warning: |iota_N| is very small so O(r^2) solve will be poorly conditioned. iota_N=', iota_N)
 
     V1 = X1c * X1c + Y1c * Y1c + Y1s * Y1s
     V2 = 2 * Y1s * Y1c
