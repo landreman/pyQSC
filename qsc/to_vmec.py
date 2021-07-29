@@ -31,23 +31,22 @@ def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol, ntor, lasym):
     ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
     ZBS = np.zeros((int(2*ntor+1),int(mpol+1)))
     factor = 2 / (ntheta * nphi_conversion)
-    for j_phi in range(nphi_conversion):
-        for j_theta in range(ntheta):
-            for m in range(mpol+1):
-                nmin = -ntor
-                if m==0: nmin = 1
-                for n in range(nmin, ntor+1):
-                    angle = m * theta[j_theta] - n * nfp * phi_conversion[j_phi]
-                    sinangle = np.sin(angle)
-                    cosangle = np.cos(angle)
-                    factor2 = factor
-                    # The next 2 lines ensure inverse Fourier transform(Fourier transform) = identity
-                    if np.mod(ntheta,2) == 0 and m  == (ntheta/2): factor2 = factor2 / 2
-                    if np.mod(nphi_conversion,2) == 0 and abs(n) == (nphi_conversion/2): factor2 = factor2 / 2
-                    RBC[n+ntor,m] = RBC[n+ntor,m] + R_2D[j_theta, j_phi] * cosangle * factor2
-                    RBS[n+ntor,m] = RBS[n+ntor,m] + R_2D[j_theta, j_phi] * sinangle * factor2
-                    ZBC[n+ntor,m] = ZBC[n+ntor,m] + Z_2D[j_theta, j_phi] * cosangle * factor2
-                    ZBS[n+ntor,m] = ZBS[n+ntor,m] + Z_2D[j_theta, j_phi] * sinangle * factor2
+    phi2d, theta2d = np.meshgrid(phi_conversion, theta)
+    for m in range(mpol+1):
+        nmin = -ntor
+        if m==0: nmin = 1
+        for n in range(nmin, ntor+1):
+            angle = m * theta2d - n * nfp * phi2d
+            sinangle = np.sin(angle)
+            cosangle = np.cos(angle)
+            factor2 = factor
+            # The next 2 lines ensure inverse Fourier transform(Fourier transform) = identity
+            if np.mod(ntheta,2) == 0 and m  == (ntheta/2): factor2 = factor2 / 2
+            if np.mod(nphi_conversion,2) == 0 and abs(n) == (nphi_conversion/2): factor2 = factor2 / 2
+            RBC[n + ntor, m] = np.sum(R_2D * cosangle * factor2)
+            RBS[n + ntor, m] = np.sum(R_2D * sinangle * factor2)
+            ZBC[n + ntor, m] = np.sum(Z_2D * cosangle * factor2)
+            ZBS[n + ntor, m] = np.sum(Z_2D * sinangle * factor2)
     RBC[ntor,0] = np.sum(R_2D) / (ntheta * nphi_conversion)
     ZBC[ntor,0] = np.sum(Z_2D) / (ntheta * nphi_conversion)
 
@@ -78,7 +77,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     if "ntor" not in params.keys():
         # We should be able to resolve (N_phi-1)/2 modes (note integer division!), but in case N_phi is very large, don't attempt more than the vmec arrays can handle.
         ntord = 100 # maximum number of mode numbers VMEC can handle
-        ntor = int(min(self.nphi / 2 + 1, ntord))
+        ntor = int(min(self.nphi / 2, ntord))
     else:
         ntor = int(params["ntor"])
     if "delt" not in params.keys():

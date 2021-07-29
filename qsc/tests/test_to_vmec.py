@@ -74,7 +74,7 @@ def compare_to_vmec(name, r=0.01, nphi=101):
     vmec.cleanup(True)
     f.close()
 
-def Fourier_Inverse(name, r = 0.1, ntheta = 25, nphi = 51, mpol = 12, ntor = 22, atol=1e-9, rtol=1e-9):
+def Fourier_Inverse(name, r = 0.1, ntheta = 26, nphi = 51, mpol = 13, ntor = 25, atol=1e-9, rtol=1e-9):
     """
     Compute the Fourier transform of a boundary surface and then
     inverse Fourier transform it to find that it arrives
@@ -98,13 +98,12 @@ def Fourier_Inverse(name, r = 0.1, ntheta = 25, nphi = 51, mpol = 12, ntor = 22,
     phi_conversion = np.linspace(0,2*np.pi/py.nfp,nphi_conversion,endpoint=False)
     R_2Dnew = np.zeros((ntheta,nphi_conversion))
     Z_2Dnew = np.zeros((ntheta,nphi_conversion))
-    for j_phi in range(nphi_conversion):
-        for j_theta in range(ntheta):
-            for m in range(mpol+1):
-                for n in range(-ntor, ntor+1):
-                    angle = m * theta[j_theta] - n * py.nfp * phi_conversion[j_phi]
-                    R_2Dnew[j_theta,j_phi] += RBC[n+ntor,m] * np.cos(angle) + RBS[n+ntor,m] * np.sin(angle)
-                    Z_2Dnew[j_theta,j_phi] += ZBC[n+ntor,m] * np.cos(angle) + ZBS[n+ntor,m] * np.sin(angle)
+    phi2d, theta2d = np.meshgrid(phi_conversion, theta)
+    for m in range(mpol+1):
+        for n in range(-ntor, ntor+1):
+            angle = m * theta2d - n * py.nfp * phi2d
+            R_2Dnew += RBC[n+ntor,m] * np.cos(angle) + RBS[n+ntor,m] * np.sin(angle)
+            Z_2Dnew += ZBC[n+ntor,m] * np.cos(angle) + ZBS[n+ntor,m] * np.sin(angle)
 
     logger.info('Check the old and the new match')
     np.testing.assert_allclose(R_2D, R_2Dnew, atol=atol, rtol=rtol)
