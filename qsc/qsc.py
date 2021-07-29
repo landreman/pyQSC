@@ -17,7 +17,7 @@ class Qsc():
     """
     
     # Import methods that are defined in separate files:
-    from .init_axis import init_axis
+    from .init_axis import init_axis, convert_to_spline
     from .calculate_r1 import _residual, _jacobian, solve_sigma_equation, \
         _determine_helicity, r1_diagnostics
     from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor
@@ -25,6 +25,8 @@ class Qsc():
     from .mercier import mercier
     from .r_singularity import calculate_r_singularity
     from .plot import plot
+    from .Frenet_to_cylindrical import Frenet_to_cylindrical
+    from .to_vmec import to_vmec
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
                  I2=0., sG=1, spsi=1, nphi=31, B2s=0., B2c=0., p2=0., order="r1"):
