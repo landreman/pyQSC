@@ -108,7 +108,7 @@ class Qsc():
         self.r1_diagnostics()
         if self.order == 'r2':
             self.calculate_r2()
-
+    
     def get_dofs(self):
         """
         Return a 1D numpy vector of all possible optimizable
