@@ -1,2 +1,11 @@
 *~
 __pycache__
+build
+qsc.egg-info
+.DS_Store
+input.*
+jxbout*
+threed*
+wout*
+mercier*
+parvmec*

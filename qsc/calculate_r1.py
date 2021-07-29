@@ -109,6 +109,23 @@ def r1_diagnostics(self):
     self.Y1s = self.sG * self.spsi * self.curvature / self.etabar
     self.Y1c = self.sG * self.spsi * self.curvature * self.sigma / self.etabar
 
+    # If helicity is nonzero, then the original X1s/X1c/Y1s/Y1c variables are defined with respect to a "poloidal" angle that
+    # is actually helical, with the theta=0 curve wrapping around the magnetic axis as you follow phi around toroidally. Therefore
+    # here we convert to an untwisted poloidal angle, such that the theta=0 curve does not wrap around the axis.
+    if self.helicity == 0:
+        self.X1s_untwisted = 0
+        self.X1c_untwisted = self.X1c
+        self.Y1s_untwisted = self.Y1s
+        self.Y1c_untwisted = self.Y1c
+    else:
+        angle = -self.helicity * self.nfp * self.varphi
+        sinangle = np.sin(angle)
+        cosangle = np.cos(angle)
+        self.X1s_untwisted = self.X1s *   cosangle  + self.X1c * sinangle
+        self.X1c_untwisted = self.X1s * (-sinangle) + self.X1c * cosangle
+        self.Y1s_untwisted = self.Y1s *   cosangle  + self.Y1c * sinangle
+        self.Y1c_untwisted = self.Y1s * (-sinangle) + self.Y1c * cosangle
+
     # Use (R,Z) for elongation in the (R,Z) plane,
     # or use (X,Y) for elongation in the plane perpendicular to the magnetic axis.
     p = self.X1s * self.X1s + self.X1c * self.X1c + self.Y1s * self.Y1s + self.Y1c * self.Y1c
