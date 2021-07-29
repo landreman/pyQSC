@@ -165,7 +165,6 @@ def calculate_r2(self):
     self.B20_variation = np.max(B20) - np.min(B20)
 
     self.N_helicity = - self.helicity * self.nfp
-    self.Bbar = spsi * B0
     self.G2 = -mu0 * p2 * G0 / (B0 * B0) - iota * I2
 
     self.d_curvature_d_varphi = np.matmul(d_d_varphi, curvature)
