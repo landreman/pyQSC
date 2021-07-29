@@ -60,7 +60,10 @@ def compare_to_vmec(name, r=0.01, nphi=101):
     # Run VMEC
     fcomm = MPI.COMM_WORLD.py2f()
     logger.info("Calling runvmec. comm={}".format(fcomm))
-    vmec.runvmec(np.array([15,0,0,0,0], dtype=np.int32), inputFile, True, fcomm, '')
+    ictrl=np.array([15,0,0,0,0], dtype=np.int32)
+    vmec.runvmec(ictrl, inputFile, True, fcomm, '')
+    # Check that VMEC converged
+    assert ictrl[1] == 11
     # Open VMEC output file
     woutFile="wout_"+str(name).replace(" ","")+".nc"
     f = netcdf.netcdf_file(woutFile, 'r')

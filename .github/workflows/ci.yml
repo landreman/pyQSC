@@ -28,7 +28,7 @@ jobs:
     - name: apt-get stuff needed for libstell and vmec
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential gfortran openmpi-bin libopenmpi-dev libnetcdf-dev libnetcdff-dev liblapack-dev libscalapack-mpi-dev libhdf5-dev libhdf5-serial-dev git m4 libfftw3-dev
+        sudo apt-get install -y build-essential gfortran openmpi-bin libopenmpi-dev libnetcdf-dev libnetcdff-dev liblapack-dev libscalapack-mpi-dev libhdf5-dev libhdf5-serial-dev git m4
 
     - uses: actions/checkout@v2
       # If we want submodules downloaded, uncomment the next 2 lines:
@@ -50,7 +50,7 @@ jobs:
     - name: Install required python packages
       run: |
         python -m pip install --upgrade pip
-        pip install wheel numpy jax jaxlib mpi4py
+        pip install wheel numpy mpi4py
     
     - name: env after adding python
       run: env
