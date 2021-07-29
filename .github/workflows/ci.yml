@@ -50,11 +50,7 @@ jobs:
     - name: Install required python packages
       run: |
         python -m pip install --upgrade pip
-<<<<<<< HEAD
-        pip install wheel numpy jax jaxlib matplotlib
-=======
-        pip install wheel numpy mpi4py scipy
->>>>>>> 543097181dab5b28985d2f0c8611f69fb07e27f5
+        pip install wheel numpy mpi4py scipy matplotlib
     
     - name: env after adding python
       run: env
