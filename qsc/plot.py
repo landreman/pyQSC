@@ -37,24 +37,45 @@ def set_axes_equal(ax):
     ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
     ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
-def createsubplot(ax, R_2D, Z_2D, nfp, colormap, elev=90, azim=45, dist=7, **kwargs):
+def create_subplot(ax, R_2D, Z_2D, nfp, colormap, elev=90, azim=45, dist=7, **kwargs):
     '''
     Construct the surface over a phi=[0,2*pi] domain given
     a surface in cylindrical coordinates R_2D, Z_2D with
     phi=[0,2*pi/Nfp]. A matplotlib figure with elements fig, ax
     must have been previously created and ax is given as input.
     '''
+    # This loop can be put outside the createsubplot function
+    # so that a (nfp, ntheta, nphi) array can be provided as
+    # an input instead of R_2D and Z_2D
     for i in range(nfp):
         phi = np.linspace(i*2*np.pi/nfp,(i+1)*2*np.pi/nfp,R_2D.shape[1])
         x_2D = R_2D*np.cos(phi)
         y_2D = R_2D*np.sin(phi)
         z_2D = Z_2D
-        ax.plot_surface(x_2D, y_2D, z_2D, facecolors = colormap, rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=1, shade=False, **kwargs)
+        ax.plot_surface(x_2D, y_2D, z_2D, facecolors = colormap, rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=1.0, shade=False, **kwargs)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.dist = dist
     ax.elev = elev
     ax.azim = azim
+
+def fieldline_plot(ax,R_2D_spline,Z_2D_spline,varphi_spline,iota,nfp):
+    alphas = [0,np.pi/2,np.pi,3*np.pi/2]
+    for alpha in alphas:
+        fieldline_X = []
+        fieldline_Y = []
+        fieldline_Z = []
+        phi_array = np.linspace(0,10*np.pi,5000)
+        for phi in phi_array:
+            phi_mod = np.mod(phi,2*np.pi/nfp)
+            varphi0=varphi_spline(phi)+phi-phi_mod
+            theta_fieldline=iota*varphi0+alpha
+            theta_fieldline_mod=np.mod(theta_fieldline,2*np.pi)
+            fieldline_R = R_2D_spline(phi_mod,theta_fieldline_mod)[0]
+            fieldline_X.append(fieldline_R*np.cos(phi))
+            fieldline_Y.append(fieldline_R*np.sin(phi))
+            fieldline_Z.append(Z_2D_spline(phi_mod,theta_fieldline_mod)[0])
+        ax.plot3D(fieldline_X, fieldline_Y, fieldline_Z, 'black', linewidth=2)
 
 def plot(self,r=0.1,ntheta_plot=40,nphi_plot=130,ntheta_fourier=16,nsections=8,save=None, colormap=None, azim_default=None,**kwargs):
     """
@@ -85,27 +106,33 @@ def plot(self,r=0.1,ntheta_plot=40,nphi_plot=130,ntheta_fourier=16,nsections=8,s
 
     # Obtain the surface shape in cylindrical coordinates
     R_2D, Z_2D, phi0_2D = self.Frenet_to_cylindrical(r, ntheta_fourier)
+    R_2D_fieldline, Z_2D_fieldline, phi0_2D_fieldline = self.Frenet_to_cylindrical(1.2*r, ntheta_fourier)
     # Make it periodic
     R_2D = np.append(R_2D,[R_2D[0,:]],0)
     R_2D = np.append(R_2D,np.array([R_2D[:,0]]).transpose(),1)
     Z_2D = np.append(Z_2D,[Z_2D[0,:]],0)
     Z_2D = np.append(Z_2D,np.array([Z_2D[:,0]]).transpose(),1)
-    phi0_2D = np.append(phi0_2D,[phi0_2D[0,:]],0)
-    phi0_2D = np.append(phi0_2D,np.array([phi0_2D[:,0]]).transpose(),1)
+    R_2D_fieldline = np.append(R_2D_fieldline,[R_2D_fieldline[0,:]],0)
+    R_2D_fieldline = np.append(R_2D_fieldline,np.array([R_2D_fieldline[:,0]]).transpose(),1)
+    Z_2D_fieldline = np.append(Z_2D_fieldline,[Z_2D_fieldline[0,:]],0)
+    Z_2D_fieldline = np.append(Z_2D_fieldline,np.array([Z_2D_fieldline[:,0]]).transpose(),1)
     # Arrays of original thetas and phis
-    theta1d = np.linspace(0, 2 * np.pi, ntheta_fourier+1, endpoint=False)
-    phi1d   = np.linspace(0, 2 * np.pi / self.nfp, self.nphi+1, endpoint=False)
+    theta1d = np.linspace(0, 2 * np.pi, ntheta_fourier+1)
+    phi1d   = np.linspace(0, 2 * np.pi / self.nfp, self.nphi+1)
     # Arrays of thetas and phis for plots
     theta1dplot  = np.linspace(0, 2 * np.pi, ntheta_plot)
     phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
     phi1dplot    = np.linspace(0, 2 * np.pi / self.nfp, nphi_plot)
     # Splines interpolants of R_2D and Z_2D
-    # NON PERIODIC
+    # NON PERIODIC SPLNE INTERPOLANTS -> Change
     R_2D_spline = interp2d(phi1d, theta1d, R_2D, kind='cubic')
     Z_2D_spline = interp2d(phi1d, theta1d, Z_2D, kind='cubic')
-    phi0_2D_spline = interp2d(phi1d, theta1d, phi0_2D, kind='cubic')
     R_2D_interp = R_2D_spline(phi1dplot,theta1dplot)
     Z_2D_interp = Z_2D_spline(phi1dplot,theta1dplot)
+    R_2D_spline_fieldline = interp2d(phi1d, theta1d, R_2D_fieldline, kind='cubic')
+    Z_2D_spline_fieldline = interp2d(phi1d, theta1d, Z_2D_fieldline, kind='cubic')
+    # Spline interpolant of varphi
+    varphi_spline = self.convert_to_spline(self.varphi)
 
     ## Poloidal plot
     fig = plt.figure(figsize=(6, 6), dpi=80)
@@ -122,7 +149,8 @@ def plot(self,r=0.1,ntheta_plot=40,nphi_plot=130,ntheta_fourier=16,nsections=8,s
         else:
             label = '_nolegend_'
         color = next(ax._get_lines.prop_cycler)['color']
-        plt.plot(self.R0_func(np.mean(phi0_2D_spline(phi,theta1dplot))),self.Z0_func(np.mean(phi0_2D_spline(phi,theta1dplot))),marker="x",linewidth=2,label=label,color=color)
+        phi0=phi
+        plt.plot(self.R0_func(phi0),self.Z0_func(phi0),marker="x",linewidth=2,label=label,color=color)
         plt.plot(R_2D_spline(phi,theta1dplot).flatten(),Z_2D_spline(phi,theta1dplot).flatten(),color=color)
     plt.xlabel('R (meters)')
     plt.ylabel('Z (meters)')
@@ -153,20 +181,16 @@ def plot(self,r=0.1,ntheta_plot=40,nphi_plot=130,ntheta_fourier=16,nsections=8,s
         ls = LightSource(azdeg=0, altdeg=10)
         cmap_plot = ls.shade(Bmag, cmap, norm=norm)
         # cmap_plot = cmap(norm(Bmag))
-    # Create the 3D figure
+    # Create the 3D figure with 3 subplots
+    plt.close()
     fig = plt.figure(constrained_layout=False, figsize=(4.5, 8))
-    gs1 = fig.add_gridspec(nrows=3, ncols=1, top=1.02, bottom=-0.3, left=0., right=0.85, hspace=0.0, wspace=0.0)
-    ax = fig.add_subplot(gs1[0, 0], projection='3d')
-    createsubplot(ax, R_2D_interp, Z_2D_interp, self.nfp, cmap_plot, elev=90, azim=azim_default, **kwargs)
-    # create_subplot(90,azim_default)
-    gs2 = fig.add_gridspec(nrows=3, ncols=1, top=1.09, bottom=-0.3, left=0., right=0.85, hspace=0.0, wspace=0.0)
-    ax = fig.add_subplot(gs2[1, 0], projection='3d')
-    createsubplot(ax, R_2D_interp, Z_2D_interp, self.nfp, cmap_plot, elev=30, azim=azim_default, **kwargs)
-    # create_subplot(30,azim_default)
-    gs3 = fig.add_gridspec(nrows=3, ncols=1, top=1.12, bottom=-0.15, left=0., right=0.85, hspace=0.0, wspace=0.0)
-    ax = fig.add_subplot(gs3[2, 0], projection='3d')
-    createsubplot(ax, R_2D_interp, Z_2D_interp, self.nfp, cmap_plot, elev=5,  azim=azim_default, **kwargs)
-    # create_subplot(0,azim_default)
+    gsParams = [[1.02,-0.3,0.,0.85],[1.09,-0.3,0.,0.85],[1.12,-0.15,0.,0.85]]
+    elevParams = [90,30,5]
+    for i in range(len(gsParams)):
+        gs = fig.add_gridspec(nrows=3, ncols=1, top=gsParams[i][0], bottom=gsParams[i][1], left=gsParams[i][2], right=gsParams[i][3], hspace=0.0, wspace=0.0)
+        ax = fig.add_subplot(gs[i, 0], projection='3d')
+        create_subplot(ax, R_2D_interp, Z_2D_interp, self.nfp, cmap_plot, elev=elevParams[i], azim=azim_default, **kwargs)
+        fieldline_plot(ax, R_2D_spline_fieldline, Z_2D_spline_fieldline, varphi_spline, self.iota, self.nfp)
     cbar_ax = fig.add_axes([0.85, 0.2, 0.03, 0.6])
     m = cm.ScalarMappable(cmap=cmap, norm=norm)
     m.set_array([])
