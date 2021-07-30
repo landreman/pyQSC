@@ -3,12 +3,60 @@ This module contains a function to plot a near-axis surface.
 """
 
 import numpy as np
-from scipy.interpolate import CubicSpline as spline
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from matplotlib.colors import Normalize
+import matplotlib.colors as clr
+from scipy.interpolate import interp2d
+from matplotlib.colors import LightSource
 
-def plot(self,r=0.14,nphi=80,ntheta=50,nsections=4,save=None,azim_default=None,**kwargs):
+def set_axes_equal(ax):
+    '''
+    Make axes of 3D plot have equal scale so that spheres appear as spheres,
+    cubes as cubes, etc..  This is one possible solution to Matplotlib's
+    ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
+
+    Input
+      ax: a matplotlib axis, e.g., as output from plt.gca().
+    '''
+    x_limits = ax.get_xlim3d()
+    y_limits = ax.get_ylim3d()
+    z_limits = ax.get_zlim3d()
+
+    x_range = abs(x_limits[1] - x_limits[0])
+    x_middle = np.mean(x_limits)
+    y_range = abs(y_limits[1] - y_limits[0])
+    y_middle = np.mean(y_limits)
+    z_range = abs(z_limits[1] - z_limits[0])
+    z_middle = np.mean(z_limits)
+
+    # The plot bounding box is a sphere in the sense of the infinity
+    # norm, hence call half the max range the plot radius.
+    plot_radius = 0.5*max([x_range, y_range, z_range])
+
+    ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+    ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+    ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
+def createsubplot(ax, R_2D, Z_2D, nfp, colormap, elev=90, azim=45, dist=7, **kwargs):
+    '''
+    Construct the surface over a phi=[0,2*pi] domain given
+    a surface in cylindrical coordinates R_2D, Z_2D with
+    phi=[0,2*pi/Nfp]. A matplotlib figure with elements fig, ax
+    must have been previously created and ax is given as input.
+    '''
+    for i in range(nfp):
+        phi = np.linspace(i*2*np.pi/nfp,(i+1)*2*np.pi/nfp,R_2D.shape[1])
+        x_2D = R_2D*np.cos(phi)
+        y_2D = R_2D*np.sin(phi)
+        z_2D = Z_2D
+        ax.plot_surface(x_2D, y_2D, z_2D, facecolors = colormap, rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=1, shade=False, **kwargs)
+    set_axes_equal(ax)
+    ax.set_axis_off()
+    ax.dist = dist
+    ax.elev = elev
+    ax.azim = azim
+
+def plot(self,r=0.1,ntheta_plot=40,nphi_plot=130,ntheta_fourier=16,nsections=8,save=None, colormap=None, azim_default=None,**kwargs):
     """
     Creates 2 matplotlib figures:
         - A plot with several poloidal planes at the specified radius r with the
@@ -17,13 +65,15 @@ def plot(self,r=0.14,nphi=80,ntheta=50,nsections=4,save=None,azim_default=None,*
          on the surface using plot_surface
     Args:
       r (float): near-axis radius r where to create the surface
-      nphi   (int): Number of grid points in the toroidal angle.
-      ntheta (int): Number of grid points in the poloidal angle.
+      ntheta_plot (int): Number of grid points to plot in the poloidal angle.
+      nphi_plot   (int): Number of grid points to plot in the toroidal angle.
+      ntheta_fourier (int): Resolution in the Fourier transform to cylindrical coordinates
       nsections (int): Number of poloidal planes to show.
       save (str): Filename prefix for the png files to save
-      azim_default: Default azimuthal angle for the three subplots
-       in the 3D surface plot
+      colormap (cmap): Custom colormap for the 3D plots
+      azim_default: Default azimuthal angle for the three subplots in the 3D surface plot
       kwargs: Any additional key-value pairs to pass to matplotlib's plot_surface.
+
     This function can generate figures like this:
 
     .. image:: 3dplot.png
@@ -33,82 +83,33 @@ def plot(self,r=0.14,nphi=80,ntheta=50,nsections=4,save=None,azim_default=None,*
        :width: 200
     """
 
-    # Create periodic spline interpolants for the quantities used in the plots
-    def Raxisf(phi): return sum([self.rc[i]*np.cos(i*self.nfp*phi) for i in range(len(self.rc))])
-    def Zaxisf(phi): return sum([self.zs[i]*np.sin(i*self.nfp*phi) for i in range(len(self.zs))])
-    def convert_to_spline(phi,array):
-        sp=spline(np.append(self.phi,2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
-        return sp(np.mod(phi,2*np.pi/self.nfp))
-    def tangentR(phi):    return convert_to_spline(phi,self.tangent_cylindrical[:,0])
-    def tangentphi(phi):  return convert_to_spline(phi,self.tangent_cylindrical[:,1])
-    def tangentZ(phi):    return convert_to_spline(phi,self.tangent_cylindrical[:,2])
-    def normalR(phi):     return convert_to_spline(phi,self.normal_cylindrical[:,0])
-    def normalphi(phi):   return convert_to_spline(phi,self.normal_cylindrical[:,1])
-    def normalZ(phi):     return convert_to_spline(phi,self.normal_cylindrical[:,2])
-    def binormalR(phi):   return convert_to_spline(phi,self.binormal_cylindrical[:,0])
-    def binormalphi(phi): return convert_to_spline(phi,self.binormal_cylindrical[:,1])
-    def binormalZ(phi):   return convert_to_spline(phi,self.binormal_cylindrical[:,2])
-    def X1cF(phi): return convert_to_spline(phi,self.X1c)
-    def X1sF(phi): return convert_to_spline(phi,self.X1s)
-    def Y1cF(phi): return convert_to_spline(phi,self.Y1c)
-    def Y1sF(phi): return convert_to_spline(phi,self.Y1s)
-    def X20F(phi): return convert_to_spline(phi,self.X20)
-    def X2cF(phi): return convert_to_spline(phi,self.X2c)
-    def X2sF(phi): return convert_to_spline(phi,self.X2s)
-    def Y20F(phi): return convert_to_spline(phi,self.Y20)
-    def Y2cF(phi): return convert_to_spline(phi,self.Y2c)
-    def Y2sF(phi): return convert_to_spline(phi,self.Y2s)
-    def Z20F(phi): return convert_to_spline(phi,self.Z20)
-    def Z2cF(phi): return convert_to_spline(phi,self.Z2c)
-    def Z2sF(phi): return convert_to_spline(phi,self.Z2s)
-    def B20F(phi): return convert_to_spline(phi,self.B20)
-    # Perform the transformation from a near-axis position vector
-    # to cylindrical coordinates
-    def rSurf(r,phi,theta):
-        thetaN = theta-(self.iota-self.iotaN)*phi
-        r0 = Raxisf(phi)
-        r1 = (X1cF(phi)*np.cos(thetaN)+X1sF(phi)*np.sin(thetaN))*normalR(phi)\
-            +(Y1cF(phi)*np.cos(thetaN)+Y1sF(phi)*np.sin(thetaN))*binormalR(phi)
-        if self.order!='r1':
-            r2 = (X20F(phi)+X2cF(phi)*np.cos(2*thetaN)+X2sF(phi)*np.sin(2*thetaN))*normalR(phi)\
-                +(Y20F(phi)+Y2cF(phi)*np.cos(2*thetaN)+Y2sF(phi)*np.sin(2*thetaN))*binormalR(phi)\
-                +(Z20F(phi)+Z2cF(phi)*np.cos(2*thetaN)+Z2sF(phi)*np.sin(2*thetaN))*tangentR(phi)
-        else:
-            r2 = 0
-        return r0+r*r1+r**2*r2
-    def phiSurf(r,phi,theta):
-        thetaN = theta-(self.iota-self.iotaN)*phi
-        phi0 = Raxisf(phi)
-        phi1 = (X1cF(phi)*np.cos(thetaN)+X1sF(phi)*np.sin(thetaN))*normalphi(phi)\
-              +(Y1cF(phi)*np.cos(thetaN)+Y1sF(phi)*np.sin(thetaN))*binormalphi(phi)
-        if self.order!='r1':
-            phi2 = (X20F(phi)+X2cF(phi)*np.cos(2*thetaN)+X2sF(phi)*np.sin(2*thetaN))*normalphi(phi)\
-                  +(Y20F(phi)+Y2cF(phi)*np.cos(2*thetaN)+Y2sF(phi)*np.sin(2*thetaN))*binormalphi(phi)\
-                  +(Z20F(phi)+Z2cF(phi)*np.cos(2*thetaN)+Z2sF(phi)*np.sin(2*thetaN))*tangentphi(phi)
-        else:
-            phi2 = 0
-        return phi0+r*phi1+r**2*phi2
-    def zSurf(r,phi,theta):
-        thetaN = theta-(self.iota-self.iotaN)*phi
-        z0 = Zaxisf(phi)
-        z1 = (X1cF(phi)*np.cos(thetaN)+X1sF(phi)*np.sin(thetaN))*normalZ(phi)\
-            +(Y1cF(phi)*np.cos(thetaN)+Y1sF(phi)*np.sin(thetaN))*binormalZ(phi)
-        if self.order!='r1':
-            z2 = (X20F(phi)+X2cF(phi)*np.cos(2*thetaN)+X2sF(phi)*np.sin(2*thetaN))*normalZ(phi)\
-                +(Y20F(phi)+Y2cF(phi)*np.cos(2*thetaN)+Y2sF(phi)*np.sin(2*thetaN))*binormalZ(phi)\
-                +(Z20F(phi)+Z2cF(phi)*np.cos(2*thetaN)+Z2sF(phi)*np.sin(2*thetaN))*tangentZ(phi)
-        else:
-            z2 = 0
-        return z0+r*z1+r**2*z2
+    # Obtain the surface shape in cylindrical coordinates
+    R_2D, Z_2D, phi0_2D = self.Frenet_to_cylindrical(r, ntheta_fourier)
+    # Make it periodic
+    R_2D = np.append(R_2D,[R_2D[0,:]],0)
+    R_2D = np.append(R_2D,np.array([R_2D[:,0]]).transpose(),1)
+    Z_2D = np.append(Z_2D,[Z_2D[0,:]],0)
+    Z_2D = np.append(Z_2D,np.array([Z_2D[:,0]]).transpose(),1)
+    phi0_2D = np.append(phi0_2D,[phi0_2D[0,:]],0)
+    phi0_2D = np.append(phi0_2D,np.array([phi0_2D[:,0]]).transpose(),1)
+    # Arrays of original thetas and phis
+    theta1d = np.linspace(0, 2 * np.pi, ntheta_fourier+1, endpoint=False)
+    phi1d   = np.linspace(0, 2 * np.pi / self.nfp, self.nphi+1, endpoint=False)
+    # Arrays of thetas and phis for plots
+    theta1dplot  = np.linspace(0, 2 * np.pi, ntheta_plot)
+    phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
+    phi1dplot    = np.linspace(0, 2 * np.pi / self.nfp, nphi_plot)
+    # Splines interpolants of R_2D and Z_2D
+    R_2D_spline = interp2d(phi1d, theta1d, R_2D, kind='cubic')
+    Z_2D_spline = interp2d(phi1d, theta1d, Z_2D, kind='cubic')
+    phi0_2D_spline = interp2d(phi1d, theta1d, phi0_2D, kind='cubic')
+    R_2D_interp = R_2D_spline(phi1dplot,theta1dplot)
+    Z_2D_interp = Z_2D_spline(phi1dplot,theta1dplot)
 
-    # Create one plot with several cuts at different toroidal planes
+    ## Poloidal plot
     fig = plt.figure(figsize=(6, 6), dpi=80)
     ax  = plt.gca()
-    theta = np.linspace(0,2*np.pi,ntheta)
-    phi1D = np.linspace(0,2*np.pi/self.nfp,nsections,endpoint=False)
-    for phi in phi1D:
-        rSurfi=rSurf(r,phi,theta)
-        zSurfi=zSurf(r,phi,theta)
+    for phi in phi1dplot_RZ:
         if phi*self.nfp/(2*np.pi)==0:
             label = r'$\phi$=0'
         elif phi*self.nfp/(2*np.pi)==0.25:
@@ -120,61 +121,58 @@ def plot(self,r=0.14,nphi=80,ntheta=50,nsections=4,save=None,azim_default=None,*
         else:
             label = '_nolegend_'
         color = next(ax._get_lines.prop_cycler)['color']
-        plt.plot(rSurfi,zSurfi,linewidth=2,label=label,color=color)
-        plt.plot(Raxisf(phi),Zaxisf(phi),'b+',color=color)
+        plt.plot(self.R0_func(np.mean(phi0_2D_spline(phi,theta1dplot))),self.Z0_func(np.mean(phi0_2D_spline(phi,theta1dplot))),marker="x",linewidth=2,label=label,color=color)
+        plt.plot(R_2D_spline(phi,theta1dplot).flatten(),Z_2D_spline(phi,theta1dplot).flatten(),color=color)
     plt.xlabel('R (meters)')
-    plt.ylabel('Z')
+    plt.ylabel('Z (meters)')
     plt.legend()
     plt.tight_layout()
     ax.set_aspect('equal')
     if save!=None:
         fig.savefig(save+'_poloidal.png')
+    # plt.show()
+    # exit()
 
-    # Create 3D plot
-    def Bf(r,phi,theta):
-        thetaN = theta-(self.iota-self.iotaN)*phi
-        if self.order=='r1':
-            return self.B0*(1+r*self.etabar*np.cos(thetaN))
-        else:
-            return self.B0*(1+r*self.etabar*np.cos(thetaN))+r*r*(B20F(phi)+self.B2c*np.cos(thetaN)+self.B2s*np.sin(thetaN))
-    theta1d = np.linspace(0, 2 * np.pi, ntheta)
-    phi1d   = np.linspace(0, 2 * np.pi, nphi)
-    phi2D, theta2D = np.meshgrid(phi1d, theta1d)
-    rs=rSurf(r,phi2D,theta2D)
-    phis=phiSurf(r,phi2D,theta2D)
-    Zsurf=zSurf(r,phi2D,theta2D)
-    Xsurf=rs*np.cos(phi2D)-phis*np.sin(phi2D)
-    Ysurf=rs*np.sin(phi2D)+phis*np.cos(phi2D)
-    Bmag=Bf(r,phi2D,theta2D)
-    norm = Normalize(vmin=Bmag.min(), vmax=Bmag.max())
-    def create_subplot(elev=90,azim=45,dist=7):
-        ax.plot_surface(Xsurf, Ysurf, Zsurf, facecolors = cm.plasma(norm(Bmag)), rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=1, **kwargs)
-        ax.auto_scale_xyz([Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()], [Xsurf.min(), Xsurf.max()])
-        ax.set_axis_off()
-        ax.dist = dist
-        ax.elev = elev
-        ax.azim = azim
+    ## 3D plot
+    # Set the default azimuthal angle of view in the 3D plot
     if azim_default == None:
         if self.helicity == 0:
-            azim_default = 135
+            azim_default = 90
         else:
-            azim_default = 0
+            azim_default = 45
+    # Define the magnetic field modulus and create its theta,phi array
+    def Bf(r,theta,phi):
+        thetaN = theta-(self.iota-self.iotaN)*phi
+        return self.B0*(1+r*self.etabar*np.cos(thetaN))
+    phi2D, theta2D = np.meshgrid(phi1dplot,theta1dplot)
+    Bmag=Bf(r,theta2D,phi2D)
+    norm = clr.Normalize(vmin=Bmag.min(), vmax=Bmag.max())
+    # Create a color map similar to the plots in the quasisymmetry
+    # papers 2019-2021 if a colormap is not provided
+    if colormap==None:
+        cmap = clr.LinearSegmentedColormap.from_list('qs_papers',['#4423bb','#4940f4','#2e6dff','#0097f2','#00bacc','#00cb93','#00cb93','#7ccd30','#fbdc00','#f9fc00'], N=256)
+        ls = LightSource(azdeg=0, altdeg=10)
+        cmap_plot = ls.shade(Bmag, cmap, norm=norm)
+        # cmap_plot = cmap(norm(Bmag))
+    # Create the 3D figure
     fig = plt.figure(constrained_layout=False, figsize=(4.5, 8))
     gs1 = fig.add_gridspec(nrows=3, ncols=1, top=1.02, bottom=-0.3, left=0., right=0.85, hspace=0.0, wspace=0.0)
     ax = fig.add_subplot(gs1[0, 0], projection='3d')
-    create_subplot(90,azim_default)
+    createsubplot(ax, R_2D_interp, Z_2D_interp, self.nfp, cmap_plot, elev=90, azim=azim_default, **kwargs)
+    # create_subplot(90,azim_default)
     gs2 = fig.add_gridspec(nrows=3, ncols=1, top=1.09, bottom=-0.3, left=0., right=0.85, hspace=0.0, wspace=0.0)
     ax = fig.add_subplot(gs2[1, 0], projection='3d')
-    create_subplot(30,azim_default)
+    createsubplot(ax, R_2D_interp, Z_2D_interp, self.nfp, cmap_plot, elev=30, azim=azim_default, **kwargs)
+    # create_subplot(30,azim_default)
     gs3 = fig.add_gridspec(nrows=3, ncols=1, top=1.12, bottom=-0.15, left=0., right=0.85, hspace=0.0, wspace=0.0)
     ax = fig.add_subplot(gs3[2, 0], projection='3d')
-    create_subplot(0,azim_default)
+    createsubplot(ax, R_2D_interp, Z_2D_interp, self.nfp, cmap_plot, elev=5,  azim=azim_default, **kwargs)
+    # create_subplot(0,azim_default)
     cbar_ax = fig.add_axes([0.85, 0.2, 0.03, 0.6])
-    m = cm.ScalarMappable(cmap=plt.cm.plasma, norm=norm)
+    m = cm.ScalarMappable(cmap=cmap, norm=norm)
     m.set_array([])
     cbar = plt.colorbar(m, cax=cbar_ax)
     cbar.ax.set_title(r'$|B| [T]$')
     if save!=None:
         fig.savefig(save+'3D.png')
-
     plt.show()

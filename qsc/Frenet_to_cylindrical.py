@@ -60,9 +60,9 @@ def Frenet_to_cylindrical_1_point(phi0, arr):
 
     Args:
         phi0: toroidal angle on the axis
-        X_spline: spline interpolant for X
-        Y_spline: spline interpolant for X
-        arr: Array with 8 entries corresponding to
+        arr: Array with 8 entries corresponding to these entries at phi0
+            X_spline: spline interpolant for X
+            Y_spline: spline interpolant for X
             R0_func: radial coordinate R0(phi0) of the axis shape
             Z0_func: vertical coordinate R0(phi0) of the axis shape
             normal_R_spline: spline interpolant for the R component of the axis normal vector
