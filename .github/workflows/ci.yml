@@ -12,7 +12,7 @@ jobs:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.1
         with:
-          access_token: ${{ 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 }}
+          access_token: ${{ github.token }}
 
   CI:
     runs-on: ubuntu-latest
