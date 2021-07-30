@@ -143,11 +143,20 @@ def create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot, fiel
 
 def plot(self, r=0.1, ntheta_plot=40, nphi_plot=130, ntheta_fourier=16, nsections=8, fieldlines=False, savefig=None, colormap=None, azim_default=None, **kwargs):
     """
-    Creates 2 matplotlib figures:
+    Plotting routine for the near-axis configurations. There are two main ways of
+    running this function:
+    If fieldlines=False (default), it creates 2 matplotlib figures:
         - A plot with several poloidal planes at the specified radius r with the
          corresponding location of the magnetic axis and label using plt.plot
         - A 3D plot with the flux surface and the magnetic field strength
-         on the surface using plot_surface
+         on the surface using plot_surface().
+    If fieldlines=True, it creates 1 matplotlib figure:
+        - A plot with several poloidal planes at the specified radius r with the
+         corresponding location of the magnetic axis and label using plt.plot
+        and one mayavi scene
+        - A 3D plot with the flux surface the magnetic field strength
+         on the surface and several magnetic field lines using mlab.mesh()
+        This functionality needs the mayavi package.
 
     Args:
       r (float): near-axis radius r where to create the surface
