@@ -130,8 +130,6 @@ def plot(self,r=0.1,ntheta_plot=40,nphi_plot=130,ntheta_fourier=16,nsections=8,s
     ax.set_aspect('equal')
     if save!=None:
         fig.savefig(save+'_poloidal.png')
-    # plt.show()
-    # exit()
 
     ## 3D plot
     # Set the default azimuthal angle of view in the 3D plot
