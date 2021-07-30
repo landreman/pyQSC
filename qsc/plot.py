@@ -100,6 +100,7 @@ def plot(self,r=0.1,ntheta_plot=40,nphi_plot=130,ntheta_fourier=16,nsections=8,s
     phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
     phi1dplot    = np.linspace(0, 2 * np.pi / self.nfp, nphi_plot)
     # Splines interpolants of R_2D and Z_2D
+    # NON PERIODIC
     R_2D_spline = interp2d(phi1d, theta1d, R_2D, kind='cubic')
     Z_2D_spline = interp2d(phi1d, theta1d, Z_2D, kind='cubic')
     phi0_2D_spline = interp2d(phi1d, theta1d, phi0_2D, kind='cubic')
