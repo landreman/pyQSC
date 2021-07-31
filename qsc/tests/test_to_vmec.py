@@ -43,7 +43,7 @@ def compare_to_fortran(name, filename):
     compare_field('ZBS', py.ZBS)
     f.close()
 
-def compare_to_vmec(name, r=0.01, nphi=101):
+def compare_to_vmec(name, r=0.005, nphi=151):
     """
     Check that VMEC can run the input file outputed by pyQSC
     and check that the resulting VMEC output file has
