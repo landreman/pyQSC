@@ -141,6 +141,53 @@ def create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot, fiel
         for j in range(len(alphas)):
             mlab.plot3d(fieldline_X_rotated[j], fieldline_Y_rotated[j]-shift_array[i], fieldline_Z_rotated[j], color=(0,0,0), line_width=0.001, tube_radius=0.005)
 
+def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=16, get_splines=False):
+    '''
+    Function that, for a given near-axis radial coordinate r, outputs
+    the [X,Y,Z] components of the boundary and, if specified by the
+    user, it also outputs the spline interpolants for the cylindrical
+    R and Z coordinates
+
+    Args:
+      r (float): near-axis radius r where to create the surface
+      ntheta (int): Number of grid points to plot in the poloidal angle.
+      nphi   (int): Number of grid points to plot in the toroidal angle.
+      ntheta_fourier (int): Resolution in the Fourier transform to cylindrical coordinates
+      get_splines (bool): Specify if spline interpolants of R and Z are outputed (True/False)
+    '''
+    # Obtain the surface shape in cylindrical coordinates
+    R_2D, Z_2D, phi0_2D = self.Frenet_to_cylindrical(r, ntheta_fourier)
+    # Make it periodic
+    R_2D = np.append(R_2D,[R_2D[0,:]],0)
+    R_2D = np.append(R_2D,np.array([R_2D[:,0]]).transpose(),1)
+    Z_2D = np.append(Z_2D,[Z_2D[0,:]],0)
+    Z_2D = np.append(Z_2D,np.array([Z_2D[:,0]]).transpose(),1)
+    # Arrays of original thetas and phis
+    theta1d = np.linspace(0, 2 * np.pi, ntheta_fourier+1)
+    phi1d   = np.linspace(0, 2 * np.pi / self.nfp, self.nphi+1)
+    # Arrays of thetas and phis for plots
+    theta1dplot  = np.linspace(0, 2 * np.pi, ntheta)
+    phi1dplot    = np.linspace(0, 2 * np.pi / self.nfp, nphi)
+    # Splines interpolants of R_2D and Z_2D
+    # NON-PERIODIC SPLNE INTERPOLANTS -> Might have artifacts at the boundary
+    R_2D_spline = interp2d(phi1d, theta1d, R_2D, kind='cubic')
+    Z_2D_spline = interp2d(phi1d, theta1d, Z_2D, kind='cubic')
+    R_2D_interp = R_2D_spline(phi1dplot,theta1dplot)
+    Z_2D_interp = Z_2D_spline(phi1dplot,theta1dplot)
+
+    # X, Y, Z arrays for the whole surface
+    x_2D_plot = R_2D_interp*np.cos(phi1dplot)
+    y_2D_plot = R_2D_interp*np.sin(phi1dplot)
+    z_2D_plot = Z_2D_interp
+    for i in range(1,self.nfp):
+        x_2D_plot = np.concatenate((x_2D_plot,R_2D_interp*np.cos(phi1dplot+i*2*np.pi/self.nfp)), axis=1)
+        y_2D_plot = np.concatenate((y_2D_plot,R_2D_interp*np.sin(phi1dplot+i*2*np.pi/self.nfp)), axis=1)
+        z_2D_plot = np.concatenate((z_2D_plot,Z_2D_interp), axis=1)
+    if get_splines==False:
+        return x_2D_plot, y_2D_plot, z_2D_plot
+    elif get_splines==True:
+        return x_2D_plot, y_2D_plot, z_2D_plot, R_2D_spline, Z_2D_spline
+
 def plot(self, r=0.1, ntheta_plot=40, nphi_plot=130, ntheta_fourier=16, nsections=8, fieldlines=False, savefig=None, colormap=None, azim_default=None, **kwargs):
     """
     Plotting routine for the near-axis configurations. There are two main ways of
@@ -181,39 +228,12 @@ def plot(self, r=0.1, ntheta_plot=40, nphi_plot=130, ntheta_fourier=16, nsection
     .. image:: poloidalplot.png
        :width: 200
     """
-
-    # Obtain the surface shape in cylindrical coordinates
-    R_2D, Z_2D, phi0_2D = self.Frenet_to_cylindrical(r, ntheta_fourier)
-    # Make it periodic
-    R_2D = np.append(R_2D,[R_2D[0,:]],0)
-    R_2D = np.append(R_2D,np.array([R_2D[:,0]]).transpose(),1)
-    Z_2D = np.append(Z_2D,[Z_2D[0,:]],0)
-    Z_2D = np.append(Z_2D,np.array([Z_2D[:,0]]).transpose(),1)
-    # Arrays of original thetas and phis
-    theta1d = np.linspace(0, 2 * np.pi, ntheta_fourier+1)
-    phi1d   = np.linspace(0, 2 * np.pi / self.nfp, self.nphi+1)
-    # Arrays of thetas and phis for plots
-    theta1dplot  = np.linspace(0, 2 * np.pi, ntheta_plot)
-    phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
-    phi1dplot    = np.linspace(0, 2 * np.pi / self.nfp, nphi_plot)
-    # Splines interpolants of R_2D and Z_2D
-    # NON-PERIODIC SPLNE INTERPOLANTS -> Might have artifacts at the boundary
-    R_2D_spline = interp2d(phi1d, theta1d, R_2D, kind='cubic')
-    Z_2D_spline = interp2d(phi1d, theta1d, Z_2D, kind='cubic')
-    R_2D_interp = R_2D_spline(phi1dplot,theta1dplot)
-    Z_2D_interp = Z_2D_spline(phi1dplot,theta1dplot)
-    # Spline interpolant of varphi
-    varphi_spline = self.convert_to_spline(self.varphi)
-    # X, Y, Z arrays for the whole surface
-    x_2D_plot = R_2D_interp*np.cos(phi1dplot)
-    y_2D_plot = R_2D_interp*np.sin(phi1dplot)
-    z_2D_plot = Z_2D_interp
-    for i in range(1,self.nfp):
-        x_2D_plot = np.concatenate((x_2D_plot,R_2D_interp*np.cos(phi1dplot+i*2*np.pi/self.nfp)), axis=1)
-        y_2D_plot = np.concatenate((y_2D_plot,R_2D_interp*np.sin(phi1dplot+i*2*np.pi/self.nfp)), axis=1)
-        z_2D_plot = np.concatenate((z_2D_plot,Z_2D_interp), axis=1)
+    ## Obtain surface shape
+    x_2D_plot, y_2D_plot, z_2D_plot, R_2D_spline, Z_2D_spline = self.get_boundary(r=r,ntheta=ntheta_plot,nphi=nphi_plot,ntheta_fourier=ntheta_fourier, get_splines=True)
 
     ## Poloidal plot
+    phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
+    theta1dplot  = np.linspace(0, 2 * np.pi, ntheta_plot)
     fig = plt.figure(figsize=(6, 6), dpi=80)
     ax  = plt.gca()
     for phi in phi1dplot_RZ:
@@ -254,13 +274,16 @@ def plot(self, r=0.1, ntheta_plot=40, nphi_plot=130, ntheta_fourier=16, nsection
     def Bf(r,theta,phi):
         thetaN = theta-(self.iota-self.iotaN)*phi
         return self.B0*(1+r*self.etabar*np.cos(thetaN))
+    phi1dplot    = np.linspace(0, 2 * np.pi / self.nfp, nphi_plot)
     phi2D, theta2D = np.meshgrid(phi1dplot,theta1dplot)
     Bmag=np.repeat(Bf(r,theta2D,phi2D),self.nfp,axis=1)
     norm = clr.Normalize(vmin=Bmag.min(), vmax=Bmag.max())
     # Create a color map similar to viridis 
     if fieldlines==False:
         if colormap==None:
-            cmap = clr.LinearSegmentedColormap.from_list('qs_papers',['#4423bb','#4940f4','#2e6dff','#0097f2','#00bacc','#00cb93','#00cb93','#7ccd30','#fbdc00','#f9fc00'], N=256)
+            # Cmap similar to quasisymmetry papers
+            # cmap = clr.LinearSegmentedColormap.from_list('qs_papers',['#4423bb','#4940f4','#2e6dff','#0097f2','#00bacc','#00cb93','#00cb93','#7ccd30','#fbdc00','#f9fc00'], N=256)
+            cmap = cm.viridis
             # Add a light source so the surface looks brighter
             ls = LightSource(azdeg=0, altdeg=10)
             cmap_plot = ls.shade(Bmag, cmap, norm=norm)
@@ -293,6 +316,7 @@ def plot(self, r=0.1, ntheta_plot=40, nphi_plot=130, ntheta_fourier=16, nsection
         # where alpha=theta-iota*varphi with (theta,varphi) the Boozer angles
         alphas = [0,np.pi/4,np.pi/2,3*np.pi/4,np.pi,5*np.pi/4,3*np.pi/2,7*np.pi/4]
         # Create the field line arrays
+        varphi_spline = self.convert_to_spline(self.varphi)
         fieldline_X, fieldline_Y, fieldline_Z = create_field_lines(alphas, self.nfp, self.iota, R_2D_spline, Z_2D_spline, varphi_spline)
         # Define the rotation arrays for the subplots
         degrees_array_x = [0., -66., 81.] # degrees for rotation in x

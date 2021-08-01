@@ -147,13 +147,13 @@ def init_axis(self):
                                                self.zs[i]*np.sin(i*self.nfp*self.phi) \
                                               for i in range(len(self.zs))]))
 
-    # Spline interpolants for the cylindrical components of the Frenet-Serret frame
-    self.normal_R_spline = self.convert_to_spline(self.normal_cylindrical[:,0])
-    self.normal_phi_spline = self.convert_to_spline(self.normal_cylindrical[:,1])
-    self.normal_z_spline = self.convert_to_spline(self.normal_cylindrical[:,2])
-    self.binormal_R_spline = self.convert_to_spline(self.binormal_cylindrical[:,0])
+    # Spline interpolants fo r the cylindrical components of the Frenet-Serret frame
+    self.normal_R_spline     = self.convert_to_spline(self.normal_cylindrical[:,0])
+    self.normal_phi_spline   = self.convert_to_spline(self.normal_cylindrical[:,1])
+    self.normal_z_spline     = self.convert_to_spline(self.normal_cylindrical[:,2])
+    self.binormal_R_spline   = self.convert_to_spline(self.binormal_cylindrical[:,0])
     self.binormal_phi_spline = self.convert_to_spline(self.binormal_cylindrical[:,1])
-    self.binormal_z_spline = self.convert_to_spline(self.binormal_cylindrical[:,2])
-    self.tangent_R_spline = self.convert_to_spline(self.tangent_cylindrical[:,0])
-    self.tangent_phi_spline = self.convert_to_spline(self.tangent_cylindrical[:,1])
-    self.tangent_z_spline = self.convert_to_spline(self.tangent_cylindrical[:,2])
+    self.binormal_z_spline   = self.convert_to_spline(self.binormal_cylindrical[:,2])
+    self.tangent_R_spline    = self.convert_to_spline(self.tangent_cylindrical[:,0])
+    self.tangent_phi_spline  = self.convert_to_spline(self.tangent_cylindrical[:,1])
+    self.tangent_z_spline    = self.convert_to_spline(self.tangent_cylindrical[:,2])
