@@ -134,17 +134,34 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
             phi0_2D[j_theta,j_phi] = phi0_solution
     return R_2D, Z_2D, phi0_2D
 
-def to_xyz(self,r,theta,phi0):
-    costheta = np.cos(theta)
-    sintheta = np.sin(theta)
-    X_at_this_theta = r * (self.X1c_untwisted * costheta + self.X1s_untwisted * sintheta)
-    Y_at_this_theta = r * (self.Y1c_untwisted * costheta + self.Y1s_untwisted * sintheta)
-    X_spline = self.convert_to_spline(X_at_this_theta)
-    Y_spline = self.convert_to_spline(Y_at_this_theta)
-    arr = [X_spline(phi0), Y_spline(phi0), self.R0_func(phi0), self.Z0_func(phi0),\
-            self.normal_R_spline(phi0), self.normal_phi_spline(phi0), self.normal_z_spline(phi0),\
-            self.binormal_R_spline(phi0), self.binormal_phi_spline(phi0), self.binormal_z_spline(phi0)]
-    R, Z = Frenet_to_cylindrical_1_point(phi0, arr)
-    # Seems wrong - how to get phi at phi>0 given phi0?
-    phi_cylindrical = phi0
-    return [R*np.cos(phi_cylindrical),R*np.sin(phi_cylindrical),Z]
+def to_xyz(self,points):
+    """
+    Function to convert a set of points in (r,theta,phi0) coordinates
+    where r=sqrt(2*psi/B0) is the near-axis radius, theta is the
+    Boozer poloidal angle and phi0 is the cylindrical angle phi
+    on the axis to cartesian coordinates (x,y,z)
+
+    Args:
+        points: an array of floats with dimension Nx3 with N the
+        number of points to evaluate with each points having
+        the (r,theta,phi0) values to evaluate
+    """
+    xyz=[]
+    for point in points:
+        r      = point[0]
+        theta  = point[1]
+        phi0   = point[2]
+        costheta = np.cos(theta)
+        sintheta = np.sin(theta)
+        X_at_this_theta = r * (self.X1c_untwisted * costheta + self.X1s_untwisted * sintheta)
+        Y_at_this_theta = r * (self.Y1c_untwisted * costheta + self.Y1s_untwisted * sintheta)
+        X_spline = self.convert_to_spline(X_at_this_theta)
+        Y_spline = self.convert_to_spline(Y_at_this_theta)
+        arr = [X_spline(phi0), Y_spline(phi0), self.R0_func(phi0), self.Z0_func(phi0),\
+                self.normal_R_spline(phi0), self.normal_phi_spline(phi0), self.normal_z_spline(phi0),\
+                self.binormal_R_spline(phi0), self.binormal_phi_spline(phi0), self.binormal_z_spline(phi0)]
+        R, Z = Frenet_to_cylindrical_1_point(phi0, arr)
+        # On the axis, phi=phi0
+        phi_cylindrical = phi0
+        xyz.append([R*np.cos(phi_cylindrical),R*np.sin(phi_cylindrical),Z])
+    return xyz
