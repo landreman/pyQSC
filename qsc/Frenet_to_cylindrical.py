@@ -164,4 +164,4 @@ def to_xyz(self,points):
         # On the axis, phi=phi0
         phi_cylindrical = phi0
         xyz.append([R*np.cos(phi_cylindrical),R*np.sin(phi_cylindrical),Z])
-    return xyz
+    return np.array(xyz)
