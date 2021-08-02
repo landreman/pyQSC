@@ -156,7 +156,7 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=16, get_spline
       get_splines (bool): Specify if spline interpolants of R and Z are outputed (True/False)
     '''
     # Obtain the surface shape in cylindrical coordinates
-    R_2D, Z_2D, phi0_2D = self.Frenet_to_cylindrical(r, ntheta_fourier)
+    R_2D, Z_2D, _ = self.Frenet_to_cylindrical(r, ntheta_fourier)
     # Make it periodic
     R_2D = np.append(R_2D,[R_2D[0,:]],0)
     R_2D = np.append(R_2D,np.array([R_2D[:,0]]).transpose(),1)
