@@ -2,6 +2,7 @@
 This module contains the routines to output a
 near-axis boundary to a VMEC input file
 """
+
 from .Frenet_to_cylindrical import Frenet_to_cylindrical
 import numpy as np
 from .util import mu0
