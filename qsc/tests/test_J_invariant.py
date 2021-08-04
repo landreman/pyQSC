@@ -37,7 +37,7 @@ class JInvariantTests(unittest.TestCase):
                     stel = Qsc.from_paper(case)
                     J_pyQSC=stel.J_invariant(r=r0, Lambda=Lambda0, plot=False)
                     # Compute J with Mathematica script in tests folder, use known values from local runs
-                    mathematica_file = os.path.join(os.path.dirname(__file__), 'J_solver.wls')
+                    # mathematica_file = os.path.join(os.path.dirname(__file__), 'J_solver.wls')
                     # J_Mathematica = float(subprocess.Popen([mathematica_file+' %s %s %s %s %s %s %s %s %s %s %s %s'\
                     #                         %(stel.B0, 0, stel.B0*stel.etabar, 0, 0, r0, 0, Lambda0, stel.iotaN, stel.nfp, stel.G0, stel.I2)],\
                     #                         shell = True, stdout=subprocess.PIPE).communicate()[0].strip().decode('ascii'))

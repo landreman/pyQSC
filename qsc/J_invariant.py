@@ -39,7 +39,7 @@ def find_roots(func,xmin,xmax,nx,root_tol):
             x_roots_temp = np.append(x_roots_temp,root)
     return x_roots_temp
 
-def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., thetaMax = 6*np.pi, ntheta = 200, root_tol = 1e-6):
+def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., thetaMax = 6*np.pi, ntheta = 500, root_tol = 1e-6):
     """
     The function J_invariant takes a given radius r, field-line label
     alpha and a pitch-angle Lambda and calculates the corresponding
@@ -92,7 +92,7 @@ def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., the
                 try:
                     theta_roots = np.array([theta_roots_temp[i],theta_roots_temp[i+1]])
                     # Integrate sqrt(v_parallel^2)/B
-                    J_normalized = quad(J_normalized_integrand,theta_roots[0],theta_roots[1])[0]
+                    J_normalized = quad(J_normalized_integrand,theta_roots[0],theta_roots[1],limit=100)[0]
                     if math.isnan(J_normalized):
                         logger.info('J is nan, try again')
                         theta_roots2 = find_roots(vpar2,theta_roots[0],theta_roots[1],ntheta,root_tol)
@@ -104,7 +104,7 @@ def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., the
                                     theta_roots = np.array([theta_roots2[i],theta_roots2[i+1]])
                                     logger.info('Getting new theta_roots: {}'.format(theta_roots))
                                     # Integrate sqrt(v_parallel^2)/B
-                                    J_normalized = quad(J_normalized_integrand,theta_roots[0],theta_roots[1])[0]
+                                    J_normalized = quad(J_normalized_integrand,theta_roots[0],theta_roots[1],limit=200)[0]
                                     break
                                 except:
                                     logger.info("Vpar2 not positive between roots")
@@ -124,12 +124,13 @@ def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., the
     # Plot v_parallel^2 to check that we've found the proper zeros
     if plot==True:
         print("Roots of v_parallel =",theta_roots)
-        phiArray = np.linspace(thetaMin,thetaMax,ntheta)
-        plt.plot(phiArray,vpar2(phiArray))
+        thetaArray = np.linspace(thetaMin,thetaMax,ntheta)
+        fig_plot = plt.figure()
+        plt.plot(thetaArray,vpar2(thetaArray))
         plt.plot(theta_roots,vpar2(theta_roots), linestyle="None", marker='o')
         plt.title('r='+str(r)+', lambda='+str(Lambda)+', J='+str(J_normalized))
-        plt.tight_layout()
         plt.show()
+        plt.close(fig_plot)
     return J
 
 def npmap2d(fun, xs, ys, **kwargs):
@@ -180,17 +181,22 @@ def J_contour(self, rmin=0.001, rmax=0.1, nr=6, nalpha=20, lambdas=[0.9,1.0,1.1]
     # Create arrays to loop through
     r_array = np.linspace(rmin,rmax,nr)
     alpha_array = np.linspace(0,2*np.pi,nalpha)
-    # Calculate the number of rows to show in the figure
-    nrows=int(len(lambdas)/numCols)
+    # Calculate the number of rows and columns to show in the figure
+    if len(lambdas)<numCols:
+        numCols = len(lambdas)
+    nrows=int(np.ceil(len(lambdas)/numCols))
     # Initialize figure
-    fig, ax = plt.subplots(nrows, numCols, subplot_kw=dict(projection='polar'), figsize=(10,0.5+3*nrows))
+    fig, ax = plt.subplots(nrows, numCols, subplot_kw=dict(projection='polar'), figsize=(0.5+3*numCols,0.5+3*nrows))
     # Calculate J for the given values of r, alpha and lambda
     r_2D, theta_2D = np.meshgrid(r_array,alpha_array)
     J_2D = np.zeros((len(lambdas),nalpha,nr))
     for i in range(len(lambdas)):
         J_2D[i] = npmap2d(self.J_invariant, r_array, alpha_array, Lambda=lambdas[i], plot=plot_debug)
         if nrows==1:
-            axs = ax[np.mod(i,numCols)]
+            if numCols==1:
+                axs = ax
+            else:
+                axs = ax[np.mod(i,numCols)]
         else:
             axs = ax[int(i/numCols), np.mod(i,numCols)]
         contourplot = axs.contourf(theta_2D, r_2D, J_2D[i], ncontours)
@@ -210,3 +216,9 @@ def J_contour(self, rmin=0.001, rmax=0.1, nr=6, nalpha=20, lambdas=[0.9,1.0,1.1]
         fig.colorbar(contourplot, ax=axs, fraction=0.046, pad=0.13)
     fig.tight_layout()
     plt.show()
+
+def max_Jness(self, rmin=0.01, rmax=0.1, nr=5, alpha=0, Lambda=1.0):
+    r_array = np.linspace(rmin,rmax,nr)
+    J_array = [self.J_invariant(r=r0,alpha=alpha,Lambda=Lambda) for r0 in r_array]
+    m, _ = np.polyfit(r_array, J_array, 1)
+    return m
