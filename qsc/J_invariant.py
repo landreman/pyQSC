@@ -252,9 +252,11 @@ def max_Jness(self, r=0.1, alpha=0, plot=False):
         def jac(theta):
             return magB(theta)**2/(self.G0+r**2*(self.G2+self.iota*self.I2))
         def dBdpsi(theta):
-            return (self.B0*self.etabar*np.cos(theta)+2*r*(B20_spline(self.phi_of_varphi_spline((theta-alpha)/self.iotaN))+self.B2c*np.cos(2*theta)))/(r*self.B0)
+            phi=self.phi_of_varphi_spline(np.mod((theta-alpha)/self.iotaN,2*np.pi/self.nfp))
+            return (self.B0*self.etabar*np.cos(theta)+2*r*(B20_spline(phi)+self.B2c*np.cos(2*theta)))/(r*self.B0)
         def dBdvarphi(theta):
-            return r**2*B20_spline_der(self.phi_of_varphi_spline((theta-alpha)/self.iotaN))
+            phi=self.phi_of_varphi_spline(np.mod((theta-alpha)/self.iotaN,2*np.pi/self.nfp))
+            return r**2*B20_spline_der(phi)
         def dBdvartheta(theta):
             return -r*self.etabar*self.B0*np.sin(theta)-r**2*2*self.B2c*np.sin(2*theta)
     # Compute X
@@ -268,9 +270,9 @@ def max_Jness(self, r=0.1, alpha=0, plot=False):
     max_dBdl_index = np.argmax(dBdl_array)
     min_dBdl_index = np.argmin(dBdl_array)
     if plot==True:
-        plt.plot(theta_array,dBdl_array,label=r'dB/dl')
-        plt.plot(theta_array[max_dBdl_index],dBdl_array[max_dBdl_index],label=r'max$(dB/dl)$')
-        plt.plot(theta_array[min_dBdl_index],dBdl_array[min_dBdl_index],label=r'min$(dB/dl)$')
+        plt.plot(theta_array,dBdl_array,label=r'$dB/dl$')
+        plt.plot(theta_array[max_dBdl_index],dBdl_array[max_dBdl_index],'rx',label=r'max$(dB/dl)$')
+        plt.plot(theta_array[min_dBdl_index],dBdl_array[min_dBdl_index],'gx',label=r'min$(dB/dl)$')
         # plt.plot(theta_array,X(theta_array),label=r'$X(theta)$')
         plt.legend()
         plt.show()
