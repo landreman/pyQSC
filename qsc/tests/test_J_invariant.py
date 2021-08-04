@@ -3,8 +3,8 @@
 import unittest
 import logging
 from qsc.qsc import Qsc
-import subprocess
-import os
+# import subprocess
+# import os
 import numpy as np
 
 logging.basicConfig(level=logging.INFO)

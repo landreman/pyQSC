@@ -6,7 +6,7 @@ adiabatic invariant, usually called J
 import numpy as np
 from scipy.optimize import brentq
 import math
-from scipy.integrate import quad
+from scipy.integrate import quadrature
 import matplotlib.pyplot as plt
 import logging
 
@@ -70,7 +70,8 @@ def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., the
     else:
         B20_spline = self.convert_to_spline(self.B20)
         def magB(theta):
-            return self.B0+r*self.B0*self.etabar*np.cos(theta)+r**2*(B20_spline((theta-alpha)/self.iotaN)+self.B2c*np.cos(2*theta)+self.B2s*np.sin(2*theta))
+            phi=self.phi_of_varphi_spline(np.mod((theta-alpha)/self.iotaN,2*np.pi/self.nfp))
+            return self.B0+r*self.B0*self.etabar*np.cos(theta)+r**2*(B20_spline(phi)+self.B2c*np.cos(2*theta)+self.B2s*np.sin(2*theta))
     def vpar2(phi):
         return 1-Lambda*magB(phi)
     def J_normalized_integrand(phi):
@@ -92,7 +93,7 @@ def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., the
                 try:
                     theta_roots = np.array([theta_roots_temp[i],theta_roots_temp[i+1]])
                     # Integrate sqrt(v_parallel^2)/B
-                    J_normalized = quad(J_normalized_integrand,theta_roots[0],theta_roots[1],limit=100)[0]
+                    J_normalized = quadrature(J_normalized_integrand,theta_roots[0],theta_roots[1],maxiter=500)[0]
                     if math.isnan(J_normalized):
                         logger.info('J is nan, try again')
                         theta_roots2 = find_roots(vpar2,theta_roots[0],theta_roots[1],ntheta,root_tol)
@@ -104,7 +105,7 @@ def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., the
                                     theta_roots = np.array([theta_roots2[i],theta_roots2[i+1]])
                                     logger.info('Getting new theta_roots: {}'.format(theta_roots))
                                     # Integrate sqrt(v_parallel^2)/B
-                                    J_normalized = quad(J_normalized_integrand,theta_roots[0],theta_roots[1],limit=200)[0]
+                                    J_normalized = quadrature(J_normalized_integrand,theta_roots[0],theta_roots[1],maxiter=500)[0]
                                     break
                                 except:
                                     logger.info("Vpar2 not positive between roots")
@@ -222,3 +223,55 @@ def max_Jness(self, rmin=0.01, rmax=0.1, nr=5, alpha=0, Lambda=1.0):
     J_array = [self.J_invariant(r=r0,alpha=alpha,Lambda=Lambda) for r0 in r_array]
     m, _ = np.polyfit(r_array, J_array, 1)
     return m
+
+def max_Jness_naive(self, rmin=0.01, rmax=0.1, nr=5, alpha=0, Lambda=1.0):
+    r_array = np.linspace(rmin,rmax,nr)
+    J_array = [self.J_invariant(r=r0,alpha=alpha,Lambda=Lambda) for r0 in r_array]
+    m, _ = np.polyfit(r_array, J_array, 1)
+    return m
+
+def max_Jness(self, r=0.1, alpha=0, plot=False):
+    # Define B analytically
+    if self.order=='r1':
+        def magB(theta):
+            return self.B0+r*self.B0*self.etabar*np.cos(theta)
+        def jac(theta):
+            return magB(theta)**2/(self.G0+r**2*self.iota*self.I2)
+        def dBdpsi(theta):
+            return self.etabar*np.cos(theta)/r
+        def dBdvarphi(theta):
+            return 0
+        def dBdvartheta(theta):
+            return -r*self.etabar*self.B0*np.sin(theta)
+    else:
+        B20_spline = self.convert_to_spline(self.B20)
+        B20_spline_der = self.convert_to_spline(np.matmul(self.d_d_phi,self.B20))
+        def magB(theta):
+            phi=self.phi_of_varphi_spline(np.mod((theta-alpha)/self.iotaN,2*np.pi/self.nfp))
+            return self.B0+r*self.B0*self.etabar*np.cos(theta)+r**2*(B20_spline(phi)+self.B2c*np.cos(2*theta)+self.B2s*np.sin(2*theta))
+        def jac(theta):
+            return magB(theta)**2/(self.G0+r**2*(self.G2+self.iota*self.I2))
+        def dBdpsi(theta):
+            return (self.B0*self.etabar*np.cos(theta)+2*r*(B20_spline(self.phi_of_varphi_spline((theta-alpha)/self.iotaN))+self.B2c*np.cos(2*theta)))/(r*self.B0)
+        def dBdvarphi(theta):
+            return r**2*B20_spline_der(self.phi_of_varphi_spline((theta-alpha)/self.iotaN))
+        def dBdvartheta(theta):
+            return -r*self.etabar*self.B0*np.sin(theta)-r**2*2*self.B2c*np.sin(2*theta)
+    # Compute X
+    def dBdl(theta):
+        return (dBdvarphi(theta)+self.iotaN*dBdvartheta(theta))/jac(theta)
+    def X(theta):
+        return dBdpsi(theta)/dBdl(theta)
+    theta_array=np.linspace(0.,8*np.pi,100)
+    dBdl_array = dBdl(theta_array)
+    # dX_array = X(theta_array)
+    max_dBdl_index = np.argmax(dBdl_array)
+    min_dBdl_index = np.argmin(dBdl_array)
+    if plot==True:
+        plt.plot(theta_array,dBdl_array,label=r'dB/dl')
+        plt.plot(theta_array[max_dBdl_index],dBdl_array[max_dBdl_index],label=r'max$(dB/dl)$')
+        plt.plot(theta_array[min_dBdl_index],dBdl_array[min_dBdl_index],label=r'min$(dB/dl)$')
+        # plt.plot(theta_array,X(theta_array),label=r'$X(theta)$')
+        plt.legend()
+        plt.show()
+    return X(theta_array[min_dBdl_index])-X(theta_array[max_dBdl_index])
