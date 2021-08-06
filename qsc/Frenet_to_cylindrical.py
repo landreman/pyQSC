@@ -7,10 +7,7 @@ off-axis cylindrical toroidal angle
 import numpy as np
 from scipy.optimize import root_scalar
 
-def Frenet_to_cylindrical_residual_func(phi0, order, X_spline, Y_spline, Z_spline, phi_target,\
-                                        R0_func, normal_R_spline, normal_phi_spline,\
-                                        binormal_R_spline, binormal_phi_spline,\
-                                        tangent_R_spline, tangent_phi_spline):
+def Frenet_to_cylindrical_residual_func(phi0, phi_target, qsc):
     """
     This function takes a point on the magnetic axis with a given
     toroidal angle phi0, computes the actual toroidal angle phi
@@ -18,28 +15,18 @@ def Frenet_to_cylindrical_residual_func(phi0, order, X_spline, Y_spline, Z_splin
     this phi and the target value of phi
 
     Args:
-        phi0: toroidal angle on the axis
-        order: 'r1' for first order near-axis expansion, 'r2' for second order
-        X_spline: spline interpolant for X
-        Y_spline: spline interpolant for Y
-        Z_spline: spline interpolant for Z (only non-zero at second order)
-        phi_target: target toroidal angle phi
-        R0_func: radial coordinate R0(phi0) of the axis shape
-        Z0_func: vertical coordinate R0(phi0) of the axis shape
-        normal_R_spline: spline interpolant for the R component of the axis normal vector
-        normal_phi_spline: spline interpolant for the phi component of the axis normal vector
-        binormal_R_spline: spline interpolant for the R component of the axis binormal vector
-        binormal_phi_spline: spline interpolant for the phi component of the axis binormal vector
+        phi0 (float): toroidal angle on the axis
+        phi_target (float): standard cylindrical toroidal angle
     """
     sinphi0 = np.sin(phi0)
     cosphi0 = np.cos(phi0)
-    R0_at_phi0   = R0_func(phi0)
-    X_at_phi0    = X_spline(phi0)
-    Y_at_phi0    = Y_spline(phi0)
-    normal_R     = normal_R_spline(phi0)
-    normal_phi   = normal_phi_spline(phi0)
-    binormal_R   = binormal_R_spline(phi0)
-    binormal_phi = binormal_phi_spline(phi0)
+    R0_at_phi0   = qsc.R0_func(phi0)
+    X_at_phi0    = qsc.X_spline(phi0)
+    Y_at_phi0    = qsc.Y_spline(phi0)
+    normal_R     = qsc.normal_R_spline(phi0)
+    normal_phi   = qsc.normal_phi_spline(phi0)
+    binormal_R   = qsc.binormal_R_spline(phi0)
+    binormal_phi = qsc.binormal_phi_spline(phi0)
 
     normal_x   =   normal_R * cosphi0 -   normal_phi * sinphi0
     normal_y   =   normal_R * sinphi0 +   normal_phi * cosphi0
@@ -49,10 +36,10 @@ def Frenet_to_cylindrical_residual_func(phi0, order, X_spline, Y_spline, Z_splin
     total_x = R0_at_phi0 * cosphi0 + X_at_phi0 * normal_x + Y_at_phi0 * binormal_x
     total_y = R0_at_phi0 * sinphi0 + X_at_phi0 * normal_y + Y_at_phi0 * binormal_y
 
-    if order != 'r1':
-        Z_at_phi0    = Z_spline(phi0)
-        tangent_R    = tangent_R_spline(phi0)
-        tangent_phi  = tangent_phi_spline(phi0)
+    if qsc.order != 'r1':
+        Z_at_phi0    = qsc.Z_spline(phi0)
+        tangent_R    = qsc.tangent_R_spline(phi0)
+        tangent_phi  = qsc.tangent_phi_spline(phi0)
 
         tangent_x = tangent_R * cosphi0 - tangent_phi * sinphi0
         tangent_y = tangent_R * sinphi0 + tangent_phi * cosphi0
@@ -66,7 +53,7 @@ def Frenet_to_cylindrical_residual_func(phi0, order, X_spline, Y_spline, Z_splin
     if (Frenet_to_cylindrical_residual < -np.pi): Frenet_to_cylindrical_residual = Frenet_to_cylindrical_residual + 2*np.pi
     return Frenet_to_cylindrical_residual
 
-def Frenet_to_cylindrical_1_point(phi0, order, arr):
+def Frenet_to_cylindrical_1_point(phi0, qsc):
     """
     This function takes a point on the magnetic axis with a given
     toroidal angle phi0 and computes the cylindrical coordinate
@@ -74,28 +61,20 @@ def Frenet_to_cylindrical_1_point(phi0, order, arr):
 
     Args:
         phi0: toroidal angle on the axis
-        order: 'r1' for first order near-axis expansion, 'r2' for second order
-        X_spline: spline interpolant for X
-        Y_spline: spline interpolant for X
-        arr: Array with 8 entries corresponding to
-            R0_func: radial coordinate R0(phi0) of the axis shape
-            Z0_func: vertical coordinate R0(phi0) of the axis shape
-            normal_R_spline: spline interpolant for the R component of the axis normal vector
-            normal_phi_spline: spline interpolant for the phi component of the axis normal vector
-            normal_Z_spline: spline interpolant for the Z component of the axis normal vector
-            binormal_R_spline: spline interpolant for the R component of the axis binormal vector
-            binormal_phi_spline: spline interpolant for the phi component of the axis binormal vector
-            binormal_Z_spline: spline interpolant for the Z component of the axis binormal vector
-            tangent_R_spline: spline interpolant for the R component of the axis tangent vector
-            tangent_phi_spline: spline interpolant for the phi component of the axis tangent vector
-            tangent_Z_spline: spline interpolant for the Z component of the axis tangent vector
     """
     sinphi0 = np.sin(phi0)
     cosphi0 = np.cos(phi0)
-    X_at_phi0, Y_at_phi0, Z_at_phi0, R0_at_phi0, z0_at_phi0,\
-    normal_R, normal_phi, normal_z,\
-    binormal_R, binormal_phi, binormal_z,\
-    tangent_R, tangent_phi, tangent_z = arr
+    R0_at_phi0   = qsc.R0_func(phi0)
+    z0_at_phi0   = qsc.Z0_func(phi0)
+    X_at_phi0    = qsc.X_spline(phi0)
+    Y_at_phi0    = qsc.Y_spline(phi0)
+    Z_at_phi0    = qsc.Z_spline(phi0)
+    normal_R     = qsc.normal_R_spline(phi0)
+    normal_phi   = qsc.normal_phi_spline(phi0)
+    normal_z     = qsc.normal_z_spline(phi0)
+    binormal_R   = qsc.binormal_R_spline(phi0)
+    binormal_phi = qsc.binormal_phi_spline(phi0)
+    binormal_z   = qsc.binormal_z_spline(phi0)
 
     normal_x   =   normal_R * cosphi0 -   normal_phi * sinphi0
     normal_y   =   normal_R * sinphi0 +   normal_phi * cosphi0
@@ -107,7 +86,11 @@ def Frenet_to_cylindrical_1_point(phi0, order, arr):
 
     total_z = z0_at_phi0           + X_at_phi0 * normal_z + Y_at_phi0 * binormal_z
 
-    if order != 'r1':
+    if qsc.order != 'r1':
+        tangent_R   = qsc.tangent_R_spline(phi0)
+        tangent_phi = qsc.tangent_phi_spline(phi0)
+        tangent_z   = qsc.tangent_z_spline(phi0)
+
         tangent_x = tangent_R * cosphi0 - tangent_phi * sinphi0
         tangent_y = tangent_R * sinphi0 + tangent_phi * cosphi0
 
@@ -150,25 +133,18 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
             X_at_this_theta = X_at_this_theta + r*r*(self.X20_untwisted + self.X2c_untwisted * cos2theta + self.X2s_untwisted * sin2theta)
             Y_at_this_theta = Y_at_this_theta + r*r*(self.Y20_untwisted + self.Y2c_untwisted * cos2theta + self.Y2s_untwisted * sin2theta)
             Z_at_this_theta = Z_at_this_theta + r*r*(self.Z20_untwisted + self.Z2c_untwisted * cos2theta + self.Z2s_untwisted * sin2theta)
-        X_spline = self.convert_to_spline(X_at_this_theta)
-        Y_spline = self.convert_to_spline(Y_at_this_theta)
-        Z_spline = self.convert_to_spline(Z_at_this_theta)
+        self.X_spline = self.convert_to_spline(X_at_this_theta)
+        self.Y_spline = self.convert_to_spline(Y_at_this_theta)
+        self.Z_spline = self.convert_to_spline(Z_at_this_theta)
         for j_phi in range(nphi_conversion):
             # Solve for the phi0 such that r0 + X1 n + Y1 b has the desired phi
             phi_target = phi_conversion[j_phi]
             phi0_rootSolve_min = phi_target - 1.0 / self.nfp
             phi0_rootSolve_max = phi_target + 1.0 / self.nfp
             res = root_scalar(Frenet_to_cylindrical_residual_func, xtol=1e-15, rtol=1e-15, maxiter=1000,\
-                              args=(self.order, X_spline, Y_spline, Z_spline, phi_target, self.R0_func, self.normal_R_spline,\
-                                    self.normal_phi_spline, self.binormal_R_spline, self.binormal_phi_spline,\
-                                    self.tangent_R_spline, self.tangent_phi_spline),
-                              bracket=[phi0_rootSolve_min, phi0_rootSolve_max], x0=phi_target)
+                              args=(phi_target, self), bracket=[phi0_rootSolve_min, phi0_rootSolve_max], x0=phi_target)
             phi0_solution = res.root
-            arr = [X_spline(phi0_solution), Y_spline(phi0_solution), Z_spline(phi0_solution), self.R0_func(phi0_solution), self.Z0_func(phi0_solution),\
-                   self.normal_R_spline(phi0_solution), self.normal_phi_spline(phi0_solution), self.normal_z_spline(phi0_solution),\
-                   self.binormal_R_spline(phi0_solution), self.binormal_phi_spline(phi0_solution), self.binormal_z_spline(phi0_solution),\
-                   self.tangent_R_spline(phi0_solution), self.tangent_phi_spline(phi0_solution), self.tangent_z_spline(phi0_solution)]
-            final_R, final_z = Frenet_to_cylindrical_1_point(phi0_solution, self.order, arr)
+            final_R, final_z = Frenet_to_cylindrical_1_point(phi0_solution, self)
             R_2D[j_theta,j_phi] = final_R
             Z_2D[j_theta,j_phi] = final_z
             phi0_2D[j_theta,j_phi] = phi0_solution

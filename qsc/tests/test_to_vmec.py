@@ -144,7 +144,7 @@ class ToVmecTests(unittest.TestCase):
         """
         for case in self.cases:
             logger.info('Going through case '+case)
-            # compare_to_vmec(case)
+            compare_to_vmec(case)
 
     def test_Fourier(self):
         """
@@ -153,4 +153,4 @@ class ToVmecTests(unittest.TestCase):
         """
         for case in self.cases:
             logger.info('Going through case '+case)
-            # Fourier_Inverse(case, atol=1e-9, rtol=1e-9)
+            Fourier_Inverse(case, atol=1e-9, rtol=1e-9)
