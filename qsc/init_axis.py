@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 # Define periodic spline interpolant conversion used in several scripts and plotting
 def convert_to_spline(self,array):
-    sp=spline(np.append(self.phi,2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
+    sp=spline(np.append(self.phi,self.phi[0]+2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
     return sp
 
 def init_axis(self):
@@ -27,6 +27,7 @@ def init_axis(self):
 
     phi = np.linspace(0, 2 * np.pi / nfp, nphi, endpoint=False)
     d_phi = phi[1] - phi[0]
+    phi = phi# + d_phi/3
     R0 = np.zeros(nphi)
     Z0 = np.zeros(nphi)
     R0p = np.zeros(nphi)

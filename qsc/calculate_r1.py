@@ -17,15 +17,15 @@ def _residual(self, x):
     the state vector, corresponding to sigma on the phi grid,
     except that the first element of x is actually iota.
     """
-    sigma = np.copy(x)
-    sigma[0] = self.sigma0
+    sigma = np.copy(x[1::])
+    # sigma[0] = self.sigma0
     iota = x[0]
     r = np.matmul(self.d_d_varphi, sigma) \
         + (iota + self.helicity * self.nfp) * \
         (self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma) \
         - 2 * self.etabar_squared_over_curvature_squared * (-self.spsi * self.torsion + self.I2 / self.B0) * self.G0 / self.B0
     #logger.debug("_residual called with x={}, r={}".format(x, r))
-    return r
+    return np.append(r,sigma[0] - self.sigma0)
 
 def _jacobian(self, x):
     """
@@ -33,8 +33,8 @@ def _jacobian(self, x):
     the state vector, corresponding to sigma on the phi grid,
     except that the first element of x is actually iota.
     """
-    sigma = np.copy(x)
-    sigma[0] = self.sigma0
+    sigma = np.copy(x[1::])
+    # sigma[0] = self.sigma0
     iota = x[0]
 
     # d (Riccati equation) / d sigma:
@@ -44,7 +44,13 @@ def _jacobian(self, x):
         jac[j, j] += (iota + self.helicity * self.nfp) * 2 * sigma[j]
 
     # d (Riccati equation) / d iota:
-    jac[:, 0] = self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma
+    # jac[:, 0] = self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma
+    jac = np.append(np.transpose([self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma]),jac,axis=1)
+
+    # d (sigma[0]-sigma0) / dsigma:
+    jac_last_row = np.zeros(self.nphi+1)
+    jac_last_row[1]=1
+    jac = np.append(jac,[jac_last_row],axis=0)
 
     #logger.debug("_jacobian called with x={}, jac={}".format(x, jac))
     return jac
@@ -53,7 +59,7 @@ def solve_sigma_equation(self):
     """
     Solve the sigma equation.
     """
-    x0 = np.full(self.nphi, self.sigma0)
+    x0 = np.full(self.nphi+1, self.sigma0)
     x0[0] = 0 # Initial guess for iota
     """
     soln = scipy.optimize.root(self._residual, x0, jac=self._jacobian, method='lm')
@@ -64,7 +70,7 @@ def solve_sigma_equation(self):
     self.sigma = newton(self._residual, x0, jac=self._jacobian)
     self.iota = self.sigma[0]
     self.iotaN = self.iota + self.helicity * self.nfp
-    self.sigma[0] = self.sigma0
+    self.sigma = self.sigma[1::]
 
 def _determine_helicity(self):
     """
