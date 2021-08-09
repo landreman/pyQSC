@@ -135,7 +135,7 @@ class ToVmecTests(unittest.TestCase):
         cases=["r1 section 5.1","r1 section 5.2","r1 section 5.3"]
         for case in cases:
             logger.info('Going through case '+case)
-            # compare_to_vmec(case)
+            compare_to_vmec(case)
 
     def test_Fourier(self):
         """

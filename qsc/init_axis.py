@@ -27,7 +27,7 @@ def init_axis(self):
 
     phi = np.linspace(0, 2 * np.pi / nfp, nphi, endpoint=False)
     d_phi = phi[1] - phi[0]
-    phi = phi# + d_phi/3
+    phi = phi + d_phi/3
     R0 = np.zeros(nphi)
     Z0 = np.zeros(nphi)
     R0p = np.zeros(nphi)

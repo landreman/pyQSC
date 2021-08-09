@@ -7,6 +7,7 @@ import numpy as np
 import logging
 from .util import fourier_minimum
 from .newton import newton
+from .fourier_interpolation import fourier_interpolation
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ def _residual(self, x):
         (self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma) \
         - 2 * self.etabar_squared_over_curvature_squared * (-self.spsi * self.torsion + self.I2 / self.B0) * self.G0 / self.B0
     #logger.debug("_residual called with x={}, r={}".format(x, r))
-    return np.append(r,sigma[0] - self.sigma0)
+    return np.append(r,fourier_interpolation(sigma, [-self.phi[0]])[0]-self.sigma0)
 
 def _jacobian(self, x):
     """
@@ -71,6 +72,7 @@ def solve_sigma_equation(self):
     self.iota = self.sigma[0]
     self.iotaN = self.iota + self.helicity * self.nfp
     self.sigma = self.sigma[1::]
+    self.sigma[0] = self.sigma0
 
 def _determine_helicity(self):
     """
