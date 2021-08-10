@@ -26,7 +26,11 @@ def _residual(self, x):
         (self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma) \
         - 2 * self.etabar_squared_over_curvature_squared * (-self.spsi * self.torsion + self.I2 / self.B0) * self.G0 / self.B0
     #logger.debug("_residual called with x={}, r={}".format(x, r))
-    return np.append(r,fourier_interpolation(sigma, [-self.phi[0]])[0]-self.sigma0)
+    # factor = self.phi[2]/self.phi[1]
+    # sigma_at_0 = (sigma[2]-sigma[1]*factor)/(1-factor) # interpolation to find sigma at phi=0
+    # return np.append(r,sigma_at_0-self.sigma0)#,fourier_interpolation(sigma,[-self.phi[0]])[0]-self.sigma0)#,sigma_at_0-self.sigma0)
+    sigma_spline = self.convert_to_spline(sigma)
+    return np.append(r,sigma_spline(0)-self.sigma0)
 
 def _jacobian(self, x):
     """
@@ -50,7 +54,9 @@ def _jacobian(self, x):
 
     # d (sigma[0]-sigma0) / dsigma:
     jac_last_row = np.zeros(self.nphi+1)
-    jac_last_row[1]=1
+    factor = self.phi[2]/self.phi[1]
+    jac_last_row[3]=1/(1-factor)
+    jac_last_row[2]=-factor/(1-factor)
     jac = np.append(jac,[jac_last_row],axis=0)
 
     #logger.debug("_jacobian called with x={}, jac={}".format(x, jac))
@@ -72,7 +78,6 @@ def solve_sigma_equation(self):
     self.iota = self.sigma[0]
     self.iotaN = self.iota + self.helicity * self.nfp
     self.sigma = self.sigma[1::]
-    self.sigma[0] = self.sigma0
 
 def _determine_helicity(self):
     """

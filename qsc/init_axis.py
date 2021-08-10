@@ -8,14 +8,17 @@ import logging
 from .spectral_diff_matrix import spectral_diff_matrix
 from .util import fourier_minimum
 from scipy.interpolate import CubicSpline as spline
+from scipy.interpolate import splev, splrep
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Define periodic spline interpolant conversion used in several scripts and plotting
 def convert_to_spline(self,array):
-    sp=spline(np.append(self.phi,self.phi[0]+2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
-    return sp
+    # sp=spline(np.append(self.phi,self.phi[0]+2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
+    # return sp
+    spl=splrep(np.append(self.phi,self.phi[0]+2*np.pi/self.nfp), np.append(array,array[0]), per=1, k=5)
+    return lambda x: splev(x, spl)
 
 def init_axis(self):
     """
@@ -107,20 +110,22 @@ def init_axis(self):
 
     self.etabar_squared_over_curvature_squared = self.etabar * self.etabar / (curvature * curvature)
 
-    self.d_d_phi = spectral_diff_matrix(self.nphi, xmax=2 * np.pi / self.nfp)
+    self.d_d_phi = spectral_diff_matrix(self.nphi, xmin = phi[0], xmax = phi[0] + 2*np.pi/self.nfp)#xmax=2 * np.pi / self.nfp)
     self.d_d_varphi = np.zeros((nphi, nphi))
     for j in range(nphi):
         self.d_d_varphi[j,:] = self.d_d_phi[j,:] / (B0_over_abs_G0 * d_l_d_phi[j])
 
     # Compute the Boozer toroidal angle:
+    self.phi = phi
     self.varphi = np.zeros(nphi)
+    d_l_d_phi_spline = self.convert_to_spline(d_l_d_phi)
+    d_l_d_phi_from_zero = d_l_d_phi_spline(np.linspace(0,2*np.pi/self.nfp,self.nphi,endpoint=False))
     for j in range(1, nphi):
         # To get toroidal angle on the full mesh, we need d_l_d_phi on the half mesh.
-        self.varphi[j] = self.varphi[j-1] + (d_l_d_phi[j-1] + d_l_d_phi[j])
+        self.varphi[j] = self.varphi[j-1] + (d_l_d_phi_from_zero[j-1] + d_l_d_phi_from_zero[j])
     self.varphi = self.varphi * (0.5 * d_phi * 2 * np.pi / axis_length)
 
     # Add all results to self:
-    self.phi = phi
     self.d_phi = d_phi
     self.R0 = R0
     self.Z0 = Z0
