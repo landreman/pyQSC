@@ -27,10 +27,8 @@ def init_axis(self):
     # Shorthand:
     nphi = self.nphi
     nfp = self.nfp
-
-    phi = np.linspace(0, 2 * np.pi / nfp, nphi, endpoint=False)
-    d_phi = phi[1] - phi[0]
-    phi = phi + d_phi/3
+    phi = self.phi
+    d_phi = self.d_phi
     R0 = np.zeros(nphi)
     Z0 = np.zeros(nphi)
     R0p = np.zeros(nphi)
@@ -54,10 +52,9 @@ def init_axis(self):
 
     d_l_d_phi = np.sqrt(R0 * R0 + R0p * R0p + Z0p * Z0p)
     d2_l_d_phi2 = (R0 * R0p + R0p * R0pp + Z0p * Z0pp) / d_l_d_phi
-    B0_over_abs_G0 = nphi / np.sum(d_l_d_phi)
-    abs_G0_over_B0 = 1 / B0_over_abs_G0
-    self.d_l_d_varphi = abs_G0_over_B0
-    G0 = self.sG * abs_G0_over_B0 * self.B0
+    G0 = self.sG * np.sum(self.B0 * d_l_d_phi) / nphi
+    self.d_l_d_varphi = self.sG * G0 / self.B0   
+
 
     # For these next arrays, the first dimension is phi, and the 2nd dimension is (R, phi, Z).
     d_r_d_phi_cylindrical = np.array([R0p, R0, Z0p]).transpose()
@@ -108,12 +105,14 @@ def init_axis(self):
 
     torsion = torsion_numerator / torsion_denominator
 
-    self.etabar_squared_over_curvature_squared = self.etabar * self.etabar / (curvature * curvature)
+    self.Bbar = self.spsi * np.mean(self.B0)
+    # etabar_squared_over_curvature_squared = B1s^2+B1c^2/(B0*Bbar*curvature^2) = etabar^2/curvature^2 in quasisymmetry
+    self.etabar_squared_over_curvature_squared = (self.B1s * self.B1s + self.B1c * self.B1c) / (curvature * curvature * self.B0 * self.Bbar)
 
     self.d_d_phi = spectral_diff_matrix(self.nphi, xmin = phi[0], xmax = phi[0] + 2*np.pi/self.nfp)#xmax=2 * np.pi / self.nfp)
     self.d_d_varphi = np.zeros((nphi, nphi))
     for j in range(nphi):
-        self.d_d_varphi[j,:] = self.d_d_phi[j,:] / (B0_over_abs_G0 * d_l_d_phi[j])
+        self.d_d_varphi[j,:] = self.d_d_phi[j,:] * self.sG * G0 / (self.B0[j] * d_l_d_phi[j])
 
     # Compute the Boozer toroidal angle:
     self.phi = phi
@@ -140,7 +139,6 @@ def init_axis(self):
     self.tangent_cylindrical = tangent_cylindrical
     self.normal_cylindrical = normal_cylindrical 
     self.binormal_cylindrical = binormal_cylindrical
-    self.Bbar = self.spsi * self.B0
 
     # The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero
     self.lasym = np.max(np.abs(self.rs))>0 or np.max(np.abs(self.zc))>0 or np.abs(self.sigma0)>0

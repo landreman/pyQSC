@@ -19,16 +19,12 @@ def _residual(self, x):
     except that the first element of x is actually iota.
     """
     sigma = np.copy(x[1::])
-    # sigma[0] = self.sigma0
     iota = x[0]
     r = np.matmul(self.d_d_varphi, sigma) \
-        + (iota + self.helicity * self.nfp) * \
+        + (iota + self.helicity * self.nfp + (self.B1s*np.matmul(self.d_d_varphi, self.B1c)-self.B1c*np.matmul(self.d_d_varphi, self.B1s))/(self.B1s*self.B1s+self.B1c*self.B1c)) * \
         (self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma) \
-        - 2 * self.etabar_squared_over_curvature_squared * (-self.spsi * self.torsion + self.I2 / self.B0) * self.G0 / self.B0
+        - 2 * self.etabar_squared_over_curvature_squared * (-self.spsi * self.torsion + self.I2 / self.Bbar) * self.G0 / self.B0
     #logger.debug("_residual called with x={}, r={}".format(x, r))
-    # factor = self.phi[2]/self.phi[1]
-    # sigma_at_0 = (sigma[2]-sigma[1]*factor)/(1-factor) # interpolation to find sigma at phi=0
-    # return np.append(r,sigma_at_0-self.sigma0)#,fourier_interpolation(sigma,[-self.phi[0]])[0]-self.sigma0)#,sigma_at_0-self.sigma0)
     sigma_spline = self.convert_to_spline(sigma)
     return np.append(r,sigma_spline(0)-self.sigma0)
 
@@ -39,17 +35,15 @@ def _jacobian(self, x):
     except that the first element of x is actually iota.
     """
     sigma = np.copy(x[1::])
-    # sigma[0] = self.sigma0
     iota = x[0]
 
     # d (Riccati equation) / d sigma:
     # For convenience we will fill all the columns now, and re-write the first column in a moment.
     jac = np.copy(self.d_d_varphi)
     for j in range(self.nphi):
-        jac[j, j] += (iota + self.helicity * self.nfp) * 2 * sigma[j]
+        jac[j, j] += (iota + self.helicity * self.nfp + (self.B1s[j]*np.matmul(self.d_d_varphi, self.B1c)[j]-self.B1c[j]*np.matmul(self.d_d_varphi, self.B1s)[j])/(self.B1s[j]*self.B1s[j]+self.B1c[j]*self.B1c[j])) * 2 * sigma[j]
 
     # d (Riccati equation) / d iota:
-    # jac[:, 0] = self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma
     jac = np.append(np.transpose([self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma]),jac,axis=1)
 
     # d (sigma[0]-sigma0) / dsigma:

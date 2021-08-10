@@ -28,6 +28,7 @@ class Qsc():
     from .to_vmec import to_vmec
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
+                 B0_vals=[], B1c_vals=[], B1s_vals=[0.],
                  I2=0., sG=1, spsi=1, nphi=31, B2s=0., B2c=0., p2=0., order="r1"):
         """
         Create a quasisymmetric stellarator.
@@ -58,7 +59,22 @@ class Qsc():
         self.nfp = nfp
         self.etabar = etabar
         self.sigma0 = sigma0
-        self.B0 = B0
+        phi = np.linspace(0, 2 * np.pi / nfp, nphi, endpoint=False)
+        self.d_phi = phi[1] - phi[0]
+        self.phi = phi + self.d_phi/3
+        if B0_vals==[]:
+            self.B0coeffs = [B0]
+        else:
+            self.B0coeffs = B0_vals
+        self.B0 = sum([self.B0coeffs[i]*np.cos(nfp*i*self.phi) for i in range(len(self.B0coeffs))])
+        if B1c_vals==[]:
+            self.B1ccoeffs = [etabar]
+        else:
+            self.B1ccoeffs = B1c_vals
+            self.etabar = B1c_vals[0]
+        self.B1scoeffs = B1s_vals
+        self.B1c = sum([self.B1ccoeffs[i]*np.cos(nfp*i*self.phi) for i in range(len(self.B1ccoeffs))])
+        self.B1s = sum([self.B1scoeffs[i]*np.sin(nfp*i*self.phi) for i in range(len(self.B1scoeffs))])
         self.I2 = I2
         self.sG = sG
         self.spsi = spsi
@@ -114,14 +130,15 @@ class Qsc():
         degrees-of-freedom, for simsopt.
         """
         return np.concatenate((self.rc, self.zs, self.rs, self.zc,
-                               np.array([self.etabar, self.sigma0, self.B2s, self.B2c, self.p2, self.I2, self.B0])))
+                               np.array([self.etabar, self.sigma0, self.B2s, self.B2c, self.p2, self.I2]),
+                               self.B0coeffs, self.B1ccoeffs, self.B1scoeffs))
 
     def set_dofs(self, x):
         """
         For interaction with simsopt, set the optimizable degrees of
         freedom from a 1D numpy vector.
         """
-        assert len(x) == self.nfourier * 4 + 7
+        assert len(x) == self.nfourier * 4 + 6 + len(self.B0coeffs) + len(self.B1ccoeffs) + len(self.B1scoeffs)
         self.rc = x[self.nfourier * 0 : self.nfourier * 1]
         self.zs = x[self.nfourier * 1 : self.nfourier * 2]
         self.rs = x[self.nfourier * 2 : self.nfourier * 3]
@@ -132,7 +149,12 @@ class Qsc():
         self.B2c = x[self.nfourier * 4 + 3]
         self.p2 = x[self.nfourier * 4 + 4]
         self.I2 = x[self.nfourier * 4 + 5]
-        self.B0 = x[self.nfourier * 4 + 6]
+        self.B0coeffs = x[self.nfourier * 4 + 6 : self.nfourier * 4 + 5 + len(self.B0coeffs) + 1]
+        self.B1ccoeffs = x[self.nfourier * 4 + 5 + len(self.B0coeffs) + 1 : self.nfourier * 4 + 5 + len(self.B0coeffs) + len(self.B1ccoeffs) + 1]
+        self.B1scoeffs = x[self.nfourier * 4 + 5 + len(self.B0coeffs) + len(self.B1ccoeffs) + 1 : self.nfourier * 4 + 5 + len(self.B0coeffs) + len(self.B1ccoeffs) + len(self.B1scoeffs) + 1]
+        self.B0 = sum([self.B0coeffs[i]*np.cos(i*self.phi) for i in range(len(self.B0coeffs))])
+        self.B1c = sum([self.B1ccoeffs[i]*np.cos(i*self.phi) for i in range(len(self.B1ccoeffs))])
+        self.B1s = sum([self.B1scoeffs[i]*np.cos(i*self.phi) for i in range(len(self.B1scoeffs))])
         self.calculate()
         logger.info('set_dofs called with x={}. Now iota={}, elongation={}'.format(x, self.iota, self.max_elongation))
         
@@ -145,7 +167,10 @@ class Qsc():
         names += ['zs({})'.format(j) for j in range(self.nfourier)]
         names += ['rs({})'.format(j) for j in range(self.nfourier)]
         names += ['zc({})'.format(j) for j in range(self.nfourier)]
-        names += ['etabar', 'sigma0', 'B2s', 'B2c', 'p2', 'I2', 'B0']
+        names += ['etabar', 'sigma0', 'B2s', 'B2c', 'p2', 'I2']
+        names += ['B0({})'.format(j) for j in range(len(self.B0coeffs))]
+        names += ['B1c({})'.format(j) for j in range(len(self.B1ccoeffs))]
+        names += ['B1s({})'.format(j+1) for j in range(len(self.B1scoeffs))]
         self.names = names
 
     @classmethod
