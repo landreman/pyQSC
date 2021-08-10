@@ -28,7 +28,7 @@ class Qsc():
     from .to_vmec import to_vmec
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
-                 B0_vals=[], B1c_vals=[], B1s_vals=[0.], phi_shift=1/3,
+                 B0_vals=[], B1c_vals=[], B1s_vals=[0.], phi_shift=0,
                  I2=0., sG=1, spsi=1, nphi=31, B2s=0., B2c=0., p2=0., order="r1"):
         """
         Create a quasisymmetric stellarator.
