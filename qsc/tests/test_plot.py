@@ -11,18 +11,20 @@ class PlotTests(unittest.TestCase):
         """
         A call to plot() to check that it works
         """
-        stel=Qsc.from_paper("r1 section 5.1")
+        # stel=Qsc.from_paper("r1 section 5.1")
         # stel.plot(fieldlines=True)
-        stel.plot()
+        # stel.plot()
         # stel=Qsc.from_paper("r1 section 5.2")
         # stel.plot(r=0.03, fieldlines=True)
         # stel.plot(r=0.03)
         # stel=Qsc.from_paper("r1 section 5.3")
         # stel.plot(fieldlines=True)
         # stel.plot()
-        stel=Qsc.from_paper(4)
+        stel=Qsc.from_paper(1)
         # stel.plot(fieldlines=True)
         stel.plot()
+        stel.B_fieldline()
+        stel.B_contour()
         # stel=Qsc.from_paper(4)
         # stel.plot(fieldlines=True)
         # stel.plot()

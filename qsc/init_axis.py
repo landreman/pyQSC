@@ -157,3 +157,6 @@ def init_axis(self):
     self.tangent_R_spline    = self.convert_to_spline(self.tangent_cylindrical[:,0])
     self.tangent_phi_spline  = self.convert_to_spline(self.tangent_cylindrical[:,1])
     self.tangent_z_spline    = self.convert_to_spline(self.tangent_cylindrical[:,2])
+
+    # Spline interpolant for nu = varphi - phi, used for plotting
+    self.nu_spline = self.convert_to_spline(self.varphi-self.phi)

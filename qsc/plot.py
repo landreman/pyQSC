@@ -9,6 +9,7 @@ import matplotlib.colors as clr
 from matplotlib.colors import LightSource
 from .to_vmec import to_Fourier
 from scipy.interpolate import interp2d
+import matplotlib.ticker as tck
 
 def set_axes_equal(ax):
     '''
@@ -271,14 +272,11 @@ def plot(self, r=0.1, ntheta=60, nphi=150, ntheta_fourier=20, nsections=8, field
             azim_default = 45
     # Define the magnetic field modulus and create its theta,phi array
     # The norm instance will be used as the colormap for the surface
-    def Bf(r,theta,phi):
-        thetaN = theta-(self.iota-self.iotaN)*phi
-        return self.B0*(1+r*self.etabar*np.cos(thetaN))
     theta1D = np.linspace(0,2*np.pi,ntheta)
     phi1D = np.linspace(0,2*np.pi,nphi)
     phi2D, theta2D = np.meshgrid(phi1D,theta1D)
     # Create a color map similar to viridis 
-    Bmag=Bf(r,theta2D,phi2D)
+    Bmag=self.B_mag(r,theta2D,phi2D)
     norm = clr.Normalize(vmin=Bmag.min(), vmax=Bmag.max())
     if fieldlines==False:
         if colormap==None:
@@ -317,8 +315,7 @@ def plot(self, r=0.1, ntheta=60, nphi=150, ntheta_fourier=20, nsections=8, field
         # where alpha=theta-iota*varphi with (theta,varphi) the Boozer angles
         alphas = [0,np.pi/4,np.pi/2,3*np.pi/4,np.pi,5*np.pi/4,3*np.pi/2,7*np.pi/4]
         # Create the field line arrays
-        nu_spline = self.convert_to_spline(self.varphi-self.phi)
-        fieldline_X, fieldline_Y, fieldline_Z = create_field_lines(alphas, self.iota, x_2D_plot, y_2D_plot, z_2D_plot, nu_spline)
+        fieldline_X, fieldline_Y, fieldline_Z = create_field_lines(alphas, self.iota, x_2D_plot, y_2D_plot, z_2D_plot, self.nu_spline)
         # Define the rotation arrays for the subplots
         degrees_array_x = [0., -66., 81.] # degrees for rotation in x
         degrees_array_z = [azim_default, azim_default, azim_default] # degrees for rotation in z
@@ -354,3 +351,59 @@ def plot(self, r=0.1, ntheta=60, nphi=150, ntheta_fourier=20, nsections=8, field
         mlab.show()
         # Close mayavi plots
         mlab.close(all=True)
+
+def B_fieldline(self, r=0.1, alpha=0, phimax = [], nphi = 400):
+    '''
+    Plot the modulus of the magnetic field B along a field line with
+    the Boozer toroidal angle varphi acting as a field-line following
+    coordinate
+
+    Args:
+      r (float): near-axis radius r where to create the surface
+      alpha (float): Field-line label
+      phimax (float): Maximum value of the field-line following parameter varphi
+      nphi (int): resolution of the phi grid
+    '''
+    if phimax == []:
+        phimax = 10*np.pi/abs(self.iota)
+    varphi_array = np.linspace(0,phimax,nphi)
+    _,ax=plt.subplots(1,1,figsize=(10, 6), dpi=80, facecolor='w', edgecolor='k')
+    plt.xlabel(r'$\varphi$')
+    plt.ylabel(r'$B(\varphi)$')
+    plt.title("r = "+str(r)+", alpha = "+str(alpha))
+    plt.plot(varphi_array,self.B_mag(r,alpha+self.iota*varphi_array,varphi_array,Boozer_toroidal=True))
+    ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    ax.xaxis.set_major_locator(tck.MultipleLocator(base=phimax*abs(self.iota)/np.pi))
+    plt.tight_layout()
+    plt.show()
+    plt.close()
+
+def B_contour(self, r=0.1, ntheta=100, nphi=100, ncontours=50):
+    '''
+    Plot contours of constant B, with B the modulus of the
+    magnetic field, in Boozer coordinates theta and varphi
+
+    Args:
+      r (float): near-axis radius r where to create the surface
+      ntheta (int): Number of grid points to plot in the Boozer poloidal angle.
+      nphi   (int): Number of grid points to plot in the Boozer toroidal angle.
+      ncontours (int): number of contours to show in the plot
+    '''
+    theta_array=np.linspace(0,2*np.pi,ntheta)
+    phi_array=np.linspace(0,2*np.pi,nphi)
+    theta_2D, phi_2D = np.meshgrid(theta_array,phi_array)
+    magB_2D = self.B_mag(r,phi_2D,theta_2D,Boozer_toroidal=True)
+    magB_2D.shape = phi_2D.shape
+    fig,ax=plt.subplots(1,1)
+    contourplot = ax.contourf(phi_2D, theta_2D, magB_2D, ncontours)
+    fig.colorbar(contourplot)
+    ax.set_title('r='+str(r))
+    ax.set_xlabel(r'$\varphi$')
+    ax.set_ylabel(r'$\theta$')
+    ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    ax.yaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    ax.xaxis.set_major_locator(tck.MultipleLocator(base=1.0))
+    ax.yaxis.set_major_locator(tck.MultipleLocator(base=1.0))
+    plt.tight_layout()
+    plt.show()
+    plt.close()
