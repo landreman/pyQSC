@@ -64,10 +64,7 @@ def fourier_minimum(y):
     return solution.fun
 
 def magB(self, radius, theta, phi):
-    B0 = sum([self.B0_vals[i]*np.cos(self.nfp*i*phi) for i in range(len(self.B0_vals))])
-    d = sum([self.d_vals[i]*np.cos(self.nfp*i*phi) for i in range(len(self.d_vals))])
-    alpha = sum([self.alpha_vals[i]*np.sin(self.nfp*(i+1)*phi) for i in range(len(self.alpha_vals))])
-    return B0*(1+radius*d*np.cos(theta-alpha))
+    return self.B0*(1+radius*self.d*np.cos(theta-self.alpha))
 
 def magB_fieldline(self, r, alpha, phi):
     return self.magB(r,alpha+self.iotaN*phi,phi)

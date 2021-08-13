@@ -71,7 +71,8 @@ class Qsc():
         self.sigma0 = sigma0
         phi = np.linspace(0, 2 * np.pi / nfp, nphi, endpoint=False)
         self.d_phi = phi[1] - phi[0]
-        self.phi = phi + phi_shift*self.d_phi
+        self.phi_shift = phi_shift
+        self.phi = phi + self.phi_shift*self.d_phi
         if B0_vals==[]:
             self.B0_vals = [B0]
         else:

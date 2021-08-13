@@ -3,6 +3,7 @@ This module contains the routine to initialize quantities like
 curvature and torsion from the magnetix axis shape.
 """
 
+from qsc.fourier_interpolation import fourier_interpolation_matrix
 import numpy as np
 import logging
 from .spectral_diff_matrix import spectral_diff_matrix
@@ -53,9 +54,6 @@ def init_axis(self):
     d_l_d_phi = np.sqrt(R0 * R0 + R0p * R0p + Z0p * Z0p)
     d2_l_d_phi2 = (R0 * R0p + R0p * R0pp + Z0p * Z0pp) / d_l_d_phi
     d3_l_d_phi3 = (R0p * R0p + R0pp * R0pp + Z0pp * Z0pp + R0 * R0pp + R0p * R0ppp + Z0p * Z0ppp - d2_l_d_phi2 * d2_l_d_phi2) / d_l_d_phi
-    G0 = self.sG * np.sum(self.B0 * d_l_d_phi) / nphi
-    self.d_l_d_varphi = self.sG * G0 / self.B0   
-
 
     # For these next arrays, the first dimension is phi, and the 2nd dimension is (R, phi, Z).
     d_r_d_phi_cylindrical = np.array([R0p, R0, Z0p]).transpose()
@@ -91,7 +89,6 @@ def init_axis(self):
     self.normal_cylindrical = normal_cylindrical
     self._determine_helicity()
 
-
     # b = t x n
     binormal_cylindrical = np.zeros((nphi, 3))
     binormal_cylindrical[:,0] = tangent_cylindrical[:,1] * normal_cylindrical[:,2] - tangent_cylindrical[:,2] * normal_cylindrical[:,1]
@@ -122,27 +119,49 @@ def init_axis(self):
 
     torsion = torsion_numerator / torsion_denominator
 
-    self.d_d_phi = spectral_diff_matrix(self.nphi, xmin = phi[0], xmax = phi[0] + 2*np.pi/self.nfp)#xmax=2 * np.pi / self.nfp)
+    # self.d_d_phi = spectral_diff_matrix(self.nphi, xmin = phi[0], xmax = phi[0] + 2*np.pi/self.nfp)
+    self.d_d_phi = spectral_diff_matrix(self.nphi, xmin = 0, xmax = 2*np.pi/self.nfp)
+
+    # Calculate G0 and varphi
+    if self.omn == False:
+        # In here B0 is assumed to be given as a fourier series in phi
+        # varphi starts from 0 and finishes at 2 * np.pi / nfp
+        G0 = self.sG * np.sum(self.B0 * d_l_d_phi) / nphi
+        self.varphi = np.zeros(nphi)
+        d_l_d_phi_spline = self.convert_to_spline(d_l_d_phi)
+        d_l_d_phi_from_zero = d_l_d_phi_spline(np.linspace(0,2*np.pi/self.nfp,self.nphi,endpoint=False))
+        for j in range(1, nphi):
+            # To get toroidal angle on the full mesh, we need d_l_d_phi on the half mesh.
+            self.varphi[j] = self.varphi[j-1] + (d_l_d_phi_from_zero[j-1] + d_l_d_phi_from_zero[j])
+        self.varphi = self.varphi * (0.5 * d_phi * 2 * np.pi / axis_length)
+    else:
+        # In here B0 is assumed to be given as a fourier series in varphi
+        # Picard iteration is used to find varphi and G0
+        self.interpolateTo0 = fourier_interpolation_matrix(nphi, -self.phi_shift*self.d_phi)
+        nu = np.zeros((nphi,))
+        for j in range(20):
+            varphi = phi + nu
+            B0 = np.array(sum([self.B0_vals[i]*np.cos(nfp*i*varphi) for i in range(len(self.B0_vals))]))
+            abs_G0 = np.sum(B0 * d_l_d_phi) / nphi
+            rhs = -1 + d_l_d_phi * B0 / abs_G0
+            last_nu = nu
+            nu = np.linalg.solve(self.d_d_phi+self.interpolateTo0, rhs)
+            norm_change = np.sqrt(sum((nu-last_nu)**2)/nphi)
+            logger.debug("  Iteration {}: |change to nu| = {}".format(j, norm_change))
+            if norm_change < 1e-13:
+                break
+        varphi = phi + nu
+        self.varphi = varphi
+        B0 = np.array(sum([self.B0_vals[i]*np.cos(nfp*i*varphi) for i in range(len(self.B0_vals))]))
+        self.B0 = B0
+        G0 = self.sG * np.sum(self.B0 * d_l_d_phi) / nphi
+        self.d = np.array(sum([self.d_cvals[i]*np.cos(nfp*i*varphi) for i in range(len(self.d_cvals))]))
+        self.d = self.d + np.array(sum([self.d_svals[i]*np.sin(nfp*i*varphi) for i in range(len(self.d_svals))]))
+
+    self.d_l_d_varphi = self.sG * G0 / self.B0   
     self.d_d_varphi = np.zeros((nphi, nphi))
     for j in range(nphi):
         self.d_d_varphi[j,:] = self.d_d_phi[j,:] * self.sG * G0 / (self.B0[j] * d_l_d_phi[j])
-
-
-    # Compute the Boozer toroidal angle:
-    self.varphi = np.zeros(nphi)
-    d_l_d_phi_spline = self.convert_to_spline(d_l_d_phi)
-    d_l_d_phi_from_zero = d_l_d_phi_spline(np.linspace(0,2*np.pi/self.nfp,self.nphi,endpoint=False))
-    for j in range(1, nphi):
-        # To get toroidal angle on the full mesh, we need d_l_d_phi on the half mesh.
-        self.varphi[j] = self.varphi[j-1] + (d_l_d_phi_from_zero[j-1] + d_l_d_phi_from_zero[j])
-    self.varphi = self.varphi * (0.5 * d_phi * 2 * np.pi / axis_length)
-
-    # If in omnigenity calculation, calculate d based on a varphi grid
-    if self.omn == True:
-        phi_from_zero_with_endpoint = np.linspace(0,2*np.pi/nfp,self.nphi+1,endpoint=True)
-        nu_of_phi=spline(phi_from_zero_with_endpoint, np.append(self.varphi,2*np.pi/nfp)-phi_from_zero_with_endpoint, bc_type='periodic')
-        self.d = np.array(sum([self.d_cvals[i]*np.cos(nfp*i*(phi+nu_of_phi(phi))) for i in range(len(self.d_cvals))]))
-        self.d = self.d + np.array(sum([self.d_svals[i]*np.sin(nfp*i*(phi+nu_of_phi(phi))) for i in range(len(self.d_svals))]))
 
     self.d_bar = self.d / (curvature + 1e-31)
 
