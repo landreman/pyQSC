@@ -99,23 +99,11 @@ def init_axis(self):
     binormal_cylindrical[:,2] = tangent_cylindrical[:,0] * normal_cylindrical[:,1] - tangent_cylindrical[:,1] * normal_cylindrical[:,0]
 
     # If looking for omnigenity, use signed Frenet-Serret frame
-    # new_normal = np.array([d2_tangent_d_l2_cylindrical[j,:]-np.dot(d2_tangent_d_l2_cylindrical[j,:],tangent_cylindrical[j,:])*tangent_cylindrical[j,:] for j in range(self.nphi)])
-    # new_normal = np.array([new_normal[j,:]/np.sqrt(np.dot(new_normal[j,:],new_normal[j,:])) for j in range(self.nphi)])
-    # self.new_normal = new_normal
-    # normal_cylindrical = new_normal
     sign_curvature_change = np.ones((self.nphi,))
-    if self.nfp == 1:
-        if self.nfourier == 2:
-            if (self.rc[0]+2*self.rc[1]) == 0 or (self.rc[0]+self.rc[1])**2+self.zs[1]**2==0:
-                sign_curvature_change[int(self.nphi/2)::] = [-sign_curvature_change[i] for i in range(int(self.nphi/2),self.nphi)]
-        if self.nfourier == 3:
-            if (self.rc[0]+2*self.rc[1]+5*self.rc[2]) == 0 or (self.rc[0]+self.rc[1]+self.rc[2])**2+(self.zs[1]+2*self.zs[2])**2==0:
-                sign_curvature_change[int(self.nphi/2)::] = [-sign_curvature_change[i] for i in range(int(self.nphi/2),self.nphi)]
-        if self.nfourier == 4:
-            if (self.rc[0]+2*self.rc[1]+5*(self.rc[2] + 2*self.rc[3])) == 0 or (self.rc[0]+self.rc[1]+self.rc[2]+self.rc[3])**2+(self.zs[1]+2*self.zs[2]+3*self.zs[3])**2==0:
-                sign_curvature_change[int(self.nphi/2)::] = [-sign_curvature_change[i] for i in range(int(self.nphi/2),self.nphi)]
-    signed_curvature = curvature * sign_curvature_change
-    curvature = signed_curvature
+    if self.omn == True:
+        sign_curvature_change[int(self.nphi/2)::] = [-sign_curvature_change[i] for i in range(int(self.nphi/2),self.nphi)]
+
+    curvature = curvature * sign_curvature_change
     for j in range(3):
         normal_cylindrical[:,j]   =   normal_cylindrical[:,j]*sign_curvature_change
         binormal_cylindrical[:,j] = binormal_cylindrical[:,j]*sign_curvature_change
@@ -134,14 +122,11 @@ def init_axis(self):
 
     torsion = torsion_numerator / torsion_denominator
 
-    self.Bbar = self.spsi * np.mean(self.B0)
-    # etabar_squared_over_curvature_squared = B1s^2+B1c^2/(B0*Bbar*curvature^2) = etabar^2/curvature^2 in quasisymmetry
-    self.etabar_squared_over_curvature_squared = (self.B1s * self.B1s + self.B1c * self.B1c) / (signed_curvature * signed_curvature * self.B0 * self.Bbar)
-
     self.d_d_phi = spectral_diff_matrix(self.nphi, xmin = phi[0], xmax = phi[0] + 2*np.pi/self.nfp)#xmax=2 * np.pi / self.nfp)
     self.d_d_varphi = np.zeros((nphi, nphi))
     for j in range(nphi):
         self.d_d_varphi[j,:] = self.d_d_phi[j,:] * self.sG * G0 / (self.B0[j] * d_l_d_phi[j])
+
 
     # Compute the Boozer toroidal angle:
     self.varphi = np.zeros(nphi)
@@ -152,6 +137,18 @@ def init_axis(self):
         self.varphi[j] = self.varphi[j-1] + (d_l_d_phi_from_zero[j-1] + d_l_d_phi_from_zero[j])
     self.varphi = self.varphi * (0.5 * d_phi * 2 * np.pi / axis_length)
 
+    # If in omnigenity calculation, calculate d based on a varphi grid
+    if self.omn == True:
+        phi_from_zero_with_endpoint = np.linspace(0,2*np.pi/nfp,self.nphi+1,endpoint=True)
+        nu_of_phi=spline(phi_from_zero_with_endpoint, np.append(self.varphi,2*np.pi/nfp)-phi_from_zero_with_endpoint, bc_type='periodic')
+        self.d = np.array(sum([self.d_cvals[i]*np.cos(nfp*i*(phi+nu_of_phi(phi))) for i in range(len(self.d_cvals))]))
+        self.d = self.d + np.array(sum([self.d_svals[i]*np.sin(nfp*i*(phi+nu_of_phi(phi))) for i in range(len(self.d_svals))]))
+
+    self.d_bar = self.d / (curvature + 1e-31)
+
+    self.Bbar = self.spsi * np.mean(self.B0)
+    self.etabar_squared_over_curvature_squared = (self.B0  / self.Bbar) * (self.d**2 / curvature**2)
+
     # Add all results to self:
     self.d_phi = d_phi
     self.R0 = R0
@@ -160,10 +157,7 @@ def init_axis(self):
     self.d_l_d_phi = d_l_d_phi
     self.axis_length = axis_length
     self.curvature = curvature
-    self.signed_curvature = signed_curvature
     self.torsion = torsion
-    self.X1s = self.B1s / (signed_curvature * self.B0)
-    self.X1c = self.B1c / (signed_curvature * self.B0)
     self.min_R0 = fourier_minimum(self.R0)
     self.tangent_cylindrical = tangent_cylindrical
     self.normal_cylindrical = normal_cylindrical 

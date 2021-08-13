@@ -8,6 +8,8 @@ import numpy as np
 import scipy.optimize
 import logging
 from qsc.fourier_interpolation import fourier_interpolation
+import matplotlib.pyplot as plt
+import matplotlib.ticker as tck
 
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -60,3 +62,44 @@ def fourier_minimum(y):
     #solution = scipy.optimize.minimize_scalar(func, bracket=bracket, options={"disp": True})
     solution = scipy.optimize.minimize_scalar(func, bracket=bracket)
     return solution.fun
+
+def magB(self, radius, theta, phi):
+    B0 = sum([self.B0_vals[i]*np.cos(self.nfp*i*phi) for i in range(len(self.B0_vals))])
+    d = sum([self.d_vals[i]*np.cos(self.nfp*i*phi) for i in range(len(self.d_vals))])
+    alpha = sum([self.alpha_vals[i]*np.sin(self.nfp*(i+1)*phi) for i in range(len(self.alpha_vals))])
+    return B0*(1+radius*d*np.cos(theta-alpha))
+
+def magB_fieldline(self, r, alpha, phi):
+    return self.magB(r,alpha+self.iotaN*phi,phi)
+
+def B_fieldline(self, r, alpha=0, phimax = None, nphi = 400):
+    if phimax == None:
+        phimax = 200*np.pi
+    plt.figure(figsize=(10, 6), dpi=80, facecolor='w', edgecolor='k')
+    plt.xlabel(r'$\varphi$')
+    plt.ylabel(r'$B(\varphi)$')
+    plt.title("r = "+str(r)+", alpha = "+str(alpha))
+    plt.plot(magB_fieldline(r,alpha,np.linspace(0,phimax,nphi)))
+    plt.tight_layout()
+    plt.show()
+    plt.close()
+
+def B_contour(self, r=0.1, ntheta=30, nphi=30, ncontours=10):
+    theta_array=np.linspace(0,2*np.pi,ntheta)
+    phi_array=np.linspace(0,2*np.pi,nphi)
+    theta_2D, phi_2D = np.meshgrid(theta_array,phi_array)
+    magB_2D = magB(r,phi_2D,theta_2D)
+    magB_2D.shape = phi_2D.shape
+    fig,ax=plt.subplots(1,1)
+    contourplot = ax.contourf(phi_2D, theta_2D, magB_2D, ncontours)
+    fig.colorbar(contourplot)
+    ax.set_title('r='+str(r))
+    ax.set_xlabel(r'$\varphi$')
+    ax.set_ylabel(r'$\vartheta$')
+    ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    ax.yaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    ax.xaxis.set_major_locator(tck.MultipleLocator(base=1.0))
+    ax.yaxis.set_major_locator(tck.MultipleLocator(base=1.0))
+    plt.tight_layout()
+    plt.show()
+    plt.close()
