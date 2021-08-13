@@ -6,8 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib.colors as clr
-from scipy.interpolate import interp2d
 from matplotlib.colors import LightSource
+from .to_vmec import to_Fourier
+from scipy.interpolate import interp2d
 
 def set_axes_equal(ax):
     '''
@@ -60,19 +61,20 @@ def create_subplot(ax, x_2D_plot, y_2D_plot, z_2D_plot, colormap, elev=90, azim=
     ax.elev = elev
     ax.azim = azim
 
-def create_field_lines(alphas, nfp, iota, R_2D_spline, Z_2D_spline, varphi_spline, phimax=2*np.pi, nphi=200):
+def create_field_lines(alphas, iota, X_2D, Y_2D, Z_2D, nu_spline, phimax=2*np.pi, nphi=500):
     '''
     Function to compute the (X, Y, Z) coordinates of field lines at
     several alphas, where alpha = theta-iota*varphi with (theta,varphi)
-    the Boozer toroidal angles.
+    the Boozer toroidal angles. This function relies on a 2D interpolator
+    from the scipy library to smooth out the lines
 
     Args:
       alphas: array of field line labels alpha
-      nfp: number of field periods
       iota: rotational transform
-      R_2D_spline: spline interpolant of the radial component of the surface
-      Z_2D_spline: spline interpolant of the vertical component of the surface
-      varphi_spline: spline interpolant of the Boozer angle varphi
+      X_2D: 2D array for the x components of the surface
+      Y_2D: 2D array for the y components of the surface
+      Z_2D: 2D array for the z components of the surface
+      nu_spline: spline interpolant of nu = varphi - phi, the Boozer angle varphi minus the cylindrical toroidal angle phi
       phimax: maximum value for the field line following angle phi
       nphi: grid resolution for the output fieldline
     '''
@@ -80,15 +82,20 @@ def create_field_lines(alphas, nfp, iota, R_2D_spline, Z_2D_spline, varphi_splin
     fieldline_X = np.zeros((len(alphas),nphi))
     fieldline_Y = np.zeros((len(alphas),nphi))
     fieldline_Z = np.zeros((len(alphas),nphi))
+    [ntheta_RZ,nphi_RZ] = X_2D.shape
+    phi1D   = np.linspace(0,2*np.pi,nphi_RZ)
+    theta1D = np.linspace(0,2*np.pi,ntheta_RZ)
+    X_2D_spline = interp2d(phi1D, theta1D, X_2D, kind='cubic')
+    Y_2D_spline = interp2d(phi1D, theta1D, Y_2D, kind='cubic')
+    Z_2D_spline = interp2d(phi1D, theta1D, Z_2D, kind='cubic')
     for i in range(len(alphas)):
         for j in range(len(phi_array)):
-            phi_mod = np.mod(phi_array[j],2*np.pi/nfp)
-            varphi0=varphi_spline(phi_array[j])+phi_array[j]-phi_mod
+            phi_mod = np.mod(phi_array[j],2*np.pi)
+            varphi0=nu_spline(phi_array[j])+2*phi_array[j]-phi_mod
             theta_fieldline=iota*varphi0+alphas[i]
             theta_fieldline_mod=np.mod(theta_fieldline,2*np.pi)
-            fieldline_R = R_2D_spline(phi_mod,theta_fieldline_mod)[0]
-            fieldline_X[i,j] = fieldline_R*np.cos(phi_array[j])
-            fieldline_Y[i,j] = fieldline_R*np.sin(phi_array[j])
+            fieldline_X[i,j] = X_2D_spline(phi_mod,theta_fieldline_mod)[0]
+            fieldline_Y[i,j] = Y_2D_spline(phi_mod,theta_fieldline_mod)[0]
             fieldline_Z[i,j] = Z_2D_spline(phi_mod,theta_fieldline_mod)[0]
     return fieldline_X, fieldline_Y, fieldline_Z
 
@@ -141,58 +148,48 @@ def create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot, fiel
         for j in range(len(alphas)):
             mlab.plot3d(fieldline_X_rotated[j], fieldline_Y_rotated[j]-shift_array[i], fieldline_Z_rotated[j], color=(0,0,0), line_width=0.001, tube_radius=0.005)
 
-def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=16, get_splines=False):
+def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol = 13, ntor = 25):
     '''
     Function that, for a given near-axis radial coordinate r, outputs
-    the [X,Y,Z] components of the boundary and, if specified by the
-    user, it also outputs the spline interpolants for the cylindrical
-    R and Z coordinates
+    the [X,Y,Z,R,Z] components of the boundary. The resolution along the toroidal
+    angle phi is equal to the resolution nphi for the axis, while ntheta
+    is specified by the used.
 
     Args:
       r (float): near-axis radius r where to create the surface
       ntheta (int): Number of grid points to plot in the poloidal angle.
       nphi   (int): Number of grid points to plot in the toroidal angle.
       ntheta_fourier (int): Resolution in the Fourier transform to cylindrical coordinates
-      get_splines (bool): Specify if spline interpolants of R and Z are outputed (True/False)
+      mpol: resolution in poloidal Fourier space
+      ntor: resolution in toroidal Fourier space
     '''
-    # Obtain the surface shape in cylindrical coordinates
-    R_2D, Z_2D, _ = self.Frenet_to_cylindrical(r, ntheta_fourier)
-    # Make it periodic
-    R_2D = np.append(R_2D,[R_2D[0,:]],0)
-    R_2D = np.append(R_2D,np.array([R_2D[:,0]]).transpose(),1)
-    Z_2D = np.append(Z_2D,[Z_2D[0,:]],0)
-    Z_2D = np.append(Z_2D,np.array([Z_2D[:,0]]).transpose(),1)
-    # Arrays of original thetas and phis
-    theta1d = np.linspace(0, 2 * np.pi, ntheta_fourier+1)
-    phi1d   = np.linspace(0, 2 * np.pi / self.nfp, self.nphi+1)
-    # Arrays of thetas and phis for plots
-    theta1dplot  = np.linspace(0, 2 * np.pi, ntheta)
-    phi1dplot    = np.linspace(0, 2 * np.pi / self.nfp, nphi)
-    # Splines interpolants of R_2D and Z_2D
-    # NON-PERIODIC SPLNE INTERPOLANTS -> Might have artifacts at the boundary
-    R_2D_spline = interp2d(phi1d, theta1d, R_2D, kind='cubic')
-    Z_2D_spline = interp2d(phi1d, theta1d, Z_2D, kind='cubic')
-    R_2D_interp = R_2D_spline(phi1dplot,theta1dplot)
-    Z_2D_interp = Z_2D_spline(phi1dplot,theta1dplot)
+    # Get surface shape at fixed off-axis toroidal angle phi
+    R_2D, Z_2D, _ = self.Frenet_to_cylindrical(r, ntheta = ntheta_fourier)
+    # Get Fourier coefficients in order to plot with arbitrary resolution
+    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, ntheta = ntheta_fourier, mpol = mpol, ntor = ntor, lasym = self.lasym)
+    if not self.lasym:
+        RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
+        ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
 
-    #### Using RBC and ZBS to reconstruct R_2D and Z_2D
-    #### Using ntheta_fourier = ntheta so that no interpolation is needed, only 1D
-    #### Make copies of the data at the boundaries to get rid of inconsistencies
+    theta1D = np.linspace(0,2*np.pi,ntheta)
+    phi1D = np.linspace(0,2*np.pi,nphi)
+    phi2D, theta2D = np.meshgrid(phi1D,theta1D)
+    R_2Dnew = np.zeros((ntheta,nphi))
+    Z_2Dnew = np.zeros((ntheta,nphi))
+    for m in range(mpol+1):
+        for n in range(-ntor, ntor+1):
+            angle = m * theta2D - n * self.nfp * phi2D
+            R_2Dnew += RBC[n+ntor,m] * np.cos(angle) + RBS[n+ntor,m] * np.sin(angle)
+            Z_2Dnew += ZBC[n+ntor,m] * np.cos(angle) + ZBS[n+ntor,m] * np.sin(angle)
 
     # X, Y, Z arrays for the whole surface
-    x_2D_plot = R_2D_interp*np.cos(phi1dplot)
-    y_2D_plot = R_2D_interp*np.sin(phi1dplot)
-    z_2D_plot = Z_2D_interp
-    for i in range(1,self.nfp):
-        x_2D_plot = np.concatenate((x_2D_plot,R_2D_interp*np.cos(phi1dplot+i*2*np.pi/self.nfp)), axis=1)
-        y_2D_plot = np.concatenate((y_2D_plot,R_2D_interp*np.sin(phi1dplot+i*2*np.pi/self.nfp)), axis=1)
-        z_2D_plot = np.concatenate((z_2D_plot,Z_2D_interp), axis=1)
-    if get_splines==False:
-        return x_2D_plot, y_2D_plot, z_2D_plot
-    elif get_splines==True:
-        return x_2D_plot, y_2D_plot, z_2D_plot, R_2D_spline, Z_2D_spline
+    x_2D_plot = R_2Dnew*np.cos(phi1D)
+    y_2D_plot = R_2Dnew*np.sin(phi1D)
+    z_2D_plot = Z_2Dnew
 
-def plot(self, r=0.1, ntheta_plot=40, nphi_plot=130, ntheta_fourier=16, nsections=8, fieldlines=False, savefig=None, colormap=None, azim_default=None, **kwargs):
+    return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew, Z_2Dnew
+
+def plot(self, r=0.1, ntheta=60, nphi=150, ntheta_fourier=20, nsections=8, fieldlines=False, savefig=None, colormap=None, azim_default=None, **kwargs):
     """
     Plotting routine for the near-axis configurations. There are two main ways of
     running this function:
@@ -211,8 +208,8 @@ def plot(self, r=0.1, ntheta_plot=40, nphi_plot=130, ntheta_fourier=16, nsection
 
     Args:
       r (float): near-axis radius r where to create the surface
-      ntheta_plot (int): Number of grid points to plot in the poloidal angle.
-      nphi_plot   (int): Number of grid points to plot in the toroidal angle.
+      ntheta (int): Number of grid points to plot in the poloidal angle.
+      nphi   (int): Number of grid points to plot in the toroidal angle.
       ntheta_fourier (int): Resolution in the Fourier transform to cylindrical coordinates
       nsections (int): Number of poloidal planes to show.
       fieldlines (bool): Specify if fieldlines are shown. Using mayavi instead of matplotlib due to known bug https://matplotlib.org/2.2.2/mpl_toolkits/mplot3d/faq.html
@@ -232,15 +229,13 @@ def plot(self, r=0.1, ntheta_plot=40, nphi_plot=130, ntheta_fourier=16, nsection
     .. image:: poloidalplot.png
        :width: 200
     """
-    ## Obtain surface shape
-    x_2D_plot, y_2D_plot, z_2D_plot, R_2D_spline, Z_2D_spline = self.get_boundary(r=r,ntheta=ntheta_plot,nphi=nphi_plot,ntheta_fourier=ntheta_fourier, get_splines=True)
+    x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew, Z_2Dnew = self.get_boundary(r=r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier)
 
     ## Poloidal plot
-    phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
-    theta1dplot  = np.linspace(0, 2 * np.pi, ntheta_plot)
+    phi1dplot_RZ = np.linspace(0,2*np.pi/self.nfp,nsections,endpoint=False)
     fig = plt.figure(figsize=(6, 6), dpi=80)
     ax  = plt.gca()
-    for phi in phi1dplot_RZ:
+    for i, phi in enumerate(phi1dplot_RZ):
         if phi*self.nfp/(2*np.pi)==0:
             label = r'$\phi$=0'
         elif phi*self.nfp/(2*np.pi)==0.25:
@@ -255,7 +250,8 @@ def plot(self, r=0.1, ntheta_plot=40, nphi_plot=130, ntheta_fourier=16, nsection
         # Plot location of the axis
         plt.plot(self.R0_func(phi),self.Z0_func(phi),marker="x",linewidth=2,label=label,color=color)
         # Plot location of the poloidal cross-sections
-        plt.plot(R_2D_spline(phi,theta1dplot).flatten(),Z_2D_spline(phi,theta1dplot).flatten(),color=color)
+        pos = int(phi/(2*np.pi)*nphi)
+        plt.plot(R_2Dnew[:,pos].flatten(),Z_2Dnew[:,pos].flatten(),color=color)
     plt.xlabel('R (meters)')
     plt.ylabel('Z (meters)')
     plt.legend()
@@ -278,11 +274,12 @@ def plot(self, r=0.1, ntheta_plot=40, nphi_plot=130, ntheta_fourier=16, nsection
     def Bf(r,theta,phi):
         thetaN = theta-(self.iota-self.iotaN)*phi
         return self.B0*(1+r*self.etabar*np.cos(thetaN))
-    phi1dplot    = np.linspace(0, 2 * np.pi / self.nfp, nphi_plot)
-    phi2D, theta2D = np.meshgrid(phi1dplot,theta1dplot)
-    Bmag=np.repeat(Bf(r,theta2D,phi2D),self.nfp,axis=1)
-    norm = clr.Normalize(vmin=Bmag.min(), vmax=Bmag.max())
+    theta1D = np.linspace(0,2*np.pi,ntheta)
+    phi1D = np.linspace(0,2*np.pi,nphi)
+    phi2D, theta2D = np.meshgrid(phi1D,theta1D)
     # Create a color map similar to viridis 
+    Bmag=Bf(r,theta2D,phi2D)
+    norm = clr.Normalize(vmin=Bmag.min(), vmax=Bmag.max())
     if fieldlines==False:
         if colormap==None:
             # Cmap similar to quasisymmetry papers
@@ -320,8 +317,8 @@ def plot(self, r=0.1, ntheta_plot=40, nphi_plot=130, ntheta_fourier=16, nsection
         # where alpha=theta-iota*varphi with (theta,varphi) the Boozer angles
         alphas = [0,np.pi/4,np.pi/2,3*np.pi/4,np.pi,5*np.pi/4,3*np.pi/2,7*np.pi/4]
         # Create the field line arrays
-        varphi_spline = self.convert_to_spline(self.varphi)
-        fieldline_X, fieldline_Y, fieldline_Z = create_field_lines(alphas, self.nfp, self.iota, R_2D_spline, Z_2D_spline, varphi_spline)
+        nu_spline = self.convert_to_spline(self.varphi-self.phi)
+        fieldline_X, fieldline_Y, fieldline_Z = create_field_lines(alphas, self.iota, x_2D_plot, y_2D_plot, z_2D_plot, nu_spline)
         # Define the rotation arrays for the subplots
         degrees_array_x = [0., -66., 81.] # degrees for rotation in x
         degrees_array_z = [azim_default, azim_default, azim_default] # degrees for rotation in z
