@@ -26,6 +26,10 @@ class PlotTests(unittest.TestCase):
         # stel=Qsc.from_paper(4)
         # stel.plot(fieldlines=True)
         # stel.plot()
+
+    # UNITTESTS
+    # Access the data with ax.data() being plotted and test those values
+    # Compare with Fortran's plot_single code in the quaisymmetry repository
                 
 if __name__ == "__main__":
     unittest.main()

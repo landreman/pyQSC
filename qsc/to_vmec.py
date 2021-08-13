@@ -89,9 +89,9 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     if "ns_array" not in params.keys():
         params["ns_array"] = [16,49,101]
     if "ftol_array" not in params.keys():
-        params["ftol_array"] = [1e-13,1e-12,1e-11]
+        params["ftol_array"] = [1e-14,1e-13,1e-13]
     if "niter_array" not in params.keys():
-        params["niter_array"] = [1000,1000,1500]
+        params["niter_array"] = [2000,2000,2000]
 
     phiedge = np.pi * r * r * self.spsi * self.Bbar
 

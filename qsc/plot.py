@@ -175,6 +175,10 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=16, get_spline
     R_2D_interp = R_2D_spline(phi1dplot,theta1dplot)
     Z_2D_interp = Z_2D_spline(phi1dplot,theta1dplot)
 
+    #### Using RBC and ZBS to reconstruct R_2D and Z_2D
+    #### Using ntheta_fourier = ntheta so that no interpolation is needed, only 1D
+    #### Make copies of the data at the boundaries to get rid of inconsistencies
+
     # X, Y, Z arrays for the whole surface
     x_2D_plot = R_2D_interp*np.cos(phi1dplot)
     y_2D_plot = R_2D_interp*np.sin(phi1dplot)
