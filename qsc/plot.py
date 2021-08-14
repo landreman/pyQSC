@@ -78,7 +78,7 @@ def create_field_lines(qsc, alphas, X_2D, Y_2D, Z_2D, phimax=2*np.pi, nphi=500):
       phimax: maximum value for the field line following angle phi
       nphi: grid resolution for the output fieldline
     '''
-    phi_array = np.linspace(0,phimax,nphi)
+    phi_array = np.linspace(0,phimax,nphi,endpoint=False)
     fieldline_X = np.zeros((len(alphas),nphi))
     fieldline_Y = np.zeros((len(alphas),nphi))
     fieldline_Z = np.zeros((len(alphas),nphi))
