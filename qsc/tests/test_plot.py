@@ -5,6 +5,7 @@ import numpy as np
 from qsc.qsc import Qsc
 from scipy.io import netcdf
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -13,7 +14,8 @@ def fortran_plot_single(filename, ntheta=150, nphi = 4):
     """
     Function to extract boundary arrays from the fortran files
     """
-    f = netcdf.netcdf_file(filename,mode='r',mmap=False)
+    abs_filename = os.path.join(os.path.dirname(__file__), filename)
+    f = netcdf.netcdf_file(abs_filename,mode='r',mmap=False)
     r = f.variables['r'][()]
     nfp = f.variables['nfp'][()]
     nphi_axis = f.variables['N_phi'][()]
