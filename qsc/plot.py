@@ -189,7 +189,7 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol = 13,
 
     return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew, Z_2Dnew
 
-def plot(self, r=0.1, ntheta=60, nphi=150, ntheta_fourier=20, nsections=8, fieldlines=False, savefig=None, colormap=None, azim_default=None, **kwargs):
+def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, fieldlines=False, savefig=None, colormap=None, azim_default=None, **kwargs):
     """
     Plotting routine for the near-axis configurations. There are two main ways of
     running this function:
