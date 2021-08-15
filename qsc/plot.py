@@ -377,7 +377,7 @@ def B_fieldline(self, r=0.1, alpha=0, phimax = [], nphi = 400):
     plt.show()
     plt.close()
 
-def B_contour(self, r=0.1, ntheta=100, nphi=100, ncontours=50):
+def B_contour(self, r=0.1, ntheta=100, nphi=100, ncontours=10):
     '''
     Plot contours of constant B, with B the modulus of the
     magnetic field, in Boozer coordinates theta and varphi
