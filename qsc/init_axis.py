@@ -16,10 +16,8 @@ logger = logging.getLogger(__name__)
 
 # Define periodic spline interpolant conversion used in several scripts and plotting
 def convert_to_spline(self,array):
-    # sp=spline(np.append(self.phi,self.phi[0]+2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
-    # return sp
-    spl=splrep(np.append(self.phi,self.phi[0]+2*np.pi/self.nfp), np.append(array,array[0]), per=1, k=5)
-    return lambda x: splev(x, spl)
+    sp=spline(np.append(self.phi,self.phi[0]+2*np.pi/self.nfp), np.append(array,array[0]), bc_type='periodic')
+    return sp
 
 def init_axis(self):
     """
@@ -134,9 +132,11 @@ def init_axis(self):
             # To get toroidal angle on the full mesh, we need d_l_d_phi on the half mesh.
             self.varphi[j] = self.varphi[j-1] + (d_l_d_phi_from_zero[j-1] + d_l_d_phi_from_zero[j])
         self.varphi = self.varphi * (0.5 * d_phi * 2 * np.pi / axis_length)
+        self.nu_spline = self.convert_to_spline(self.varphi-self.phi)
     else:
         # In here B0 is assumed to be given as a fourier series in varphi
-        # Picard iteration is used to find varphi and G0
+        # Picard iteration is used to find varphi and G0, with varphi periodic
+        # but not starting necessarily at 0
         self.interpolateTo0 = fourier_interpolation_matrix(nphi, -self.phi_shift*self.d_phi)
         nu = np.zeros((nphi,))
         for j in range(20):
@@ -152,6 +152,7 @@ def init_axis(self):
                 break
         varphi = phi + nu
         self.varphi = varphi
+        self.nu_spline = self.convert_to_spline(nu)
         B0 = np.array(sum([self.B0_vals[i]*np.cos(nfp*i*varphi) for i in range(len(self.B0_vals))]))
         self.B0 = B0
         G0 = self.sG * np.sum(self.B0 * d_l_d_phi) / nphi
@@ -203,3 +204,6 @@ def init_axis(self):
     self.tangent_R_spline = self.convert_to_spline(self.tangent_cylindrical[:,0])
     self.tangent_phi_spline = self.convert_to_spline(self.tangent_cylindrical[:,1])
     self.tangent_z_spline = self.convert_to_spline(self.tangent_cylindrical[:,2])
+
+    # Spline interpolant for the magnetic field on-axis as a function of phi (not varphi)
+    self.B0_spline = self.convert_to_spline(self.B0)

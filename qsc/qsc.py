@@ -23,10 +23,11 @@ class Qsc():
     from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor
     from .calculate_r2 import calculate_r2
     from .mercier import mercier
+    from .plot import plot, get_boundary, B_fieldline, B_contour
     from .r_singularity import calculate_r_singularity
     from .Frenet_to_cylindrical import Frenet_to_cylindrical
     from .to_vmec import to_vmec
-    from .util import magB, magB_fieldline, B_contour, B_fieldline
+    from .util import B_mag
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
                  B0_vals=[], d_cvals=[], d_svals=[], alpha_cvals=[0.], alpha_svals=[0.], phi_shift=0,
@@ -51,10 +52,10 @@ class Qsc():
         # Solve for omnigenity
         self.omn = omn
         if omn == True:
-            self.c0 = -np.pi/2
-            self.m  = 1
-            self.delta  = np.pi/5
-            self.alpha0 = -3*np.pi/2
+            self.c0 = c0
+            self.m  = m
+            self.delta  = delta
+            self.alpha0 = alpha0
 
         # Force nphi to be odd:
         if np.mod(nphi, 2) == 0:
@@ -86,6 +87,7 @@ class Qsc():
             self.d_svals = d_svals
             if self.d_cvals == []:
                 self.etabar = 0
+                self.d_cvals = [0]
             else:
                 self.etabar = d_cvals[0]
         self.alpha_cvals = alpha_cvals
@@ -151,7 +153,7 @@ class Qsc():
         degrees-of-freedom, for simsopt.
         """
         return np.concatenate((self.rc, self.zs, self.rs, self.zc,
-                               np.array([self.etabar, self.sigma0, self.B2s, self.B2c, self.p2, self.I2]),
+                               np.array([self.etabar, self.sigma0, self.B2s, self.B2c, self.p2, self.I2, self.c0, self.alpha0]),
                                self.B0_vals, self.d_cvals, self.d_svals, self.alpha_cvals, self.alpha_svals))
 
     def set_dofs(self, x):
@@ -159,7 +161,7 @@ class Qsc():
         For interaction with simsopt, set the optimizable degrees of
         freedom from a 1D numpy vector.
         """
-        assert len(x) == self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals)
+        assert len(x) == self.nfourier * 4 + 8 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals)
         self.rc = x[self.nfourier * 0 : self.nfourier * 1]
         self.zs = x[self.nfourier * 1 : self.nfourier * 2]
         self.rs = x[self.nfourier * 2 : self.nfourier * 3]
@@ -170,11 +172,13 @@ class Qsc():
         self.B2c = x[self.nfourier * 4 + 3]
         self.p2 = x[self.nfourier * 4 + 4]
         self.I2 = x[self.nfourier * 4 + 5]
-        self.B0_vals = x[self.nfourier * 4 + 6 : self.nfourier * 4 + 5 + len(self.B0_vals) + 1]
-        self.d_cvals = x[self.nfourier * 4 + 5 + len(self.B0_vals) + 1 : self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_vals) + 1]
-        self.d_svals = x[self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + 1 : self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + 1]
-        self.alpha_cvals = x[self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + 1 : self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + 1]
-        self.alpha_svals = x[self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + 1 : self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + 1]
+        self.c0 = x[self.nfourier * 4 + 6]
+        self.alpha0 = x[self.nfourier * 4 + 7]
+        self.B0_vals = x[self.nfourier * 4 + 8 : self.nfourier * 4 + 7 + len(self.B0_vals) + 1]
+        self.d_cvals = x[self.nfourier * 4 + 7 + len(self.B0_vals) + 1 : self.nfourier * 4 + 7 + len(self.B0_vals) + len(self.d_cvals) + 1]
+        self.d_svals = x[self.nfourier * 4 + 7 + len(self.B0_vals) + len(self.d_cvals) + 1 : self.nfourier * 4 + 7 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + 1]
+        self.alpha_cvals = x[self.nfourier * 4 + 7 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + 1 : self.nfourier * 4 + 7 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + 1]
+        self.alpha_svals = x[self.nfourier * 4 + 7 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + 1 : self.nfourier * 4 + 7 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + 1]
         # Set new B0, d, alpha and B1
         self.B0 = sum([self.B0_vals[i]*np.cos(i*self.phi) for i in range(len(self.B0_vals))])
         self.d  = np.array(sum([self.d_cvals[i]*np.cos(self.nfp*i*self.phi) for i in range(len(self.d_cvals))]))
@@ -195,7 +199,7 @@ class Qsc():
         names += ['zs({})'.format(j) for j in range(self.nfourier)]
         names += ['rs({})'.format(j) for j in range(self.nfourier)]
         names += ['zc({})'.format(j) for j in range(self.nfourier)]
-        names += ['etabar', 'sigma0', 'B2s', 'B2c', 'p2', 'I2']
+        names += ['etabar', 'sigma0', 'B2s', 'B2c', 'p2', 'I2', 'c0', 'alpha0']
         names += ['B0({})'.format(j) for j in range(len(self.B0_vals))]
         names += ['dc({})'.format(j) for j in range(len(self.d_cvals))]
         names += ['ds({})'.format(j) for j in range(len(self.d_svals))]

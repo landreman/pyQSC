@@ -10,6 +10,7 @@ import logging
 from qsc.fourier_interpolation import fourier_interpolation
 import matplotlib.pyplot as plt
 import matplotlib.ticker as tck
+from scipy.interpolate import CubicSpline as spline
 
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -63,40 +64,28 @@ def fourier_minimum(y):
     solution = scipy.optimize.minimize_scalar(func, bracket=bracket)
     return solution.fun
 
-def magB(self, radius, theta, phi):
-    return self.B0*(1+radius*self.d*np.cos(theta-self.alpha))
+def B_mag(self, r, theta, phi, Boozer_toroidal = False):
+    '''
+    Function to calculate the modulus of the magnetic field B for a given
+    near-axis radius r, a Boozer poloidal angle theta (not vartheta) and
+    a cylindrical toroidal angle phi if Boozer_toroidal = True or the
+    Boozer angle varphi if Boozer_toroidal = True
 
-def magB_fieldline(self, r, alpha, phi):
-    return self.magB(r,alpha+self.iotaN*phi,phi)
+    Args:
+      r: the near-axis radius
+      theta: the Boozer poloidal angle
+      phi: the cylindrical or Boozer toroidal angle
+      Boozer_toroidal: False if phi is the cylindrical toroidal angle, True for the Boozer one
+    '''
+    if Boozer_toroidal == False:
+        varphi = phi + self.nu_spline(phi)
+    else:
+        varphi = phi
+        phi    = varphi - self.nu_spline(phi)
 
-def B_fieldline(self, r, alpha=0, phimax = None, nphi = 400):
-    if phimax == None:
-        phimax = 200*np.pi
-    plt.figure(figsize=(10, 6), dpi=80, facecolor='w', edgecolor='k')
-    plt.xlabel(r'$\varphi$')
-    plt.ylabel(r'$B(\varphi)$')
-    plt.title("r = "+str(r)+", alpha = "+str(alpha))
-    plt.plot(magB_fieldline(r,alpha,np.linspace(0,phimax,nphi)))
-    plt.tight_layout()
-    plt.show()
-    plt.close()
+    thetaN = theta-(self.iota-self.iotaN)*varphi
 
-def B_contour(self, r=0.1, ntheta=30, nphi=30, ncontours=10):
-    theta_array=np.linspace(0,2*np.pi,ntheta)
-    phi_array=np.linspace(0,2*np.pi,nphi)
-    theta_2D, phi_2D = np.meshgrid(theta_array,phi_array)
-    magB_2D = magB(r,phi_2D,theta_2D)
-    magB_2D.shape = phi_2D.shape
-    fig,ax=plt.subplots(1,1)
-    contourplot = ax.contourf(phi_2D, theta_2D, magB_2D, ncontours)
-    fig.colorbar(contourplot)
-    ax.set_title('r='+str(r))
-    ax.set_xlabel(r'$\varphi$')
-    ax.set_ylabel(r'$\vartheta$')
-    ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
-    ax.yaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
-    ax.xaxis.set_major_locator(tck.MultipleLocator(base=1.0))
-    ax.yaxis.set_major_locator(tck.MultipleLocator(base=1.0))
-    plt.tight_layout()
-    plt.show()
-    plt.close()
+    if self.order == 'r1':
+        return self.B0_spline(phi)*(1+r*self.d_spline(phi)*np.cos(thetaN-self.alpha_spline(phi)))
+    else:
+        return self.B0_spline(phi)*(1+r*self.d_spline(phi)*np.cos(thetaN-self.alpha_spline(phi)))+r**2*(self.B20_spline(phi)+self.B2c*np.cos(2*thetaN)+self.B2s*np.sin(2*thetaN))

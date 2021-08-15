@@ -57,7 +57,6 @@ def _jacobian(self, x):
     except that the first element of x is actually iota.
     """
     sigma = np.copy(x[1::])
-    iota = x[0]
 
     # d (Riccati equation) / d sigma:
     jac = np.copy(self.d_d_varphi)
@@ -142,6 +141,11 @@ def r1_diagnostics(self):
     self.X1c = self.d_bar * np.cos(self.alpha)
     self.Y1s = self.sG * (self.Bbar / self.B0) * (1 / self.d_bar) * (self.sigma * np.sin(self.alpha) + np.cos(self.alpha))
     self.Y1c = self.sG * (self.Bbar / self.B0) * (1 / self.d_bar) * (self.sigma * np.cos(self.alpha) - np.sin(self.alpha))
+
+    # Spline interpolant for the first order components of the magnetic field
+    # as a function of phi, not varphi
+    self.d_spline = self.convert_to_spline(self.d)
+    self.alpha_spline = self.convert_to_spline(self.alpha)
 
     # If helicity is nonzero, then the original X1s/X1c/Y1s/Y1c variables are defined with respect to a "poloidal" angle that
     # is actually helical, with the theta=0 curve wrapping around the magnetic axis as you follow phi around toroidally. Therefore
