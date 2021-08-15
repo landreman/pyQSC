@@ -27,9 +27,11 @@ class Qsc():
     from .plot import plot, get_boundary, B_fieldline, B_contour
     from .Frenet_to_cylindrical import Frenet_to_cylindrical
     from .to_vmec import to_vmec
-    from .util import B_mag
+    from .util import B_mag, magB, magB_fieldline, B_contour, B_fieldline
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
+                 B0_vals=[], d_cvals=[], d_svals=[], alpha_cvals=[0.], alpha_svals=[0.], phi_shift=0,
+                 omn = False, c0 = -np.pi/2, m  = 1, delta  = np.pi/5, alpha0 = -3*np.pi/2,
                  I2=0., sG=1, spsi=1, nphi=31, B2s=0., B2c=0., p2=0., order="r1"):
         """
         Create a quasisymmetric stellarator.
@@ -47,6 +49,14 @@ class Qsc():
         self.rs[:len(rs)] = rs
         self.zc[:len(zc)] = zc
 
+        # Solve for omnigenity
+        self.omn = omn
+        if omn == True:
+            self.c0 = -np.pi/2
+            self.m  = 1
+            self.delta  = np.pi/5
+            self.alpha0 = -3*np.pi/2
+
         # Force nphi to be odd:
         if np.mod(nphi, 2) == 0:
             nphi += 1
@@ -60,7 +70,33 @@ class Qsc():
         self.nfp = nfp
         self.etabar = etabar
         self.sigma0 = sigma0
-        self.B0 = B0
+        phi = np.linspace(0, 2 * np.pi / nfp, nphi, endpoint=False)
+        self.d_phi = phi[1] - phi[0]
+        self.phi_shift = phi_shift
+        self.phi = phi + self.phi_shift*self.d_phi
+        if B0_vals==[]:
+            self.B0_vals = [B0]
+        else:
+            self.B0_vals = B0_vals
+        self.B0 = np.array(sum([self.B0_vals[i]*np.cos(nfp*i*self.phi) for i in range(len(self.B0_vals))]))
+        if d_cvals==[] and d_svals == []:
+            self.d_cvals = [etabar]
+            self.d_svals = d_svals
+        else:
+            self.d_cvals = d_cvals
+            self.d_svals = d_svals
+            if self.d_cvals == []:
+                self.etabar = 0
+            else:
+                self.etabar = d_cvals[0]
+        self.alpha_cvals = alpha_cvals
+        self.alpha_svals = alpha_svals
+        self.d = np.array(sum([self.d_cvals[i]*np.cos(nfp*i*self.phi) for i in range(len(self.d_cvals))]))
+        self.d = self.d + np.array(sum([self.d_svals[i]*np.sin(nfp*i*self.phi) for i in range(len(self.d_svals))]))
+        self.alpha = np.array(sum([self.alpha_cvals[i]*np.cos(nfp*i*self.phi) for i in range(len(self.alpha_cvals))]))
+        self.alpha = self.alpha + np.array(sum([self.alpha_svals[i]*np.sin(nfp*i*self.phi) for i in range(len(self.alpha_svals))]))
+        self.B1s = self.B0 * self.d * np.sin(self.alpha)
+        self.B1c = self.B0 * self.d * np.cos(self.alpha)
         self.I2 = I2
         self.sG = sG
         self.spsi = spsi
@@ -116,14 +152,15 @@ class Qsc():
         degrees-of-freedom, for simsopt.
         """
         return np.concatenate((self.rc, self.zs, self.rs, self.zc,
-                               np.array([self.etabar, self.sigma0, self.B2s, self.B2c, self.p2, self.I2, self.B0])))
+                               np.array([self.etabar, self.sigma0, self.B2s, self.B2c, self.p2, self.I2]),
+                               self.B0_vals, self.d_cvals, self.d_svals, self.alpha_cvals, self.alpha_svals))
 
     def set_dofs(self, x):
         """
         For interaction with simsopt, set the optimizable degrees of
         freedom from a 1D numpy vector.
         """
-        assert len(x) == self.nfourier * 4 + 7
+        assert len(x) == self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals)
         self.rc = x[self.nfourier * 0 : self.nfourier * 1]
         self.zs = x[self.nfourier * 1 : self.nfourier * 2]
         self.rs = x[self.nfourier * 2 : self.nfourier * 3]
@@ -134,7 +171,19 @@ class Qsc():
         self.B2c = x[self.nfourier * 4 + 3]
         self.p2 = x[self.nfourier * 4 + 4]
         self.I2 = x[self.nfourier * 4 + 5]
-        self.B0 = x[self.nfourier * 4 + 6]
+        self.B0_vals = x[self.nfourier * 4 + 6 : self.nfourier * 4 + 5 + len(self.B0_vals) + 1]
+        self.d_cvals = x[self.nfourier * 4 + 5 + len(self.B0_vals) + 1 : self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_vals) + 1]
+        self.d_svals = x[self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + 1 : self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + 1]
+        self.alpha_cvals = x[self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + 1 : self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + 1]
+        self.alpha_svals = x[self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + 1 : self.nfourier * 4 + 5 + len(self.B0_vals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + 1]
+        # Set new B0, d, alpha and B1
+        self.B0 = sum([self.B0_vals[i]*np.cos(i*self.phi) for i in range(len(self.B0_vals))])
+        self.d  = np.array(sum([self.d_cvals[i]*np.cos(self.nfp*i*self.phi) for i in range(len(self.d_cvals))]))
+        self.d += np.array(sum([self.d_svals[i]*np.sin(self.nfp*i*self.phi) for i in range(len(self.d_svals))]))
+        self.alpha  = np.array(sum([self.alpha_cvals[i]*np.cos(self.nfp*i*self.phi) for i in range(len(self.alpha_cvals))]))
+        self.alpha += np.array(sum([self.alpha_svals[i]*np.sin(self.nfp*i*self.phi) for i in range(len(self.alpha_svals))]))
+        self.B1s = self.B0 * self.d * np.sin(self.alpha)
+        self.B1c = self.B0 * self.d * np.cos(self.alpha)
         self.calculate()
         logger.info('set_dofs called with x={}. Now iota={}, elongation={}'.format(x, self.iota, self.max_elongation))
         
@@ -147,7 +196,12 @@ class Qsc():
         names += ['zs({})'.format(j) for j in range(self.nfourier)]
         names += ['rs({})'.format(j) for j in range(self.nfourier)]
         names += ['zc({})'.format(j) for j in range(self.nfourier)]
-        names += ['etabar', 'sigma0', 'B2s', 'B2c', 'p2', 'I2', 'B0']
+        names += ['etabar', 'sigma0', 'B2s', 'B2c', 'p2', 'I2']
+        names += ['B0({})'.format(j) for j in range(len(self.B0_vals))]
+        names += ['dc({})'.format(j) for j in range(len(self.d_cvals))]
+        names += ['ds({})'.format(j) for j in range(len(self.d_svals))]
+        names += ['alphac({})'.format(j) for j in range(len(self.alpha_cvals))]
+        names += ['alphas({})'.format(j) for j in range(len(self.alpha_svals))]
         self.names = names
 
     @classmethod
