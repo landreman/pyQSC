@@ -389,7 +389,7 @@ def B_fieldline(self, r=0.1, alpha=0, phimax = [], nphi = 400):
     plt.title("r = "+str(r)+", alpha = "+str(alpha))
     plt.plot(varphi_array/np.pi,self.B_mag(r,varphi_array,alpha+self.iota*varphi_array,Boozer_toroidal=True))
     ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
-    ax.xaxis.set_major_locator(tck.MultipleLocator(base=0.5))
+    ax.xaxis.set_major_locator(tck.MultipleLocator(base=2))
     plt.tight_layout()
     plt.show()
     plt.close()
@@ -422,7 +422,7 @@ def B_contour(self, r=0.1, ntheta=100, nphi=100, ncontours=50, B0=1):
     ax.yaxis.set_major_locator(tck.MultipleLocator(base=0.5))
     plt.tight_layout()
     if B0 == 1:
-        plt.title(r'$|\mathbf B|$')
+        plt.title(r'|B|')
     elif B0 == 0:
         plt.title(r'$B_1$')
     plt.show()
