@@ -120,6 +120,7 @@ def init_axis(self):
     # self.d_d_phi = spectral_diff_matrix(self.nphi, xmin = phi[0], xmax = phi[0] + 2*np.pi/self.nfp)
     self.d_d_phi = spectral_diff_matrix(self.nphi, xmin = 0, xmax = 2*np.pi/self.nfp)
 
+    self.interpolateTo0 = fourier_interpolation_matrix(nphi, -self.phi_shift*self.d_phi)
     # Calculate G0 and varphi
     if self.omn == False:
         # In here B0 is assumed to be given as a fourier series in phi
@@ -137,7 +138,6 @@ def init_axis(self):
         # In here B0 is assumed to be given as a fourier series in varphi
         # Picard iteration is used to find varphi and G0, with varphi periodic
         # but not starting necessarily at 0
-        self.interpolateTo0 = fourier_interpolation_matrix(nphi, -self.phi_shift*self.d_phi)
         nu = np.zeros((nphi,))
         for j in range(20):
             varphi = phi + nu
@@ -167,7 +167,7 @@ def init_axis(self):
     self.d_bar = self.d / (curvature + 1e-31)
 
     self.Bbar = self.spsi * np.mean(self.B0)
-    self.etabar_squared_over_curvature_squared = (self.B0  / self.Bbar) * (self.d**2 / curvature**2)
+    self.etabar_squared_over_curvature_squared = (self.B0  / self.Bbar) * self.d_bar**2
 
     # Add all results to self:
     self.d_phi = d_phi

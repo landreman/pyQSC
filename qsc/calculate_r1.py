@@ -7,7 +7,7 @@ import numpy as np
 import logging
 from .util import fourier_minimum
 from .newton import newton
-from .fourier_interpolation import fourier_interpolation
+from scipy.interpolate import CubicSpline as spline
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -145,13 +145,18 @@ def r1_diagnostics(self):
     # Spline interpolant for the first order components of the magnetic field
     # as a function of phi, not varphi
     self.d_spline = self.convert_to_spline(self.d)
-    self.alpha_spline = self.convert_to_spline(self.alpha)
+    if self.omn == True and self.phi_shift !=0:
+        self.alpha_spline = spline(np.append(np.append(0,self.phi),self.phi[0]+2*np.pi/self.nfp), np.append(np.append(self.alpha0,self.alpha),self.alpha0+self.m*2*np.pi), extrapolate=False)
+    else:
+        self.alpha_spline = self.convert_to_spline(self.alpha)
+    self.cos_alpha_spline = self.convert_to_spline(np.cos(self.alpha))
+    self.sin_alpha_spline = self.convert_to_spline(np.sin(self.alpha))
 
     # If helicity is nonzero, then the original X1s/X1c/Y1s/Y1c variables are defined with respect to a "poloidal" angle that
     # is actually helical, with the theta=0 curve wrapping around the magnetic axis as you follow phi around toroidally. Therefore
     # here we convert to an untwisted poloidal angle, such that the theta=0 curve does not wrap around the axis.
     if self.helicity == 0:
-        self.X1s_untwisted = 0
+        self.X1s_untwisted = self.X1s
         self.X1c_untwisted = self.X1c
         self.Y1s_untwisted = self.Y1s
         self.Y1c_untwisted = self.Y1c
