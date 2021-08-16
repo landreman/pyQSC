@@ -6,6 +6,7 @@ off-axis cylindrical toroidal angle
 
 import numpy as np
 from scipy.optimize import root_scalar
+import logging
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
