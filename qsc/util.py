@@ -8,7 +8,6 @@ import numpy as np
 import scipy.optimize
 import logging
 from qsc.fourier_interpolation import fourier_interpolation
-from scipy.interpolate import CubicSpline as spline
 
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -62,28 +61,29 @@ def fourier_minimum(y):
     solution = scipy.optimize.minimize_scalar(func, bracket=bracket)
     return solution.fun
 
-def B_mag(self, r, theta, phi, Boozer_toroidal = False):
+def B_mag(self, r, phi, theta, Boozer_toroidal = False, B0 = 1):
     '''
     Function to calculate the modulus of the magnetic field B for a given
     near-axis radius r, a Boozer poloidal angle theta (not vartheta) and
     a cylindrical toroidal angle phi if Boozer_toroidal = True or the
-    Boozer angle varphi if Boozer_toroidal = True
+    Boozer angle varphi if Boozer_toroidal = True.
 
     Args:
       r: the near-axis radius
       theta: the Boozer poloidal angle
       phi: the cylindrical or Boozer toroidal angle
       Boozer_toroidal: False if phi is the cylindrical toroidal angle, True for the Boozer one
+      B0: coefficient of B0 in the magnetic field strength. Set to 0 to only have B1
     '''
     if Boozer_toroidal == False:
-        thetaN = theta-(self.iota-self.iotaN)*(phi+self.nu_spline(phi))
+        varphi = phi + self.nu_spline(phi)
     else:
-        thetaN = theta-(self.iota-self.iotaN)*phi
+        varphi = phi
+        phi    = varphi - self.nu_spline(phi)
+
+    thetaN = theta-(self.iota-self.iotaN)*varphi
+
     if self.order == 'r1':
-        return self.B0*(1+r*self.etabar*np.cos(thetaN))
+        return self.B0_spline(phi)*(B0+r*self.d_spline(phi)*(self.cos_alpha_spline(phi)*np.cos(thetaN)+self.sin_alpha_spline(phi)*np.sin(thetaN)))
     else:
-        if Boozer_toroidal == False:
-            self.B20_spline = self.convert_to_spline(self.B20)
-        else:
-            self.B20_spline=spline(np.append(self.varphi,2*np.pi/self.nfp), np.append(self.B20,self.B20[0]), bc_type='periodic')
-        return self.B0*(1+r*self.etabar*np.cos(thetaN))+r**2*(self.B20_spline(phi)+self.B2c*np.cos(2*thetaN)+self.B2s*np.sin(2*thetaN))
+        return self.B0_spline(phi)*(B0+r*self.d_spline(phi)*(self.cos_alpha_spline(phi)*np.cos(thetaN)+self.sin_alpha_spline(phi)*np.sin(thetaN)))+r**2*(self.B20_spline(phi)+self.B2c*np.cos(2*thetaN)+self.B2s*np.sin(2*thetaN))
