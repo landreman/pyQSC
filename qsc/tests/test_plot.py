@@ -119,6 +119,12 @@ class PlotTests(unittest.TestCase):
             logger.info('Going through case '+self.cases[i])
             compare_with_fortran(self.cases[i], self.fortran_names[i])
 
+    def test_axis(self):
+        """
+        Test call to plot axis shape
+        """
+        stel=Qsc.from_paper(4)
+        stel.plot_axis()
                 
 if __name__ == "__main__":
     unittest.main()

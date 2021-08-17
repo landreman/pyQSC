@@ -406,3 +406,37 @@ def B_contour(self, r=0.1, ntheta=100, nphi=100, ncontours=10):
     plt.tight_layout()
     plt.show()
     plt.close()
+
+def plot_axis(self, nphi=100, frenet_serret=True, savefig=None):
+    '''
+    Plot axis shape and the Frenet-Serret frame along
+    the axis (optional).
+
+    Args:
+      nphi (int): Number of grid points in the axis shape
+      frenet_serret (bool): True plots the Frenet-Serret frame, False it doesn't
+      savefig (string): filename to save resulting figure in png format
+    '''
+    phi_array=np.linspace(0,2*np.pi,nphi)
+    R0 = self.R0_func(phi_array)
+    Z0 = self.Z0_func(phi_array)
+    x_plot = R0*np.cos(phi_array)
+    y_plot = R0*np.sin(phi_array)
+    z_plot = Z0
+    fig = plt.figure(figsize=(6,5.5))
+    ax = plt.axes(projection='3d')
+    plt.plot(x_plot, y_plot, z_plot)
+    set_axes_equal(ax)
+    # from mpl_toolkits.mplot3d import Axes3D
+    # ax.get_proj = lambda: np.dot(Axes3D.get_proj(ax), np.diag([1.2, 1.2, 1.2, 1]))
+    ax.grid(False)
+    ax.set_xlabel(r'$X (meters)$', fontsize=10)
+    ax.set_ylabel(r'$Y (meters)$', fontsize=10)
+    ax.set_zlabel(r'$Z (meters)$', fontsize=10)
+    plt.tight_layout()
+    fig.subplots_adjust(left=-0.11, top=1.1)
+    # Save figure
+    if savefig!=None:
+        fig.savefig(savefig+'.png')
+    # Show figure
+    plt.show()
