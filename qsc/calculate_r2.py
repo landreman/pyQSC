@@ -203,6 +203,7 @@ def calculate_r2(self):
     self.Z2c = Z2c
     self.beta_1s = beta_1s
     self.B20 = B20
+    self.B20_spline = self.convert_to_spline(self.B20)
 
     # O(r^2) diagnostics:
     self.mercier()
@@ -211,3 +212,28 @@ def calculate_r2(self):
     #self.grad_grad_B_inverse_scale_length = t.grad_grad_B_inverse_scale_length
     self.calculate_r_singularity()
 
+    if self.helicity == 0:
+        self.X20_untwisted = self.X20
+        self.X2s_untwisted = self.X2s
+        self.X2c_untwisted = self.X2c
+        self.Y20_untwisted = self.Y20
+        self.Y2s_untwisted = self.Y2s
+        self.Y2c_untwisted = self.Y2c
+        self.Z20_untwisted = self.Z20
+        self.Z2s_untwisted = self.Z2s
+        self.Z2c_untwisted = self.Z2c
+    else:
+        angle = -self.helicity * self.nfp * self.varphi
+        sinangle = np.sin(angle)
+        cosangle = np.cos(angle)
+        self.X20_untwisted = self.X20
+        self.Y20_untwisted = self.Y20
+        self.Z20_untwisted = self.Z20
+        sinangle = np.sin(2*angle)
+        cosangle = np.cos(2*angle)
+        self.X2s_untwisted = self.X2s *   cosangle  + self.X2c * sinangle
+        self.X2c_untwisted = self.X2s * (-sinangle) + self.X2c * cosangle
+        self.Y2s_untwisted = self.Y2s *   cosangle  + self.Y2c * sinangle
+        self.Y2c_untwisted = self.Y2s * (-sinangle) + self.Y2c * cosangle
+        self.Z2s_untwisted = self.Z2s *   cosangle  + self.Z2c * sinangle
+        self.Z2c_untwisted = self.Z2s * (-sinangle) + self.Z2c * cosangle
