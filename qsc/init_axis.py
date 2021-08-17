@@ -204,6 +204,7 @@ def init_axis(self):
     self.tangent_R_spline = self.convert_to_spline(self.tangent_cylindrical[:,0])
     self.tangent_phi_spline = self.convert_to_spline(self.tangent_cylindrical[:,1])
     self.tangent_z_spline = self.convert_to_spline(self.tangent_cylindrical[:,2])
+    self.phi_of_varphi_spline = spline(np.append(self.varphi,2*np.pi/self.nfp), np.append(self.phi,2*np.pi/self.nfp))
 
     # Spline interpolant for the magnetic field on-axis as a function of phi (not varphi)
     self.B0_spline = self.convert_to_spline(self.B0)

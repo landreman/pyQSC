@@ -27,6 +27,7 @@ class Qsc():
     from .r_singularity import calculate_r_singularity
     from .Frenet_to_cylindrical import Frenet_to_cylindrical
     from .to_vmec import to_vmec
+    from .J_invariant import J_invariant, J_contour
     from .util import B_mag
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
