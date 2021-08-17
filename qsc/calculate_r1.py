@@ -47,8 +47,8 @@ def _residual(self, x):
         (self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma) \
         - 2 * self.etabar_squared_over_curvature_squared * (-self.spsi * self.torsion + self.I2 / self.Bbar) * self.G0 / self.B0
     #logger.debug("_residual called with x={}, r={}".format(x, r))
-    sigma_spline = self.convert_to_spline(sigma)
-    return np.append(r,sigma_spline(0)-self.sigma0)
+    self.sigma_spline = self.convert_to_spline(sigma)
+    return np.append(r,self.sigma_spline(0)-self.sigma0)
 
 def _jacobian(self, x):
     """
