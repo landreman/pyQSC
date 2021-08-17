@@ -407,7 +407,7 @@ def B_contour(self, r=0.1, ntheta=100, nphi=100, ncontours=10):
     plt.show()
     plt.close()
 
-def plot_axis(self, nphi=100, frenet_serret=True, savefig=None):
+def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret = 80, frenet_serret_factor = 0.12, savefig=None):
     '''
     Plot axis shape and the Frenet-Serret frame along
     the axis (optional).
@@ -423,20 +423,57 @@ def plot_axis(self, nphi=100, frenet_serret=True, savefig=None):
     x_plot = R0*np.cos(phi_array)
     y_plot = R0*np.sin(phi_array)
     z_plot = Z0
-    fig = plt.figure(figsize=(6,5.5))
-    ax = plt.axes(projection='3d')
-    plt.plot(x_plot, y_plot, z_plot)
-    set_axes_equal(ax)
-    # from mpl_toolkits.mplot3d import Axes3D
-    # ax.get_proj = lambda: np.dot(Axes3D.get_proj(ax), np.diag([1.2, 1.2, 1.2, 1]))
-    ax.grid(False)
-    ax.set_xlabel(r'$X (meters)$', fontsize=10)
-    ax.set_ylabel(r'$Y (meters)$', fontsize=10)
-    ax.set_zlabel(r'$Z (meters)$', fontsize=10)
-    plt.tight_layout()
-    fig.subplots_adjust(left=-0.11, top=1.1)
-    # Save figure
-    if savefig!=None:
-        fig.savefig(savefig+'.png')
-    # Show figure
-    plt.show()
+    if frenet_serret:
+        from mayavi import mlab
+        fig = mlab.figure(bgcolor=(1,1,1), fgcolor=(0.,0.,0.), size=(600,500))
+        s=mlab.plot3d(x_plot, y_plot, z_plot, color=(0,0,0), line_width=0.001, tube_radius=0.01)
+        ax=mlab.axes(s,xlabel='X',ylabel='Y',zlabel='Z',line_width=1.0,nb_labels=4)
+        ax.axes.font_factor = 1.3
+        ax.axes.label_format = '    %4.2f'
+        ax.label_text_property.bold = False
+        ax.label_text_property.italic = False
+        phi_array=np.linspace(0,2*np.pi,nphi_frenet_serret)
+        R0 = self.R0_func(phi_array)
+        Z0 = self.Z0_func(phi_array)
+        x_plot = R0*np.cos(phi_array)
+        y_plot = R0*np.sin(phi_array)
+        z_plot = Z0
+        normal_R   = self.normal_R_spline(phi_array)
+        normal_phi = self.normal_phi_spline(phi_array)
+        normal_Z   = self.normal_z_spline(phi_array)
+        normal_X   = normal_R * np.cos(phi_array) - normal_phi * np.sin(phi_array)
+        normal_Y   = normal_R * np.sin(phi_array) + normal_phi * np.cos(phi_array)
+        mlab.quiver3d(x_plot,y_plot,z_plot,normal_X,normal_Y,normal_Z,scale_factor=frenet_serret_factor,color=(1,0,0),reset_zoom=False)
+        binormal_R   = self.binormal_R_spline(phi_array)
+        binormal_phi = self.binormal_phi_spline(phi_array)
+        binormal_Z   = self.binormal_z_spline(phi_array)
+        binormal_X   = binormal_R * np.cos(phi_array) - binormal_phi * np.sin(phi_array)
+        binormal_Y   = binormal_R * np.sin(phi_array) + binormal_phi * np.cos(phi_array)
+        mlab.quiver3d(x_plot,y_plot,z_plot,binormal_X,binormal_Y,binormal_Z,scale_factor=frenet_serret_factor,color=(0,0,1),reset_zoom=False)
+        tangent_R   = self.tangent_R_spline(phi_array)
+        tangent_phi = self.tangent_phi_spline(phi_array)
+        tangent_Z   = self.tangent_z_spline(phi_array)
+        tangent_X   = tangent_R * np.cos(phi_array) - tangent_phi * np.sin(phi_array)
+        tangent_Y   = tangent_R * np.sin(phi_array) + tangent_phi * np.cos(phi_array)
+        mlab.quiver3d(x_plot,y_plot,z_plot,tangent_X,tangent_Y,tangent_Z,scale_factor=frenet_serret_factor,color=(0,1,0),reset_zoom=False)
+        # Save figure
+        if savefig!=None:
+            mlab.savefig(savefig+'.png')
+        # Show figure
+        mlab.show()
+    else:
+        fig = plt.figure(figsize=(6,5))
+        ax = plt.axes(projection='3d')
+        plt.plot(x_plot, y_plot, z_plot)
+        set_axes_equal(ax)
+        ax.grid(False)
+        ax.set_xlabel('X (meters)', fontsize=10)
+        ax.set_ylabel('Y (meters)', fontsize=10)
+        ax.set_zlabel('Z (meters)', fontsize=10)
+        plt.tight_layout()
+        fig.subplots_adjust(left=-0.05, top=1.05)
+        # Save figure
+        if savefig!=None:
+            fig.savefig(savefig+'.png')
+        # Show figure
+        plt.show()
