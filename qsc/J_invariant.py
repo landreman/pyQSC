@@ -39,7 +39,7 @@ def find_roots(func,xmin,xmax,nx,root_tol):
             x_roots_temp = np.append(x_roots_temp,root)
     return x_roots_temp
 
-def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., thetaMax = 6*np.pi, ntheta = 500, root_tol = 1e-6):
+def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., thetaMax = 12*np.pi, ntheta = 500, root_tol = 1e-6):
     """
     The function J_invariant takes a given radius r, field-line label
     alpha and a pitch-angle Lambda and calculates the corresponding
@@ -63,19 +63,11 @@ def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., the
         nfp: number of field periods of the surface
         ntheta: poloidal resolution
     """
-    # Define B, v_parallel^2 and J functions analytically
-    if self.order=='r1':
-        def magB(theta):
-            return self.B0+r*self.B0*self.etabar*np.cos(theta)
-    else:
-        B20_spline = self.convert_to_spline(self.B20)
-        def magB(theta):
-            phi=self.phi_of_varphi_spline(np.mod((theta-alpha)/self.iotaN,2*np.pi/self.nfp))
-            return self.B0+r*self.B0*self.etabar*np.cos(theta)+r**2*(B20_spline(phi)+self.B2c*np.cos(2*theta)+self.B2s*np.sin(2*theta))
-    def vpar2(phi):
-        return 1-Lambda*magB(phi)
-    def J_normalized_integrand(phi):
-        return np.sqrt(vpar2(phi))/magB(phi)
+    # Define v_parallel^2 and J functions analytically
+    def vpar2(theta):
+        return 1-Lambda*self.B_mag(r,(theta-alpha)/self.iota,theta,Boozer_toroidal=True)
+    def J_normalized_integrand(theta):
+        return np.sqrt(vpar2(theta))/self.B_mag(r,(theta-alpha)/self.iota,theta,Boozer_toroidal=True)
     # Find zeros of v_parallel
     theta_roots_temp = find_roots(vpar2,thetaMin,thetaMax,ntheta,root_tol)
     # Check if roots are good roots with a two-step approach
@@ -130,8 +122,8 @@ def J_invariant(self, r=0.1, alpha=0, Lambda=1.0, plot=False, thetaMin = 0., the
         plt.plot(thetaArray,vpar2(thetaArray))
         plt.plot(theta_roots,vpar2(theta_roots), linestyle="None", marker='o')
         plt.title('r='+str(r)+', lambda='+str(Lambda)+', J='+str(J_normalized))
-        plt.show()
-        plt.close(fig_plot)
+        plt.draw()
+        # plt.close(fig_plot)
     return J
 
 def npmap2d(fun, xs, ys, **kwargs):
@@ -187,7 +179,7 @@ def J_contour(self, rmin=0.001, rmax=0.1, nr=6, nalpha=20, lambdas=[0.9,1.0,1.1]
         numCols = len(lambdas)
     nrows=int(np.ceil(len(lambdas)/numCols))
     # Initialize figure
-    fig, ax = plt.subplots(nrows, numCols, subplot_kw=dict(projection='polar'), figsize=(0.5+3*numCols,0.5+3*nrows))
+    fig, ax = plt.subplots(nrows, numCols, figsize=(0.5+3*numCols,0.5+3*nrows), subplot_kw=dict(projection='polar'))
     # Calculate J for the given values of r, alpha and lambda
     r_2D, theta_2D = np.meshgrid(r_array,alpha_array)
     J_2D = np.zeros((len(lambdas),nalpha,nr))
@@ -211,7 +203,7 @@ def J_contour(self, rmin=0.001, rmax=0.1, nr=6, nalpha=20, lambdas=[0.9,1.0,1.1]
         axs.xaxis.grid(True,color='black',linestyle='-')
         # axs.set_rmin(0) # needs to be after ax.fill. No idea why.
         axs.set_xticks(np.linspace(0, 2*np.pi, 4, endpoint=False))
-        # axs.set_xticklabels(["0",r"$\pi$/2",r"$\pi$",r"3$\pi$/2"])
+        axs.set_xticklabels(["0",r"$\pi$/2",r"$\pi$",r"3$\pi$/2"])
         axs.title.set_text(r'$\lambda$='+str(lambdas[i]))
         # Add colorbar
         fig.colorbar(contourplot, ax=axs, fraction=0.046, pad=0.13)
