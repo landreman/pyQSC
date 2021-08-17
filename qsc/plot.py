@@ -85,9 +85,9 @@ def create_field_lines(qsc, alphas, X_2D, Y_2D, Z_2D, phimax=2*np.pi, nphi=500):
     [ntheta_RZ,nphi_RZ] = X_2D.shape
     phi1D   = np.linspace(0,2*np.pi,nphi_RZ)
     theta1D = np.linspace(0,2*np.pi,ntheta_RZ)
-    X_2D_spline = interp2d(phi1D, theta1D, X_2D, kind='cubic', fill_value=float("NaN"))
-    Y_2D_spline = interp2d(phi1D, theta1D, Y_2D, kind='cubic', fill_value=float("NaN"))
-    Z_2D_spline = interp2d(phi1D, theta1D, Z_2D, kind='cubic', fill_value=float("NaN"))
+    X_2D_spline = interp2d(phi1D, theta1D, X_2D, kind='cubic')
+    Y_2D_spline = interp2d(phi1D, theta1D, Y_2D, kind='cubic')
+    Z_2D_spline = interp2d(phi1D, theta1D, Z_2D, kind='cubic')
     for i in range(len(alphas)):
         for j in range(len(phi_array)):
             phi_mod = np.mod(phi_array[j],2*np.pi)
@@ -165,13 +165,6 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol = 13,
     '''
     # Get surface shape at fixed off-axis toroidal angle phi
     R_2D, Z_2D, _ = self.Frenet_to_cylindrical(r, ntheta = ntheta_fourier)
-    
-    # phi1D=np.linspace(0,2*np.pi/self.nfp,self.nphi,endpoint=False)
-    # x_2D_plot = R_2D*np.cos(phi1D)
-    # y_2D_plot = R_2D*np.sin(phi1D)
-    # z_2D_plot = Z_2D
-    # return x_2D_plot, y_2D_plot, z_2D_plot, R_2D, Z_2D
-
     # Get Fourier coefficients in order to plot with arbitrary resolution
     RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, ntheta = ntheta_fourier, mpol = mpol, ntor = ntor, lasym = self.lasym)
     if not self.lasym:
@@ -236,39 +229,29 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, field
     .. image:: poloidalplot.png
        :width: 200
     """
-    if nphi<self.nphi:
-        nphi = self.nphi
     x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew, Z_2Dnew = self.get_boundary(r=r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier)
-    ntheta = R_2Dnew.shape[0]
-    nphi   = R_2Dnew.shape[1]
-    phi1d = np.linspace(0,2*np.pi/self.nfp,nphi)
-    theta1d = np.linspace(0,2*np.pi,ntheta)
-    R_2D_spline = interp2d(phi1d, theta1d, R_2Dnew, kind='cubic')
-    Z_2D_spline = interp2d(phi1d, theta1d, Z_2Dnew, kind='cubic')
+
     ## Poloidal plot
     phi1dplot_RZ = np.linspace(0,2*np.pi/self.nfp,nsections,endpoint=False)
     fig = plt.figure(figsize=(6, 6), dpi=80)
     ax  = plt.gca()
-    for i, phi_plot in enumerate(phi1dplot_RZ):
-        # pos = np.argmin(np.abs(np.mod(phi1d,2*np.pi/self.nfp)-phi))
-        # phi_plot = phi1d[pos]
-        if phi_plot*self.nfp/(2*np.pi)==0:
+    for i, phi in enumerate(phi1dplot_RZ):
+        if phi*self.nfp/(2*np.pi)==0:
             label = r'$\phi$=0'
-        elif phi_plot*self.nfp/(2*np.pi)==0.25:
+        elif phi*self.nfp/(2*np.pi)==0.25:
             label = r'$\phi={\pi}/$'+str(2*self.nfp)
-        elif phi_plot*self.nfp/(2*np.pi)==0.5:
+        elif phi*self.nfp/(2*np.pi)==0.5:
             label = r'$\phi=\pi/$'+str(self.nfp)
-        elif phi_plot*self.nfp/(2*np.pi)==0.75:
+        elif phi*self.nfp/(2*np.pi)==0.75:
             label = r'$\phi={3\pi}/$'+str(2*self.nfp)
         else:
             label = '_nolegend_'
         color = next(ax._get_lines.prop_cycler)['color']
         # Plot location of the axis
-        plt.plot(self.R0_func(phi_plot),self.Z0_func(phi_plot),marker="x",linewidth=2,label=label,color=color)
+        plt.plot(self.R0_func(phi),self.Z0_func(phi),marker="x",linewidth=2,label=label,color=color)
         # Plot location of the poloidal cross-sections
-        # pos = int(phi/(2*np.pi)*nphi)
-        # plt.plot(R_2Dnew[:,pos].flatten(),Z_2Dnew[:,pos].flatten(),color=color)
-        plt.plot(R_2D_spline(phi_plot,theta1d).flatten(),Z_2D_spline(phi_plot,theta1d).flatten(),color=color)
+        pos = int(phi/(2*np.pi)*nphi)
+        plt.plot(R_2Dnew[:,pos].flatten(),Z_2Dnew[:,pos].flatten(),color=color)
     plt.xlabel('R (meters)')
     plt.ylabel('Z (meters)')
     plt.legend()
@@ -387,14 +370,14 @@ def B_fieldline(self, r=0.1, alpha=0, phimax = [], nphi = 400):
     plt.xlabel(r'$\varphi$')
     plt.ylabel(r'$B(\varphi)$')
     plt.title("r = "+str(r)+", alpha = "+str(alpha))
-    plt.plot(varphi_array/np.pi,self.B_mag(r,varphi_array,alpha+self.iota*varphi_array,Boozer_toroidal=True))
+    plt.plot(varphi_array,self.B_mag(r,alpha+self.iota*varphi_array,varphi_array,Boozer_toroidal=True))
     ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
-    ax.xaxis.set_major_locator(tck.MultipleLocator(base=2))
+    ax.xaxis.set_major_locator(tck.MultipleLocator(base=phimax*abs(self.iota)/np.pi))
     plt.tight_layout()
     plt.show()
     plt.close()
 
-def B_contour(self, r=0.1, ntheta=100, nphi=100, ncontours=50, B0=1):
+def B_contour(self, r=0.1, ntheta=100, nphi=100, ncontours=10):
     '''
     Plot contours of constant B, with B the modulus of the
     magnetic field, in Boozer coordinates theta and varphi
@@ -408,23 +391,19 @@ def B_contour(self, r=0.1, ntheta=100, nphi=100, ncontours=50, B0=1):
     theta_array=np.linspace(0,2*np.pi,ntheta)
     phi_array=np.linspace(0,2*np.pi,nphi)
     theta_2D, phi_2D = np.meshgrid(theta_array,phi_array)
-    magB_2D = self.B_mag(r,phi_2D,theta_2D,Boozer_toroidal=True,B0=B0)
+    magB_2D = self.B_mag(r,phi_2D,theta_2D,Boozer_toroidal=True)
     magB_2D.shape = phi_2D.shape
     fig,ax=plt.subplots(1,1)
-    contourplot = ax.contourf(phi_2D/np.pi, theta_2D/np.pi, magB_2D, ncontours)
+    contourplot = ax.contourf(phi_2D, theta_2D, magB_2D, ncontours)
     fig.colorbar(contourplot)
     ax.set_title('r='+str(r))
     ax.set_xlabel(r'$\varphi$')
     ax.set_ylabel(r'$\theta$')
     ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
     ax.yaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
-    ax.xaxis.set_major_locator(tck.MultipleLocator(base=0.5))
-    ax.yaxis.set_major_locator(tck.MultipleLocator(base=0.5))
+    ax.xaxis.set_major_locator(tck.MultipleLocator(base=1.0))
+    ax.yaxis.set_major_locator(tck.MultipleLocator(base=1.0))
     plt.tight_layout()
-    if B0 == 1:
-        plt.title(r'|B|')
-    elif B0 == 0:
-        plt.title(r'$B_1$')
     plt.show()
     plt.close()
 

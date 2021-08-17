@@ -203,7 +203,6 @@ def calculate_r2(self):
     self.Z2c = Z2c
     self.beta_1s = beta_1s
     self.B20 = B20
-    self.B20_spline = self.convert_to_spline(self.B20)
 
     # O(r^2) diagnostics:
     self.mercier()

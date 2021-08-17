@@ -63,18 +63,3 @@ def fourier_interpolation(fk, x):
     return np.dot(D, w * fk) / np.dot(D, w)
     #return (D @ w * fk) / (D @ w)
     #return D.dot(w * fk) / D.dot(w)
-
-def fourier_interpolation_matrix(N, x):
-    x = np.array([x])
-    M = len(x)
-    xk = (np.arange(N) * 2 * np.pi) / N
-    w = (-1.0) ** np.arange(0, N)
-    x2 = x / 2
-    xk2 = xk / 2
-    xk2_2D, x2_2D = np.meshgrid(xk2, x2)
-    D = x2_2D - xk2_2D
-    if np.mod(N, 2) == 0:
-        D = 1 / np.tan(D + eps * (D==0))
-    else:
-        D = 1 / np.sin(D + eps * (D==0))
-    return np.diag(1/(D * w)) * D * np.diag(w)

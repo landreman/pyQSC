@@ -6,10 +6,6 @@ off-axis cylindrical toroidal angle
 
 import numpy as np
 from scipy.optimize import root_scalar
-import logging
-
-#logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 def Frenet_to_cylindrical_residual_func(phi0, phi_target, qsc):
     """
@@ -143,23 +139,10 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
         for j_phi in range(nphi_conversion):
             # Solve for the phi0 such that r0 + X1 n + Y1 b has the desired phi
             phi_target = phi_conversion[j_phi]
-            res_factor0 = 3
-            for res_factor in range(res_factor0,100):
-                # Try to find an interval where the residual changes sign
-                phi0_rootSolve_min = phi_target - 1.0 / res_factor
-                phi0_rootSolve_max = phi_target + 1.0 / res_factor
-                try:
-                    res = root_scalar(Frenet_to_cylindrical_residual_func, xtol=1e-15, rtol=1e-15, maxiter=1000,\
-                                    args=(phi_target, self), bracket=[phi0_rootSolve_min, phi0_rootSolve_max], x0=phi_target)
-                    if res_factor != res_factor0:
-                        logger.debug('res_factor0 in Frenet_to_cylindrical changed from',res_factor0,'to =',res_factor)
-                    break
-                except:
-                    continue
-            # phi0_rootSolve_min = phi_target - 1.0 / res_factor0
-            # phi0_rootSolve_max = phi_target + 1.0 / res_factor0
-            # res = root_scalar(Frenet_to_cylindrical_residual_func, xtol=1e-15, rtol=1e-15, maxiter=1000,\
-            #                   args=(phi_target, self), bracket=[phi0_rootSolve_min, phi0_rootSolve_max], x0=phi_target)
+            phi0_rootSolve_min = phi_target - 1.0 / self.nfp
+            phi0_rootSolve_max = phi_target + 1.0 / self.nfp
+            res = root_scalar(Frenet_to_cylindrical_residual_func, xtol=1e-15, rtol=1e-15, maxiter=1000,\
+                              args=(phi_target, self), bracket=[phi0_rootSolve_min, phi0_rootSolve_max], x0=phi_target)
             phi0_solution = res.root
             final_R, final_z = Frenet_to_cylindrical_1_point(phi0_solution, self)
             R_2D[j_theta,j_phi] = final_R
