@@ -2,10 +2,10 @@
 This module contains the routines to output a
 near-axis boundary to a VMEC input file
 """
-from .Frenet_to_cylindrical import Frenet_to_cylindrical
-import numpy as np
-from .util import mu0
 from datetime import datetime
+import numpy as np
+from .Frenet_to_cylindrical import Frenet_to_cylindrical
+from .util import mu0
 
 def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol, ntor, lasym):
     """
@@ -65,7 +65,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
         filename: name of the text file to be created
         r:  near-axis radius r of the desired boundary surface
         params: a Python dict() instance containing one/several of the following parameters: mpol,
-        delt, nstep, tcon0, ns_array, ftol_array, niter_array
+          delt, nstep, tcon0, ns_array, ftol_array, niter_array
         ntheta: resolution in the poloidal angle theta for the Frenet_to_cylindrical and VMEC calculations
         ntorMax: maximum number of NTOR in the resulting VMEC input file
     """

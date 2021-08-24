@@ -3,13 +3,13 @@ This module contains a function to plot a near-axis surface.
 """
 
 import numpy as np
+from scipy.interpolate import interp2d
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib.colors as clr
 from matplotlib.colors import LightSource
-from .to_vmec import to_Fourier
-from scipy.interpolate import interp2d
 import matplotlib.ticker as tck
+from .to_vmec import to_Fourier
 
 def set_axes_equal(ax):
     '''
@@ -33,7 +33,7 @@ def set_axes_equal(ax):
 
     # The plot bounding box is a sphere in the sense of the infinity
     # norm, hence call half the max range the plot radius.
-    plot_radius = 0.5*max([x_range, y_range, z_range])
+    plot_radius = 0.5 * max([x_range, y_range, z_range])
 
     ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
     ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
@@ -55,7 +55,9 @@ def create_subplot(ax, x_2D_plot, y_2D_plot, z_2D_plot, colormap, elev=90, azim=
         azim: azim angle for the camera view
         distance: distance parameter for the camera view
     '''
-    ax.plot_surface(x_2D_plot, y_2D_plot, z_2D_plot, facecolors = colormap, rstride=1, cstride=1, antialiased=False, linewidth=0, alpha=1., shade=False, **kwargs)
+    ax.plot_surface(x_2D_plot, y_2D_plot, z_2D_plot, facecolors=colormap,
+                    rstride=1, cstride=1, antialiased=False,
+                    linewidth=0, alpha=1., shade=False, **kwargs)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.dist = dist
@@ -99,7 +101,9 @@ def create_field_lines(qsc, alphas, X_2D, Y_2D, Z_2D, phimax=2*np.pi, nphi=500):
             fieldline_Z[i,j] = Z_2D_spline(phi_mod,theta_fieldline_mod)[0]
     return fieldline_X, fieldline_Y, fieldline_Z
 
-def create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot, fieldline_X, fieldline_Y, fieldline_Z, Bmag, degrees_array_x, degrees_array_z, shift_array):
+def create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot,
+                          fieldline_X, fieldline_Y, fieldline_Z,
+                          Bmag, degrees_array_x, degrees_array_z, shift_array):
     '''
     Plotting routine for a mayavi figure instance that plots
     both the surface and the field lines together. The number
@@ -148,7 +152,7 @@ def create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot, fiel
         for j in range(len(alphas)):
             mlab.plot3d(fieldline_X_rotated[j], fieldline_Y_rotated[j]-shift_array[i], fieldline_Z_rotated[j], color=(0,0,0), line_width=0.001, tube_radius=0.005)
 
-def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol = 13, ntor = 25):
+def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, ntor=25):
     '''
     Function that, for a given near-axis radial coordinate r, outputs
     the [X,Y,Z,R,Z] components of the boundary. The resolution along the toroidal
@@ -166,7 +170,7 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol = 13,
     # Get surface shape at fixed off-axis toroidal angle phi
     R_2D, Z_2D, _ = self.Frenet_to_cylindrical(r, ntheta = ntheta_fourier)
     # Get Fourier coefficients in order to plot with arbitrary resolution
-    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, ntheta = ntheta_fourier, mpol = mpol, ntor = ntor, lasym = self.lasym)
+    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, ntheta=ntheta_fourier, mpol=mpol, ntor=ntor, lasym=self.lasym)
     if not self.lasym:
         RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
         ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
@@ -189,27 +193,28 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol = 13,
 
     return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew, Z_2Dnew
 
-def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, fieldlines=False, savefig=None, colormap=None, azim_default=None, **kwargs):
+def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
+         fieldlines=False, savefig=None, colormap=None, azim_default=None, **kwargs):
     """
-    Plotting routine for the near-axis configurations. There are two main ways of
+    Plot the near-axis configuration. There are two main ways of
     running this function.
 
-    If fieldlines=False (default), it creates 2 matplotlib figures:
+    If ``fieldlines=False`` (default), 2 matplotlib figures are generated:
 
-        - A plot with several poloidal planes at the specified radius r with the
-          corresponding location of the magnetic axis and label using plt.plot.
+        - A 2D plot with several poloidal planes at the specified radius r with the
+          corresponding location of the magnetic axis.
 
         - A 3D plot with the flux surface and the magnetic field strength
-          on the surface using plot_surface().
+          on the surface.
 
-    If fieldlines=True, both matplotlib and mayavi are required, and
+    If ``fieldlines=True``, both matplotlib and mayavi are required, and
     the following 2 figures are generated:
 
-        - A matplotlib plot with several poloidal planes at the specified radius r with the
-          corresponding location of the magnetic axis and label using plt.plot.
+        - A 2D matplotlib plot with several poloidal planes at the specified radius r with the
+          corresponding location of the magnetic axis.
 
-        - A 3D mayavi plot with the flux surface the magnetic field strength
-          on the surface and several magnetic field lines using mlab.mesh()
+        - A 3D mayavi figure with the flux surface the magnetic field strength
+          on the surface and several magnetic field lines.
 
     Args:
       r (float): near-axis radius r where to create the surface
@@ -218,7 +223,9 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, field
       ntheta_fourier (int): Resolution in the Fourier transform to cylindrical coordinates
       nsections (int): Number of poloidal planes to show.
       fieldlines (bool): Specify if fieldlines are shown. Using mayavi instead of matplotlib due to known bug https://matplotlib.org/2.2.2/mpl_toolkits/mplot3d/faq.html
-      savefig (str): Filename prefix for the png files to save
+      savefig (str): Filename prefix for the png files to save.
+        Note that a suffix including ``.png`` will be appended.
+        If ``None``, no figure files will be saved.
       colormap (cmap): Custom colormap for the 3D plots
       azim_default: Default azimuthal angle for the three subplots in the 3D surface plot
       kwargs: Any additional key-value pairs to pass to matplotlib's plot_surface.
@@ -237,33 +244,34 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, field
     x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew, Z_2Dnew = self.get_boundary(r=r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier)
 
     ## Poloidal plot
-    phi1dplot_RZ = np.linspace(0,2*np.pi/self.nfp,nsections,endpoint=False)
+    phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
     fig = plt.figure(figsize=(6, 6), dpi=80)
     ax  = plt.gca()
     for i, phi in enumerate(phi1dplot_RZ):
-        if phi*self.nfp/(2*np.pi)==0:
+        phinorm = phi * self.nfp / (2 * np.pi)
+        if phinorm == 0:
             label = r'$\phi$=0'
-        elif phi*self.nfp/(2*np.pi)==0.25:
-            label = r'$\phi={\pi}/$'+str(2*self.nfp)
-        elif phi*self.nfp/(2*np.pi)==0.5:
-            label = r'$\phi=\pi/$'+str(self.nfp)
-        elif phi*self.nfp/(2*np.pi)==0.75:
-            label = r'$\phi={3\pi}/$'+str(2*self.nfp)
+        elif phinorm == 0.25:
+            label = r'$\phi={\pi}/$' + str(2 * self.nfp)
+        elif phinorm == 0.5:
+            label = r'$\phi=\pi/$' + str(self.nfp)
+        elif phinorm == 0.75:
+            label = r'$\phi={3\pi}/$' + str(2 * self.nfp)
         else:
             label = '_nolegend_'
         color = next(ax._get_lines.prop_cycler)['color']
         # Plot location of the axis
-        plt.plot(self.R0_func(phi),self.Z0_func(phi),marker="x",linewidth=2,label=label,color=color)
+        plt.plot(self.R0_func(phi), self.Z0_func(phi), marker="x", linewidth=2, label=label, color=color)
         # Plot location of the poloidal cross-sections
-        pos = int(phi/(2*np.pi)*nphi)
-        plt.plot(R_2Dnew[:,pos].flatten(),Z_2Dnew[:,pos].flatten(),color=color)
+        pos = int(phi / (2 * np.pi) * nphi)
+        plt.plot(R_2Dnew[:, pos].flatten(), Z_2Dnew[:, pos].flatten(), color=color)
     plt.xlabel('R (meters)')
     plt.ylabel('Z (meters)')
     plt.legend()
     plt.tight_layout()
     ax.set_aspect('equal')
-    if savefig!=None:
-        fig.savefig(savefig+'_poloidal.png')
+    if savefig != None:
+        fig.savefig(savefig + '_poloidal.png')
 
     ## 3D plot
     # Set the default azimuthal angle of view in the 3D plot
@@ -276,11 +284,11 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, field
             azim_default = 45
     # Define the magnetic field modulus and create its theta,phi array
     # The norm instance will be used as the colormap for the surface
-    theta1D = np.linspace(0,2*np.pi,ntheta)
-    phi1D = np.linspace(0,2*np.pi,nphi)
-    phi2D, theta2D = np.meshgrid(phi1D,theta1D)
+    theta1D = np.linspace(0, 2 * np.pi, ntheta)
+    phi1D = np.linspace(0, 2 * np.pi, nphi)
+    phi2D, theta2D = np.meshgrid(phi1D, theta1D)
     # Create a color map similar to viridis 
-    Bmag=self.B_mag(r,theta2D,phi2D)
+    Bmag = self.B_mag(r, theta2D, phi2D)
     norm = clr.Normalize(vmin=Bmag.min(), vmax=Bmag.max())
     if fieldlines==False:
         if colormap==None:
@@ -294,10 +302,13 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, field
         # gsParams: extension in the top, bottom, left right directions for each subplot
         # elevParams: elevation (distance to the plot) for each subplot
         fig = plt.figure(constrained_layout=False, figsize=(4.5, 8))
-        gsParams = [[1.02,-0.3,0.,0.85],[1.09,-0.3,0.,0.85],[1.12,-0.15,0.,0.85]]
-        elevParams = [90,30,5]
+        gsParams = [[1.02,-0.3,0.,0.85], [1.09,-0.3,0.,0.85], [1.12,-0.15,0.,0.85]]
+        elevParams = [90, 30, 5]
         for i in range(len(gsParams)):
-            gs = fig.add_gridspec(nrows=3, ncols=1, top=gsParams[i][0], bottom=gsParams[i][1], left=gsParams[i][2], right=gsParams[i][3], hspace=0.0, wspace=0.0)
+            gs = fig.add_gridspec(nrows=3, ncols=1,
+                                  top=gsParams[i][0], bottom=gsParams[i][1],
+                                  left=gsParams[i][2], right=gsParams[i][3],
+                                  hspace=0.0, wspace=0.0)
             ax = fig.add_subplot(gs[i, 0], projection='3d')
             create_subplot(ax, x_2D_plot, y_2D_plot, z_2D_plot, cmap_plot, elev=elevParams[i], azim=azim_default, **kwargs)
         # Create color bar with axis placed on the right
@@ -307,8 +318,8 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, field
         cbar = plt.colorbar(m, cax=cbar_ax)
         cbar.ax.set_title(r'$|B| [T]$')
         # Save figure
-        if savefig!=None:
-            fig.savefig(savefig+'3D.png')
+        if savefig != None:
+            fig.savefig(savefig + '3D.png')
         # Show figures
         plt.show()
         # Close figures
@@ -317,7 +328,8 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, field
         ## X, Y, Z arrays for the field lines
         # Plot different field lines corresponding to different alphas
         # where alpha=theta-iota*varphi with (theta,varphi) the Boozer angles
-        alphas = [0,np.pi/4,np.pi/2,3*np.pi/4,np.pi,5*np.pi/4,3*np.pi/2,7*np.pi/4]
+        #alphas = [0, np.pi/4, np.pi/2, 3*np.pi/4, np.pi, 5*np.pi/4, 3*np.pi/2, 7*np.pi/4]
+        alphas = np.linspace(0, 2 * np.pi, 8, endpoint=False)
         # Create the field line arrays
         fieldline_X, fieldline_Y, fieldline_Z = create_field_lines(self, alphas, x_2D_plot, y_2D_plot, z_2D_plot)
         # Define the rotation arrays for the subplots
@@ -334,7 +346,9 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, field
         # Create 3D figure
         fig = mlab.figure(bgcolor=(1,1,1), size=(430,720))
         # Create subplots
-        create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot, fieldline_X, fieldline_Y, fieldline_Z, Bmag, degrees_array_x, degrees_array_z, shift_array)
+        create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot,
+                              fieldline_X, fieldline_Y, fieldline_Z,
+                              Bmag, degrees_array_x, degrees_array_z, shift_array)
         # Create a good camera angle
         mlab.view(azimuth=0, elevation=0, distance=8.5, focalpoint=(-0.15,0,0), figure=fig)
         # Create the colorbar and change its properties
@@ -349,14 +363,14 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, field
         cb.title_text_property.color=(0,0,0)
         cb.title_text_property.bold = 1
         # Save figure
-        if savefig!=None:
+        if savefig != None:
             mlab.savefig(filename=savefig+'3D_fieldlines.png', figure=fig)
         # Show mayavi plot
         mlab.show()
         # Close mayavi plots
         mlab.close(all=True)
 
-def B_fieldline(self, r=0.1, alpha=0, phimax = [], nphi = 400):
+def B_fieldline(self, r=0.1, alpha=0, phimax=None, nphi=400):
     '''
     Plot the modulus of the magnetic field B along a field line with
     the Boozer toroidal angle varphi acting as a field-line following
@@ -368,24 +382,25 @@ def B_fieldline(self, r=0.1, alpha=0, phimax = [], nphi = 400):
       phimax (float): Maximum value of the field-line following parameter varphi
       nphi (int): resolution of the phi grid
     '''
-    if phimax == []:
-        phimax = 10*np.pi/abs(self.iota)
-    varphi_array = np.linspace(0,phimax,nphi)
-    _,ax=plt.subplots(1,1,figsize=(10, 6), dpi=80, facecolor='w', edgecolor='k')
+    if phimax is None:
+        phimax = 10 * np.pi / abs(self.iota)
+    varphi_array = np.linspace(0, phimax, nphi)
+    _, ax = plt.subplots(1, 1, figsize=(10, 6), dpi=80, facecolor='w', edgecolor='k')
     plt.xlabel(r'$\varphi$')
     plt.ylabel(r'$B(\varphi)$')
-    plt.title("r = "+str(r)+", alpha = "+str(alpha))
-    plt.plot(varphi_array,self.B_mag(r,alpha+self.iota*varphi_array,varphi_array,Boozer_toroidal=True))
-    ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
-    ax.xaxis.set_major_locator(tck.MultipleLocator(base=phimax*abs(self.iota)/np.pi))
+    plt.title("r = " + str(r) + ", alpha = " + str(alpha))
+    theta = alpha + self.iota * varphi_array
+    plt.plot(varphi_array, self.B_mag(r, theta, varphi_array, Boozer_toroidal=True))
+    #ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    #ax.xaxis.set_major_locator(tck.MultipleLocator(base=phimax*abs(self.iota)/np.pi))
     plt.tight_layout()
     plt.show()
     plt.close()
 
-def B_contour(self, r=0.1, ntheta=100, nphi=100, ncontours=10):
+def B_contour(self, r=0.1, ntheta=100, nphi=120, ncontours=10):
     '''
     Plot contours of constant B, with B the modulus of the
-    magnetic field, in Boozer coordinates theta and varphi
+    magnetic field, as a function of Boozer coordinates theta and varphi
 
     Args:
       r (float): near-axis radius r where to create the surface
@@ -393,26 +408,22 @@ def B_contour(self, r=0.1, ntheta=100, nphi=100, ncontours=10):
       nphi   (int): Number of grid points to plot in the Boozer toroidal angle.
       ncontours (int): number of contours to show in the plot
     '''
-    theta_array=np.linspace(0,2*np.pi,ntheta)
-    phi_array=np.linspace(0,2*np.pi,nphi)
-    theta_2D, phi_2D = np.meshgrid(theta_array,phi_array)
-    magB_2D = self.B_mag(r,phi_2D,theta_2D,Boozer_toroidal=True)
+    theta_array = np.linspace(0, 2 * np.pi, ntheta)
+    phi_array = np.linspace(0, 2 * np.pi, nphi)
+    phi_2D, theta_2D = np.meshgrid(phi_array, theta_array)
+    magB_2D = self.B_mag(r, theta_2D, phi_2D, Boozer_toroidal=True)
     magB_2D.shape = phi_2D.shape
-    fig,ax=plt.subplots(1,1)
+    fig, ax = plt.subplots(1, 1)
     contourplot = ax.contourf(phi_2D, theta_2D, magB_2D, ncontours)
     fig.colorbar(contourplot)
-    ax.set_title('r='+str(r))
+    ax.set_title('|B| for r=' + str(r))
     ax.set_xlabel(r'$\varphi$')
     ax.set_ylabel(r'$\theta$')
-    ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
-    ax.yaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
-    ax.xaxis.set_major_locator(tck.MultipleLocator(base=1.0))
-    ax.yaxis.set_major_locator(tck.MultipleLocator(base=1.0))
     plt.tight_layout()
     plt.show()
     plt.close()
 
-def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret = 80, frenet_serret_factor = 0.12, savefig=None):
+def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret=80, frenet_serret_factor=0.12, savefig=None):
     '''
     Plot axis shape and the Frenet-Serret frame along
     the axis (optional). If frenet_serret is true, creates
@@ -427,16 +438,18 @@ def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret = 80, frene
       frenet_serret (bool): True plots the Frenet-Serret frame, False it doesn't
       nphi_frenet_serret (int): Number of Frenet-Serret vectors to show
       frenet_serret_factor (float): Size of Frenet-Serret vectors
-      savefig (string): filename to save resulting figure in png format
+      savefig (string): filename to save resulting figure in png format.
+        Note that ``.png`` will be appended.
+        If ``None``, no figure file will be saved.
     '''
     # Create array of toroidal angles along the axis
     # where the axis points will be created
-    phi_array=np.linspace(0,2*np.pi,nphi)
+    phi_array = np.linspace(0, 2 * np.pi, nphi)
     # Calculate the x, y and z components of the axis
     R0 = self.R0_func(phi_array)
     Z0 = self.Z0_func(phi_array)
-    x_plot = R0*np.cos(phi_array)
-    y_plot = R0*np.sin(phi_array)
+    x_plot = R0 * np.cos(phi_array)
+    y_plot = R0 * np.sin(phi_array)
     z_plot = Z0
     if frenet_serret:
         # Show Frenet-Serret frame
@@ -444,15 +457,15 @@ def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret = 80, frene
         from mayavi import mlab
         fig = mlab.figure(bgcolor=(1,1,1), fgcolor=(0.,0.,0.), size=(600,500))
         # Plot the magnetic axis
-        s=mlab.plot3d(x_plot, y_plot, z_plot, color=(0,0,0), line_width=0.001, tube_radius=0.01)
+        s = mlab.plot3d(x_plot, y_plot, z_plot, color=(0,0,0), line_width=0.001, tube_radius=0.01)
         # Show the x,y,z axis
-        ax=mlab.axes(s,xlabel='X',ylabel='Y',zlabel='Z',line_width=1.0,nb_labels=4)
+        ax = mlab.axes(s,xlabel='X',ylabel='Y',zlabel='Z',line_width=1.0,nb_labels=4)
         ax.axes.font_factor = 1.3
         ax.axes.label_format = '    %4.2f'
         ax.label_text_property.bold = False
         ax.label_text_property.italic = False
         # Create array of toroidal angles where the Frenet-Serret is shown
-        phi_array=np.linspace(0,2*np.pi,nphi_frenet_serret)
+        phi_array = np.linspace(0, 2 * np.pi, nphi_frenet_serret)
         # Calculate origin and vector arrays for the Frenet-Serret frame
         R0 = self.R0_func(phi_array)
         Z0 = self.Z0_func(phi_array)
@@ -465,30 +478,40 @@ def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret = 80, frene
         normal_Z   = self.normal_z_spline(phi_array)
         normal_X   = normal_R * np.cos(phi_array) - normal_phi * np.sin(phi_array)
         normal_Y   = normal_R * np.sin(phi_array) + normal_phi * np.cos(phi_array)
-        mlab.quiver3d(x_plot,y_plot,z_plot,normal_X,normal_Y,normal_Z,scale_factor=frenet_serret_factor,color=(1,0,0),reset_zoom=False)
+        mlab.quiver3d(x_plot, y_plot, z_plot,
+                      normal_X, normal_Y, normal_Z,
+                      scale_factor=frenet_serret_factor,
+                      color=(1, 0, 0), reset_zoom=False)
         # Biormal vector (blue)
         binormal_R   = self.binormal_R_spline(phi_array)
         binormal_phi = self.binormal_phi_spline(phi_array)
         binormal_Z   = self.binormal_z_spline(phi_array)
         binormal_X   = binormal_R * np.cos(phi_array) - binormal_phi * np.sin(phi_array)
         binormal_Y   = binormal_R * np.sin(phi_array) + binormal_phi * np.cos(phi_array)
-        mlab.quiver3d(x_plot,y_plot,z_plot,binormal_X,binormal_Y,binormal_Z,scale_factor=frenet_serret_factor,color=(0,0,1),reset_zoom=False)
+        mlab.quiver3d(x_plot, y_plot, z_plot,
+                      binormal_X, binormal_Y, binormal_Z,
+                      scale_factor=frenet_serret_factor,
+                      color=(0, 0, 1), reset_zoom=False)
         # Tangent vector (green)
         tangent_R   = self.tangent_R_spline(phi_array)
         tangent_phi = self.tangent_phi_spline(phi_array)
         tangent_Z   = self.tangent_z_spline(phi_array)
         tangent_X   = tangent_R * np.cos(phi_array) - tangent_phi * np.sin(phi_array)
         tangent_Y   = tangent_R * np.sin(phi_array) + tangent_phi * np.cos(phi_array)
-        mlab.quiver3d(x_plot,y_plot,z_plot,tangent_X,tangent_Y,tangent_Z,scale_factor=frenet_serret_factor,color=(0,1,0),reset_zoom=False)
+        mlab.quiver3d(x_plot, y_plot, z_plot,
+                      tangent_X, tangent_Y, tangent_Z,
+                      scale_factor=frenet_serret_factor,
+                      color=(0, 1, 0),
+                      reset_zoom=False)
         # Save figure
-        if savefig!=None:
-            mlab.savefig(savefig+'.png')
+        if savefig != None:
+            mlab.savefig(savefig + '.png')
         # Show figure
         mlab.show()
     else:
         # Do not show Frenet-Serret frame
         # Initiate matplotlib instance
-        fig = plt.figure(figsize=(6,5))
+        fig = plt.figure(figsize=(6, 5))
         ax = plt.axes(projection='3d')
         # Plot the magnetic axis
         plt.plot(x_plot, y_plot, z_plot)
@@ -500,7 +523,7 @@ def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret = 80, frene
         plt.tight_layout()
         fig.subplots_adjust(left=-0.05, top=1.05)
         # Save figure
-        if savefig!=None:
-            fig.savefig(savefig+'.png')
+        if savefig != None:
+            fig.savefig(savefig + '.png')
         # Show figure
         plt.show()

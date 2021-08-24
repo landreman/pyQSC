@@ -4,9 +4,9 @@
 Various utility functions
 """
 
+import logging
 import numpy as np
 import scipy.optimize
-import logging
 from qsc.fourier_interpolation import fourier_interpolation
 from scipy.interpolate import CubicSpline as spline
 
@@ -76,14 +76,21 @@ def B_mag(self, r, theta, phi, Boozer_toroidal = False):
       Boozer_toroidal: False if phi is the cylindrical toroidal angle, True for the Boozer one
     '''
     if Boozer_toroidal == False:
-        thetaN = theta-(self.iota-self.iotaN)*(phi+self.nu_spline(phi))
+        thetaN = theta - (self.iota - self.iotaN) * (phi + self.nu_spline(phi))
     else:
-        thetaN = theta-(self.iota-self.iotaN)*phi
-    if self.order == 'r1':
-        return self.B0*(1+r*self.etabar*np.cos(thetaN))
-    else:
+        thetaN = theta - (self.iota - self.iotaN) * phi
+
+    B = self.B0*(1 + r * self.etabar * np.cos(thetaN))
+
+    # Add O(r^2) terms if necessary:
+    if self.order != 'r1':
         if Boozer_toroidal == False:
             self.B20_spline = self.convert_to_spline(self.B20)
         else:
-            self.B20_spline=spline(np.append(self.varphi,2*np.pi/self.nfp), np.append(self.B20,self.B20[0]), bc_type='periodic')
-        return self.B0*(1+r*self.etabar*np.cos(thetaN))+r**2*(self.B20_spline(phi)+self.B2c*np.cos(2*thetaN)+self.B2s*np.sin(2*thetaN))
+            self.B20_spline = spline(np.append(self.varphi, 2 * np.pi / self.nfp),
+                                     np.append(self.B20, self.B20[0]),
+                                     bc_type='periodic')
+
+        B += (r**2) * (self.B20_spline(phi) + self.B2c * np.cos(2 * thetaN) + self.B2s * np.sin(2 * thetaN))
+
+    return B

@@ -147,7 +147,7 @@ def init_axis(self):
                                                self.zs[i]*np.sin(i*self.nfp*self.phi) \
                                               for i in range(len(self.zs))]))
 
-    # Spline interpolants fo r the cylindrical components of the Frenet-Serret frame
+    # Spline interpolants for the cylindrical components of the Frenet-Serret frame:
     self.normal_R_spline     = self.convert_to_spline(self.normal_cylindrical[:,0])
     self.normal_phi_spline   = self.convert_to_spline(self.normal_cylindrical[:,1])
     self.normal_z_spline     = self.convert_to_spline(self.normal_cylindrical[:,2])
@@ -159,4 +159,4 @@ def init_axis(self):
     self.tangent_z_spline    = self.convert_to_spline(self.tangent_cylindrical[:,2])
 
     # Spline interpolant for nu = varphi - phi, used for plotting
-    self.nu_spline = self.convert_to_spline(self.varphi-self.phi)
+    self.nu_spline = self.convert_to_spline(self.varphi - self.phi)
