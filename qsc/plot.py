@@ -9,7 +9,7 @@ from matplotlib import cm
 import matplotlib.colors as clr
 from matplotlib.colors import LightSource
 import matplotlib.ticker as tck
-from .to_vmec import to_Fourier
+from .util import to_Fourier
 
 def set_axes_equal(ax):
     '''
@@ -168,9 +168,9 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, n
       ntor: resolution in toroidal Fourier space
     '''
     # Get surface shape at fixed off-axis toroidal angle phi
-    R_2D, Z_2D, _ = self.Frenet_to_cylindrical(r, ntheta = ntheta_fourier)
+    R_2D, Z_2D, _ = self.Frenet_to_cylindrical(r, ntheta=ntheta_fourier)
     # Get Fourier coefficients in order to plot with arbitrary resolution
-    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, ntheta=ntheta_fourier, mpol=mpol, ntor=ntor, lasym=self.lasym)
+    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, mpol=mpol, ntor=ntor, lasym=self.lasym)
     if not self.lasym:
         RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
         ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))

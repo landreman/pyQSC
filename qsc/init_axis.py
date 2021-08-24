@@ -3,11 +3,11 @@ This module contains the routine to initialize quantities like
 curvature and torsion from the magnetix axis shape.
 """
 
-import numpy as np
 import logging
+import numpy as np
+from scipy.interpolate import CubicSpline as spline
 from .spectral_diff_matrix import spectral_diff_matrix
 from .util import fourier_minimum
-from scipy.interpolate import CubicSpline as spline
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

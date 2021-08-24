@@ -2,8 +2,8 @@
 This module contains the calculation for the O(r^2) solution
 """
 
-import numpy as np
 import logging
+import numpy as np
 from .util import mu0
 
 #logging.basicConfig(level=logging.DEBUG)

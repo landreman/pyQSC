@@ -3,8 +3,8 @@ This module contains the top-level routines for the quasisymmetric
 stellarator construction.
 """
 
-import numpy as np
 import logging
+import numpy as np
 #from numba import jit
 
 #logging.basicConfig(level=logging.DEBUG)
