@@ -192,19 +192,24 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol = 13,
 def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, fieldlines=False, savefig=None, colormap=None, azim_default=None, **kwargs):
     """
     Plotting routine for the near-axis configurations. There are two main ways of
-    running this function:
+    running this function.
+
     If fieldlines=False (default), it creates 2 matplotlib figures:
+
         - A plot with several poloidal planes at the specified radius r with the
-         corresponding location of the magnetic axis and label using plt.plot
+          corresponding location of the magnetic axis and label using plt.plot.
+
         - A 3D plot with the flux surface and the magnetic field strength
-         on the surface using plot_surface().
-    If fieldlines=True, it creates 1 matplotlib figure:
-        - A plot with several poloidal planes at the specified radius r with the
-         corresponding location of the magnetic axis and label using plt.plot
-        and one mayavi scene
-        - A 3D plot with the flux surface the magnetic field strength
-         on the surface and several magnetic field lines using mlab.mesh()
-        This functionality needs the mayavi package.
+          on the surface using plot_surface().
+
+    If fieldlines=True, both matplotlib and mayavi are required, and
+    the following 2 figures are generated:
+
+        - A matplotlib plot with several poloidal planes at the specified radius r with the
+          corresponding location of the magnetic axis and label using plt.plot.
+
+        - A 3D mayavi plot with the flux surface the magnetic field strength
+          on the surface and several magnetic field lines using mlab.mesh()
 
     Args:
       r (float): near-axis radius r where to create the surface
@@ -218,7 +223,7 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, field
       azim_default: Default azimuthal angle for the three subplots in the 3D surface plot
       kwargs: Any additional key-value pairs to pass to matplotlib's plot_surface.
 
-    This function generates similar to the ones below:
+    This function generates plots similar to the ones below:
 
     .. image:: 3dplot1.png
        :width: 200
