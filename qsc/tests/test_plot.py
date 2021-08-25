@@ -67,7 +67,7 @@ def compare_with_fortran(name, filename, ntheta = 60, nphi = 100, rtol=1e-7, ato
     logger.info('Creating pyQSC configuration')
     stel = Qsc.from_paper(name, nphi=nphi_axis)
     logger.info('Creating R and Z arrays with get_boundary function')
-    _, _, _, R_qsc, Z_qsc = stel.get_boundary(r=r, ntheta=ntheta, nphi=nphi, mpol=mpol, ntor=ntor, ntheta_fourier=2*mpol)
+    _, _, Z_qsc, R_qsc = stel.get_boundary(r=r, ntheta=ntheta, nphi=nphi, mpol=mpol, ntor=ntor, ntheta_fourier=2*mpol)
     logger.info('Creating R0 and Z0 arrays with R0_func and Z0_func functions')
     phi_array = np.linspace(0, 2*np.pi, nphi)
     R0_qsc = stel.R0_func(phi_array)
