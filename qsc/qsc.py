@@ -3,8 +3,8 @@ This module contains the top-level routines for the quasisymmetric
 stellarator construction.
 """
 
-import numpy as np
 import logging
+import numpy as np
 #from numba import jit
 
 #logging.basicConfig(level=logging.DEBUG)
@@ -24,8 +24,10 @@ class Qsc():
     from .calculate_r2 import calculate_r2
     from .mercier import mercier
     from .r_singularity import calculate_r_singularity
+    from .plot import plot, get_boundary, B_fieldline, B_contour, plot_axis
     from .Frenet_to_cylindrical import Frenet_to_cylindrical
     from .to_vmec import to_vmec
+    from .util import B_mag
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
                  I2=0., sG=1, spsi=1, nphi=31, B2s=0., B2c=0., p2=0., order="r1"):
@@ -107,7 +109,7 @@ class Qsc():
         self.r1_diagnostics()
         if self.order == 'r2':
             self.calculate_r2()
-       
+    
     def get_dofs(self):
         """
         Return a 1D numpy vector of all possible optimizable

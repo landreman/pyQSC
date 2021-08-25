@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from qsc.to_vmec import to_Fourier
+from qsc.util import to_Fourier
 import unittest
 import os
 from scipy.io import netcdf
@@ -90,7 +90,7 @@ def Fourier_Inverse(name, r = 0.05, ntheta = 26, nphi = 51, mpol = 13, ntor = 25
     R_2D, Z_2D, phi0_2D = py.Frenet_to_cylindrical(r, ntheta)
 
     logger.info('Calculating corresponding RBC, RBS, ZBC, ZBS')
-    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, py.nfp, ntheta, mpol, ntor, py.lasym)
+    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, py.nfp, mpol, ntor, py.lasym)
     if not py.lasym:
         RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
         ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
