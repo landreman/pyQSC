@@ -124,9 +124,9 @@ class PlotTests(unittest.TestCase):
         Test call to plot axis shape
         """
         stel=Qsc.from_paper('r1 section 5.2')
-        stel.plot_axis(frenet_serret=False)
+        stel.plot_axis(frenet=False)
         stel=Qsc.from_paper(4)
-        stel.plot_axis(frenet_serret=False)
+        stel.plot_axis(frenet=False)
                 
 if __name__ == "__main__":
     unittest.main()
