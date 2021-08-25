@@ -16,11 +16,8 @@ with no need for compilation, though it is slower.
 Requirements
 ^^^^^^^^^^^^
 
-pyQSC has minimal dependencies - it requires only python3, numpy,
-scipy, and matplotlib. If you don't already have numpy, scipy, and
-matplotlib, they will be installed automatically by the ``pip
-install`` step described in the next section. Certain plotting
-routines also require the mayavi package.
+pyQSC has minimal dependencies - it requires only python3, numpy, and scipy. If you don't already have numpy and scipy,
+they will be installed automatically by the ``pip install`` step described in the next section.
 
 
 

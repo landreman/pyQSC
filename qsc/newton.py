@@ -2,8 +2,8 @@
 This module contains a function for Newton's method.
 """
 
-import logging
 import numpy as np
+import logging
 
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
