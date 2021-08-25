@@ -390,9 +390,9 @@ def B_fieldline(self, r=0.1, alpha=0, phimax=None, nphi=400):
     plt.ylabel(r'$B(\varphi)$')
     plt.title("r = " + str(r) + ", alpha = " + str(alpha))
     theta = alpha + self.iota * varphi_array
-    plt.plot(varphi_array, self.B_mag(r, theta, varphi_array, Boozer_toroidal=True))
-    #ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
-    #ax.xaxis.set_major_locator(tck.MultipleLocator(base=phimax*abs(self.iota)/np.pi))
+    plt.plot(varphi_array/np.pi, self.B_mag(r, theta, varphi_array, Boozer_toroidal=True))
+    ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    ax.xaxis.set_major_locator(tck.MultipleLocator(base=2))
     plt.tight_layout()
     plt.show()
     plt.close()
