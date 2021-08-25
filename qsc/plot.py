@@ -155,7 +155,7 @@ def create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot,
 def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, ntor=25):
     '''
     Function that, for a given near-axis radial coordinate r, outputs
-    the [X,Y,Z,R,Z] components of the boundary. The resolution along the toroidal
+    the [X,Y,Z,R] components of the boundary. The resolution along the toroidal
     angle phi is equal to the resolution nphi for the axis, while ntheta
     is specified by the used.
 
@@ -191,7 +191,7 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, n
     y_2D_plot = R_2Dnew*np.sin(phi1D)
     z_2D_plot = Z_2Dnew
 
-    return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew, Z_2Dnew
+    return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew
 
 def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
          fieldlines=False, savefig=None, colormap=None, azim_default=None, **kwargs):
@@ -241,7 +241,7 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
     .. image:: poloidalplot.png
        :width: 200
     """
-    x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew, Z_2Dnew = self.get_boundary(r=r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier)
+    x_2D_plot, y_2D_plot, z_2D_plot, R_2D_plot = self.get_boundary(r=r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier)
 
     ## Poloidal plot
     phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
@@ -264,7 +264,7 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
         plt.plot(self.R0_func(phi), self.Z0_func(phi), marker="x", linewidth=2, label=label, color=color)
         # Plot location of the poloidal cross-sections
         pos = int(phi / (2 * np.pi) * nphi)
-        plt.plot(R_2Dnew[:, pos].flatten(), Z_2Dnew[:, pos].flatten(), color=color)
+        plt.plot(R_2D_plot[:, pos].flatten(), z_2D_plot[:, pos].flatten(), color=color)
     plt.xlabel('R (meters)')
     plt.ylabel('Z (meters)')
     plt.legend()
