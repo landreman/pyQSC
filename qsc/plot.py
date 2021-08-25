@@ -413,7 +413,7 @@ def B_contour(self, r=0.1, ntheta=100, nphi=120, ncontours=10):
     phi_2D, theta_2D = np.meshgrid(phi_array, theta_array)
     magB_2D = self.B_mag(r, theta_2D, phi_2D, Boozer_toroidal=True)
     fig, ax = plt.subplots(1, 1)
-    contourplot = ax.contourf(phi_2D/np.pi, theta_2D/np.pi, magB_2D, ncontours, cmap=cm.plasma, linewidths=2.0)
+    contourplot = ax.contourf(phi_2D / np.pi, theta_2D / np.pi, magB_2D, ncontours, cmap=cm.plasma)
     fig.colorbar(contourplot)
     ax.set_title('|B| for r=' + str(r))
     ax.set_xlabel(r'$\varphi$')
