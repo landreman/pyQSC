@@ -426,21 +426,21 @@ def B_contour(self, r=0.1, ntheta=100, nphi=120, ncontours=10):
     plt.show()
     plt.close()
 
-def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret=80, frenet_serret_factor=0.12, savefig=None):
+def plot_axis(self, nphi=100, frenet=True, nphi_frenet=80, frenet_factor=0.12, savefig=None):
     '''
     Plot axis shape and the Frenet-Serret frame along
-    the axis (optional). If frenet_serret is true, creates
-    a mayavi instance showing the axis and nphi_frenet_serret
+    the axis (optional). If frenet is true, creates
+    a mayavi instance showing the axis and nphi_frenet
     times 3 vectors, corresponding to the tangent, normal and
-    binormal vectors. If frenet_serret is false, creates a
+    binormal vectors. If frenet is false, creates a
     matplotlib instance with only a single axis shape
     curve shown.
 
     Args:
       nphi (int): Number of grid points in the axis shape
-      frenet_serret (bool): True plots the Frenet-Serret frame, False it doesn't
-      nphi_frenet_serret (int): Number of Frenet-Serret vectors to show
-      frenet_serret_factor (float): Size of Frenet-Serret vectors
+      frenet (bool): True plots the Frenet-Serret frame, False it doesn't
+      nphi_frenet (int): Number of Frenet-Serret vectors to show
+      frenet_factor (float): Size of Frenet-Serret vectors
       savefig (string): filename to save resulting figure in png format.
         Note that ``.png`` will be appended.
         If ``None``, no figure file will be saved.
@@ -454,7 +454,7 @@ def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret=80, frenet_
     x_plot = R0 * np.cos(phi_array)
     y_plot = R0 * np.sin(phi_array)
     z_plot = Z0
-    if frenet_serret:
+    if frenet:
         # Show Frenet-Serret frame
         # Initiate mayavi instance
         from mayavi import mlab
@@ -468,7 +468,7 @@ def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret=80, frenet_
         ax.label_text_property.bold = False
         ax.label_text_property.italic = False
         # Create array of toroidal angles where the Frenet-Serret is shown
-        phi_array = np.linspace(0, 2 * np.pi, nphi_frenet_serret)
+        phi_array = np.linspace(0, 2 * np.pi, nphi_frenet)
         # Calculate origin and vector arrays for the Frenet-Serret frame
         R0 = self.R0_func(phi_array)
         Z0 = self.Z0_func(phi_array)
@@ -483,7 +483,7 @@ def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret=80, frenet_
         normal_Y   = normal_R * np.sin(phi_array) + normal_phi * np.cos(phi_array)
         mlab.quiver3d(x_plot, y_plot, z_plot,
                       normal_X, normal_Y, normal_Z,
-                      scale_factor=frenet_serret_factor,
+                      scale_factor=frenet_factor,
                       color=(1, 0, 0), reset_zoom=False)
         # Biormal vector (blue)
         binormal_R   = self.binormal_R_spline(phi_array)
@@ -493,7 +493,7 @@ def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret=80, frenet_
         binormal_Y   = binormal_R * np.sin(phi_array) + binormal_phi * np.cos(phi_array)
         mlab.quiver3d(x_plot, y_plot, z_plot,
                       binormal_X, binormal_Y, binormal_Z,
-                      scale_factor=frenet_serret_factor,
+                      scale_factor=frenet_factor,
                       color=(0, 0, 1), reset_zoom=False)
         # Tangent vector (green)
         tangent_R   = self.tangent_R_spline(phi_array)
@@ -503,7 +503,7 @@ def plot_axis(self, nphi=100, frenet_serret=True, nphi_frenet_serret=80, frenet_
         tangent_Y   = tangent_R * np.sin(phi_array) + tangent_phi * np.cos(phi_array)
         mlab.quiver3d(x_plot, y_plot, z_plot,
                       tangent_X, tangent_Y, tangent_Z,
-                      scale_factor=frenet_serret_factor,
+                      scale_factor=frenet_factor,
                       color=(0, 1, 0),
                       reset_zoom=False)
         # Save figure
