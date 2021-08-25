@@ -2,10 +2,59 @@
 This module contains the routines to output a
 near-axis boundary to a VMEC input file
 """
-from datetime import datetime
-import numpy as np
 from .Frenet_to_cylindrical import Frenet_to_cylindrical
-from .util import mu0, to_Fourier
+import numpy as np
+from .util import mu0
+from datetime import datetime
+
+def to_Fourier(R_2D, Z_2D, nfp, ntheta, mpol, ntor, lasym):
+    """
+    This function takes two 2D arrays (R_2D and Z_2D), which contain
+    the values of the radius R and vertical coordinate Z in cylindrical
+    coordinates of a given surface and Fourier transform it, outputing
+    the resulting cos(theta) and sin(theta) Fourier coefficients
+
+    Args:
+        R_2D: 2D array of the radial coordinate R(theta,phi) of a given surface
+        Z_2D: 2D array of the vertical coordinate Z(theta,phi) of a given surface
+        nfp: number of field periods of the surface
+        ntheta: poloidal resolution
+        mpol: resolution in poloidal Fourier space
+        ntor: resolution in toroidal Fourier space
+        lasym: False if stellarator-symmetric, True if not
+    """
+    nphi_conversion = np.array(R_2D).shape[1]
+    theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
+    phi_conversion = np.linspace(0,2*np.pi/nfp,nphi_conversion,endpoint=False)
+    RBC = np.zeros((int(2*ntor+1),int(mpol+1)))
+    RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
+    ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
+    ZBS = np.zeros((int(2*ntor+1),int(mpol+1)))
+    factor = 2 / (ntheta * nphi_conversion)
+    phi2d, theta2d = np.meshgrid(phi_conversion, theta)
+    for m in range(mpol+1):
+        nmin = -ntor
+        if m==0: nmin = 1
+        for n in range(nmin, ntor+1):
+            angle = m * theta2d - n * nfp * phi2d
+            sinangle = np.sin(angle)
+            cosangle = np.cos(angle)
+            factor2 = factor
+            # The next 2 lines ensure inverse Fourier transform(Fourier transform) = identity
+            if np.mod(ntheta,2) == 0 and m  == (ntheta/2): factor2 = factor2 / 2
+            if np.mod(nphi_conversion,2) == 0 and abs(n) == (nphi_conversion/2): factor2 = factor2 / 2
+            RBC[n + ntor, m] = np.sum(R_2D * cosangle * factor2)
+            RBS[n + ntor, m] = np.sum(R_2D * sinangle * factor2)
+            ZBC[n + ntor, m] = np.sum(Z_2D * cosangle * factor2)
+            ZBS[n + ntor, m] = np.sum(Z_2D * sinangle * factor2)
+    RBC[ntor,0] = np.sum(R_2D) / (ntheta * nphi_conversion)
+    ZBC[ntor,0] = np.sum(Z_2D) / (ntheta * nphi_conversion)
+
+    if not lasym:
+        RBS = 0
+        ZBC = 0
+
+    return RBC, RBS, ZBC, ZBS
 
 def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     """
@@ -16,7 +65,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
         filename: name of the text file to be created
         r:  near-axis radius r of the desired boundary surface
         params: a Python dict() instance containing one/several of the following parameters: mpol,
-          delt, nstep, tcon0, ns_array, ftol_array, niter_array
+        delt, nstep, tcon0, ns_array, ftol_array, niter_array
         ntheta: resolution in the poloidal angle theta for the Frenet_to_cylindrical and VMEC calculations
         ntorMax: maximum number of NTOR in the resulting VMEC input file
     """
@@ -63,7 +112,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     
     # Fourier transform the result.
     # This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.
-    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, mpol, ntor, self.lasym)
+    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, ntheta, mpol, ntor, self.lasym)
 
     # Write to VMEC file
     file_object = open(filename,"w+")

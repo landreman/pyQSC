@@ -3,8 +3,8 @@ This module contains the functions for solving the sigma equation
 and computing diagnostics of the O(r^1) solution.
 """
 
-import logging
 import numpy as np
+import logging
 from .util import fourier_minimum
 from .newton import newton
 
