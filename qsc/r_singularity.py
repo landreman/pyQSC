@@ -5,9 +5,9 @@ Functions for computing the maximum r at which the flux surfaces
 become singular.
 """
 
-import numpy as np
 import logging
 import warnings
+import numpy as np
 #from .util import Struct, fourier_minimum
 
 #logging.basicConfig(level=logging.DEBUG)

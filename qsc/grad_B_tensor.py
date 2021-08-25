@@ -4,8 +4,8 @@
 Functions for computing the grad B tensor and grad grad B tensor.
 """
 
-import numpy as np
 import logging
+import numpy as np
 from .util import Struct, fourier_minimum
 
 #logging.basicConfig(level=logging.INFO)
