@@ -135,6 +135,7 @@ def init_axis(self):
     self.normal_cylindrical = normal_cylindrical 
     self.binormal_cylindrical = binormal_cylindrical
     self.Bbar = self.spsi * self.B0
+    self.abs_G0_over_B0 = abs_G0_over_B0
 
     # The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero
     self.lasym = np.max(np.abs(self.rs))>0 or np.max(np.abs(self.zc))>0 or np.abs(self.sigma0)>0

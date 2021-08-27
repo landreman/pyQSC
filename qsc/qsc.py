@@ -22,6 +22,7 @@ class Qsc():
         _determine_helicity, r1_diagnostics
     from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor
     from .calculate_r2 import calculate_r2
+    from .calculate_r3 import calculate_r3
     from .mercier import mercier
     from .r_singularity import calculate_r_singularity
     from .plot import plot, get_boundary, B_fieldline, B_contour, plot_axis
@@ -107,8 +108,10 @@ class Qsc():
         self.init_axis()
         self.solve_sigma_equation()
         self.r1_diagnostics()
-        if self.order == 'r2':
+        if self.order != 'r2':
             self.calculate_r2()
+            if self.order == 'r3':
+                self.calculate_r3()
     
     def get_dofs(self):
         """
