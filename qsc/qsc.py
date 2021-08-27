@@ -108,7 +108,7 @@ class Qsc():
         self.init_axis()
         self.solve_sigma_equation()
         self.r1_diagnostics()
-        if self.order != 'r2':
+        if self.order != 'r1':
             self.calculate_r2()
             if self.order == 'r3':
                 self.calculate_r3()
