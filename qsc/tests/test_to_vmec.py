@@ -170,7 +170,7 @@ class ToVmecTests(unittest.TestCase):
 
             logger.info('Reading from Fortran')
             abs_filename = os.path.join(os.path.dirname(__file__), filename)
-            f    = netcdf.netcdf_file(abs_filename, 'r')
+            f    = netcdf.netcdf_file(abs_filename, 'r', mmap=False)
             r    = f.variables['r'][()]
             p2   = f.variables['p2'][()]
             rc   = f.variables['R0c'][()]
