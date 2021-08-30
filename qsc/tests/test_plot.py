@@ -65,7 +65,8 @@ def compare_with_fortran(name, filename, ntheta = 60, nphi = 100, rtol=1e-7, ato
     R_fortran, Z_fortran, R0_fortran, Z0_fortran, r, mpol, ntor, nphi_axis = fortran_plot_single(filename=filename, ntheta=ntheta, nphi=nphi)
 
     logger.info('Creating pyQSC configuration')
-    stel = Qsc.from_paper(name, nphi=nphi_axis)
+    order = 'r2' if name[1] == '2' else 'r1'
+    stel = Qsc.from_paper(name, nphi=nphi_axis, order=order)
     logger.info('Creating R and Z arrays with get_boundary function')
     _, _, Z_qsc, R_qsc = stel.get_boundary(r=r, ntheta=ntheta, nphi=nphi, mpol=mpol, ntor=ntor, ntheta_fourier=2*mpol)
     logger.info('Creating R0 and Z0 arrays with R0_func and Z0_func functions')
@@ -84,32 +85,32 @@ class PlotTests(unittest.TestCase):
         super(PlotTests, self).__init__(*args, **kwargs)
         logger = logging.getLogger('qsc.qsc')
         logger.setLevel(1)
-        self.cases=["r1 section 5.1","r1 section 5.2","r1 section 5.3",\
-                    "r2 section 5.1","r2 section 5.2","r2 section 5.3","r2 section 5.4","r2 section 5.5"]
-        self.fortran_names=["quasisymmetry_out.LandremanSenguptaPlunk2019_section5.1_order_r1_finite_r_nonlinear.nc",
-                            "quasisymmetry_out.LandremanSenguptaPlunk2019_section5.2_order_r1_finite_r_nonlinear.nc",
-                            "quasisymmetry_out.LandremanSenguptaPlunk2019_section5.3_order_r1_finite_r_nonlinear.nc",
-                            "quasisymmetry_out.LandremanSengupta2019_section5.1_order_r2_finite_r_nonlinear.nc",
-                            "quasisymmetry_out.LandremanSengupta2019_section5.2_order_r2_finite_r_nonlinear.nc",
-                            "quasisymmetry_out.LandremanSengupta2019_section5.3_order_r2_finite_r_nonlinear.nc",
-                            "quasisymmetry_out.LandremanSengupta2019_section5.4_order_r2_finite_r_nonlinear.nc",
-                            "quasisymmetry_out.LandremanSengupta2019_section5.5_order_r2_finite_r_nonlinear.nc"]
+        self.cases = ["r1 section 5.1","r1 section 5.2","r1 section 5.3",\
+                      "r2 section 5.1","r2 section 5.2","r2 section 5.3","r2 section 5.4","r2 section 5.5"]
+        self.fortran_names = ["quasisymmetry_out.LandremanSenguptaPlunk2019_section5.1_order_r1_finite_r_nonlinear.nc",
+                              "quasisymmetry_out.LandremanSenguptaPlunk2019_section5.2_order_r1_finite_r_nonlinear.nc",
+                              "quasisymmetry_out.LandremanSenguptaPlunk2019_section5.3_order_r1_finite_r_nonlinear.nc",
+                              "quasisymmetry_out.LandremanSengupta2019_section5.1_order_r2_finite_r_nonlinear.nc",
+                              "quasisymmetry_out.LandremanSengupta2019_section5.2_order_r2_finite_r_nonlinear.nc",
+                              "quasisymmetry_out.LandremanSengupta2019_section5.3_order_r2_finite_r_nonlinear.nc",
+                              "quasisymmetry_out.LandremanSengupta2019_section5.4_order_r2_finite_r_nonlinear.nc",
+                              "quasisymmetry_out.LandremanSengupta2019_section5.5_order_r2_finite_r_nonlinear.nc"]
 
     def test_plot_call(self):
         """
         A call to plot() to check that it works with
         a first order case and a second order one
         """
-        stel=Qsc.from_paper("r1 section 5.1")
+        stel = Qsc.from_paper("r1 section 5.1")
         # stel.plot(fieldlines=True)
-        stel.plot()
-        stel.B_fieldline()
-        stel.B_contour()
-        stel=Qsc.from_paper(4)
+        stel.plot(show=False)
+        stel.B_fieldline(show=False)
+        stel.B_contour(show=False)
+        stel = Qsc.from_paper(4)
         # stel.plot(fieldlines=True)
-        stel.plot()
-        stel.B_fieldline()
-        stel.B_contour()
+        stel.plot(show=False)
+        stel.B_fieldline(show=False)
+        stel.B_contour(show=False)
 
     def test_compare_with_fortran(self):
         """
@@ -123,10 +124,10 @@ class PlotTests(unittest.TestCase):
         """
         Test call to plot axis shape
         """
-        stel=Qsc.from_paper('r1 section 5.2')
-        stel.plot_axis(frenet=False)
-        stel=Qsc.from_paper(4)
-        stel.plot_axis(frenet=False)
+        stel = Qsc.from_paper('r1 section 5.2')
+        stel.plot_axis(frenet=False, show=False)
+        stel = Qsc.from_paper(4)
+        stel.plot_axis(frenet=False, show=False)
                 
 if __name__ == "__main__":
     unittest.main()

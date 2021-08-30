@@ -194,7 +194,8 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, n
     return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew
 
 def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
-         fieldlines=False, savefig=None, colormap=None, azim_default=None, **kwargs):
+         fieldlines=False, savefig=None, colormap=None, azim_default=None,
+         show=True, **kwargs):
     """
     Plot the near-axis configuration. There are two main ways of
     running this function.
@@ -228,6 +229,7 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
         If ``None``, no figure files will be saved.
       colormap (cmap): Custom colormap for the 3D plots
       azim_default: Default azimuthal angle for the three subplots in the 3D surface plot
+      show: Whether or not to call the matplotlib/mayavi ``show()`` command.
       kwargs: Any additional key-value pairs to pass to matplotlib's plot_surface.
 
     This function generates plots similar to the ones below:
@@ -320,10 +322,11 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
         # Save figure
         if savefig != None:
             fig.savefig(savefig + '3D.png')
-        # Show figures
-        plt.show()
-        # Close figures
-        plt.close()
+        if show:
+            # Show figures
+            plt.show()
+            # Close figures
+            plt.close()
     else:
         ## X, Y, Z arrays for the field lines
         # Plot different field lines corresponding to different alphas
@@ -339,10 +342,11 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
         # Import mayavi and rotation packages (takes a few seconds)
         from mayavi import mlab
         from scipy.spatial.transform import Rotation as R
-        # Show RZ plot
-        plt.show()
-        # Close RZ plot
-        plt.close()
+        if show:
+            # Show RZ plot
+            plt.show()
+            # Close RZ plot
+            plt.close()
         # Create 3D figure
         fig = mlab.figure(bgcolor=(1,1,1), size=(430,720))
         # Create subplots
@@ -365,12 +369,13 @@ def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
         # Save figure
         if savefig != None:
             mlab.savefig(filename=savefig+'3D_fieldlines.png', figure=fig)
-        # Show mayavi plot
-        mlab.show()
-        # Close mayavi plots
-        mlab.close(all=True)
+        if show:
+            # Show mayavi plot
+            mlab.show()
+            # Close mayavi plots
+            mlab.close(all=True)
 
-def B_fieldline(self, r=0.1, alpha=0, phimax=None, nphi=400):
+def B_fieldline(self, r=0.1, alpha=0, phimax=None, nphi=400, show=True):
     '''
     Plot the modulus of the magnetic field B along a field line with
     the Boozer toroidal angle varphi acting as a field-line following
@@ -381,6 +386,7 @@ def B_fieldline(self, r=0.1, alpha=0, phimax=None, nphi=400):
       alpha (float): Field-line label
       phimax (float): Maximum value of the field-line following parameter varphi
       nphi (int): resolution of the phi grid
+      show (bool): Whether or not to call the matplotlib ``show()`` command.
     '''
     if phimax is None:
         phimax = 10 * np.pi / abs(self.iota)
@@ -394,10 +400,11 @@ def B_fieldline(self, r=0.1, alpha=0, phimax=None, nphi=400):
     ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
     ax.xaxis.set_major_locator(tck.MultipleLocator(base=2))
     plt.tight_layout()
-    plt.show()
-    plt.close()
+    if show:
+        plt.show()
+        plt.close()
 
-def B_contour(self, r=0.1, ntheta=100, nphi=120, ncontours=10):
+def B_contour(self, r=0.1, ntheta=100, nphi=120, ncontours=10, show=True):
     '''
     Plot contours of constant B, with B the modulus of the
     magnetic field, as a function of Boozer coordinates theta and varphi
@@ -407,6 +414,7 @@ def B_contour(self, r=0.1, ntheta=100, nphi=120, ncontours=10):
       ntheta (int): Number of grid points to plot in the Boozer poloidal angle.
       nphi   (int): Number of grid points to plot in the Boozer toroidal angle.
       ncontours (int): number of contours to show in the plot
+      show (bool): Whether or not to call the matplotlib ``show()`` command.
     '''
     theta_array = np.linspace(0, 2 * np.pi, ntheta)
     phi_array = np.linspace(0, 2 * np.pi, nphi)
@@ -423,10 +431,11 @@ def B_contour(self, r=0.1, ntheta=100, nphi=120, ncontours=10):
     ax.xaxis.set_major_locator(tck.MultipleLocator(base=0.5))
     ax.yaxis.set_major_locator(tck.MultipleLocator(base=0.5))
     plt.tight_layout()
-    plt.show()
-    plt.close()
+    if show:
+        plt.show()
+        plt.close()
 
-def plot_axis(self, nphi=100, frenet=True, nphi_frenet=80, frenet_factor=0.12, savefig=None):
+def plot_axis(self, nphi=100, frenet=True, nphi_frenet=80, frenet_factor=0.12, savefig=None, show=True):
     '''
     Plot axis shape and the Frenet-Serret frame along
     the axis (optional). If frenet is true, creates
@@ -444,6 +453,7 @@ def plot_axis(self, nphi=100, frenet=True, nphi_frenet=80, frenet_factor=0.12, s
       savefig (string): filename to save resulting figure in png format.
         Note that ``.png`` will be appended.
         If ``None``, no figure file will be saved.
+      show (bool): Whether or not to call the matplotlib/mayavi ``show()`` command.
     '''
     # Create array of toroidal angles along the axis
     # where the axis points will be created
@@ -509,8 +519,9 @@ def plot_axis(self, nphi=100, frenet=True, nphi_frenet=80, frenet_factor=0.12, s
         # Save figure
         if savefig != None:
             mlab.savefig(savefig + '.png')
-        # Show figure
-        mlab.show()
+        if show:
+            # Show figure
+            mlab.show()
     else:
         # Do not show Frenet-Serret frame
         # Initiate matplotlib instance
@@ -528,5 +539,6 @@ def plot_axis(self, nphi=100, frenet=True, nphi_frenet=80, frenet_factor=0.12, s
         # Save figure
         if savefig != None:
             fig.savefig(savefig + '.png')
-        # Show figure
-        plt.show()
+        if show:
+            # Show figure
+            plt.show()

@@ -27,7 +27,8 @@ def compare_to_fortran(name, filename):
     ntor = f.variables['ntor'][()]
 
     logger.info('Creating pyQSC configuration')
-    py = Qsc.from_paper(name, nphi=nphi)
+    order = 'r2' if name[1] == '2' else 'r1'
+    py = Qsc.from_paper(name, nphi=nphi, order=order)
     logger.info('Creating RBC, RBS, ZBC and ZBS arrays with to_vmec function')
     py.to_vmec(str("input."+name).replace(" ",""), r=r,params={'mpol': mpol, 'ntor': ntor})
 
@@ -54,7 +55,8 @@ def compare_to_vmec(name, r=0.005, nphi=151):
     abs_filename = os.path.join(os.path.dirname(__file__), inputFile)
     # Run pyQsc and create a VMEC input file
     logger.info('Creating pyQSC configuration')
-    py = Qsc.from_paper(name, nphi=nphi)
+    order = 'r2' if name[1] == '2' else 'r1'
+    py = Qsc.from_paper(name, nphi=nphi, order=order)
     logger.info('Outputing to VMEC')
     py.to_vmec(inputFile,r)
     # Run VMEC
