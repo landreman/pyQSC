@@ -3,11 +3,11 @@ This module contains the routine to initialize quantities like
 curvature and torsion from the magnetix axis shape.
 """
 
-import numpy as np
 import logging
+import numpy as np
+from scipy.interpolate import CubicSpline as spline
 from .spectral_diff_matrix import spectral_diff_matrix
 from .util import fourier_minimum
-from scipy.interpolate import CubicSpline as spline
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -135,6 +135,7 @@ def init_axis(self):
     self.normal_cylindrical = normal_cylindrical 
     self.binormal_cylindrical = binormal_cylindrical
     self.Bbar = self.spsi * self.B0
+    self.abs_G0_over_B0 = abs_G0_over_B0
 
     # The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero
     self.lasym = np.max(np.abs(self.rs))>0 or np.max(np.abs(self.zc))>0 or np.abs(self.sigma0)>0
@@ -147,13 +148,16 @@ def init_axis(self):
                                                self.zs[i]*np.sin(i*self.nfp*self.phi) \
                                               for i in range(len(self.zs))]))
 
-    # Spline interpolants for the cylindrical components of the Frenet-Serret frame
-    self.normal_R_spline = self.convert_to_spline(self.normal_cylindrical[:,0])
-    self.normal_phi_spline = self.convert_to_spline(self.normal_cylindrical[:,1])
-    self.normal_z_spline = self.convert_to_spline(self.normal_cylindrical[:,2])
-    self.binormal_R_spline = self.convert_to_spline(self.binormal_cylindrical[:,0])
+    # Spline interpolants for the cylindrical components of the Frenet-Serret frame:
+    self.normal_R_spline     = self.convert_to_spline(self.normal_cylindrical[:,0])
+    self.normal_phi_spline   = self.convert_to_spline(self.normal_cylindrical[:,1])
+    self.normal_z_spline     = self.convert_to_spline(self.normal_cylindrical[:,2])
+    self.binormal_R_spline   = self.convert_to_spline(self.binormal_cylindrical[:,0])
     self.binormal_phi_spline = self.convert_to_spline(self.binormal_cylindrical[:,1])
-    self.binormal_z_spline = self.convert_to_spline(self.binormal_cylindrical[:,2])
-    self.tangent_R_spline = self.convert_to_spline(self.tangent_cylindrical[:,0])
-    self.tangent_phi_spline = self.convert_to_spline(self.tangent_cylindrical[:,1])
-    self.tangent_z_spline = self.convert_to_spline(self.tangent_cylindrical[:,2])
+    self.binormal_z_spline   = self.convert_to_spline(self.binormal_cylindrical[:,2])
+    self.tangent_R_spline    = self.convert_to_spline(self.tangent_cylindrical[:,0])
+    self.tangent_phi_spline  = self.convert_to_spline(self.tangent_cylindrical[:,1])
+    self.tangent_z_spline    = self.convert_to_spline(self.tangent_cylindrical[:,2])
+
+    # Spline interpolant for nu = varphi - phi, used for plotting
+    self.nu_spline = self.convert_to_spline(self.varphi - self.phi)

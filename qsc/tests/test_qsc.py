@@ -6,6 +6,7 @@ from scipy.io import netcdf
 import numpy as np
 import logging
 from qsc.qsc import Qsc
+from qsc.util import to_Fourier
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -83,6 +84,53 @@ def check_r2(s):
     np.testing.assert_allclose(eq3residual, np.zeros(s.nphi), atol=atol)
     np.testing.assert_allclose(eq4residual, np.zeros(s.nphi), atol=atol)
 
+
+def fortran_plot_single(filename, ntheta=150, nphi = 4):
+    """
+    Function to extract boundary arrays from the fortran files
+    """
+    abs_filename = os.path.join(os.path.dirname(__file__), filename)
+    f = netcdf.netcdf_file(abs_filename,mode='r',mmap=False)
+    r = f.variables['r'][()]
+    nfp = f.variables['nfp'][()]
+    nphi_axis = f.variables['N_phi'][()]
+    mpol = f.variables['mpol'][()]
+    ntor = f.variables['ntor'][()]
+    RBC = f.variables['RBC'][()]
+    RBS = f.variables['RBS'][()]
+    ZBC = f.variables['ZBC'][()]
+    ZBS = f.variables['ZBS'][()]
+    R0c = f.variables['R0c'][()]
+    R0s = f.variables['R0s'][()]
+    Z0c = f.variables['Z0c'][()]
+    Z0s = f.variables['Z0s'][()]
+
+    theta1D = np.linspace(0,2*np.pi,ntheta)
+    phi1D = np.linspace(0,2*np.pi,nphi)
+    phi2D,theta2D = np.meshgrid(phi1D,theta1D)
+
+    R = np.zeros((ntheta,nphi))
+    z = np.zeros((ntheta,nphi))
+    for m in range(mpol+1):
+        for jn in range(ntor*2+1):
+            n = jn-ntor
+            angle = m * theta2D - nfp * n * phi2D
+            sinangle = np.sin(angle)
+            cosangle = np.cos(angle)
+            R += RBC[m,jn] * cosangle + RBS[m,jn] * sinangle
+            z += ZBC[m,jn] * cosangle + ZBS[m,jn] * sinangle
+
+    R0 = np.zeros(nphi)
+    z0 = np.zeros(nphi)
+    for n in range(len(R0c)):
+        angle = nfp * n * phi1D
+        sinangle = np.sin(angle)
+        cosangle = np.cos(angle)
+        R0 += R0c[n] * cosangle + R0s[n] * sinangle
+        z0 += Z0c[n] * cosangle + Z0s[n] * sinangle
+
+    return R, z, R0, z0, r, mpol, ntor, nphi_axis
+
 def compare_to_fortran(name, filename):
     """
     Compare output from this python code to the fortran code, for one
@@ -90,10 +138,14 @@ def compare_to_fortran(name, filename):
     """
     # Add the directory of this file to the specified filename:
     abs_filename = os.path.join(os.path.dirname(__file__), filename)
-    f = netcdf.netcdf_file(abs_filename, 'r')
-    nphi = f.variables['N_phi'][()]
+    f      = netcdf.netcdf_file(abs_filename, 'r')
+    nphi   = f.variables['N_phi'][()]
+    mpol   = f.variables['mpol'][()]
+    ntor   = f.variables['ntor'][()]
+    r      = f.variables['r'][()]
+    ntheta = 20
 
-    py = Qsc.from_paper(name, nphi=nphi)
+    py = Qsc.from_paper(name, nphi=nphi, order='r3')
     logger.info('Comparing to fortran file ' + abs_filename)
 
     def compare_field(fortran_name, py_field, rtol=1e-9, atol=1e-9):
@@ -125,7 +177,50 @@ def compare_to_fortran(name, filename):
         compare_field('grad_grad_B_inverse_scale_length', py.grad_grad_B_inverse_scale_length)
         #compare_field('r_singularity', py.r_singularity) # Could be different if Newton refinement was on in 1 but not the other
         compare_field('r_singularity_basic_vs_zeta', py.r_singularity_basic_vs_varphi)
-    
+    if hasattr(py, 'X3c1'):
+        compare_field('X3c1', py.X3c1)
+        compare_field('X3s1', py.X3s1)
+        compare_field('Y3c1', py.Y3c1)
+        compare_field('Y3s1', py.Y3s1)
+        compare_field('Z3c1', py.Z3c1)
+        compare_field('Z3s1', py.Z3s1)
+        compare_field('X3c3', py.X3c3)
+        compare_field('X3s3', py.X3s3)
+        compare_field('Y3c3', py.Y3c3)
+        compare_field('Y3s3', py.Y3s3)
+        compare_field('Z3c3', py.Z3c3)
+        compare_field('Z3s3', py.Z3s3)
+        compare_field('B0_order_a_squared_to_cancel', py.B0_order_a_squared_to_cancel)
+
+    # logger.info('Creating RBC, RBS, ZBC and ZBS arrays')
+    R_2D, Z_2D, _ = py.Frenet_to_cylindrical(r=r, ntheta=ntheta)
+    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, py.nfp, mpol, ntor, py.lasym)
+
+    RBC = RBC.transpose()
+    ZBS = ZBS.transpose()
+    if py.lasym:
+        RBS = RBS.transpose()
+        ZBC = ZBC.transpose()
+
+    # logger.info('Comparing RBC, RBS, ZBC and ZBS arrays')
+    compare_field('RBC', RBC)
+    compare_field('RBS', RBS)
+    compare_field('ZBC', ZBC)
+    compare_field('ZBS', ZBS)
+
+    # logger.info('Test boundary and axis splines in cylindrical coordinates')
+    R_fortran, Z_fortran, R0_fortran, Z0_fortran, r, mpol, ntor, _ = fortran_plot_single(filename=filename, ntheta=ntheta, nphi=nphi)
+    _, _, Z_qsc, R_qsc = py.get_boundary(r=r, ntheta=ntheta, nphi=nphi, mpol=mpol, ntor=ntor, ntheta_fourier=2*mpol)
+    phi_array = np.linspace(0, 2*np.pi, nphi)
+    R0_qsc = py.R0_func(phi_array)
+    Z0_qsc = py.Z0_func(phi_array)
+    rtol = 1e-7
+    atol = 1e-7
+    np.testing.assert_allclose(R_fortran, R_qsc,   rtol=rtol, atol=atol)
+    np.testing.assert_allclose(Z_fortran, Z_qsc,   rtol=rtol, atol=atol)
+    np.testing.assert_allclose(R0_fortran, R0_qsc, rtol=rtol, atol=atol)
+    np.testing.assert_allclose(Z0_fortran, Z0_qsc, rtol=rtol, atol=atol)
+
     f.close()
     
 class QscTests(unittest.TestCase):
