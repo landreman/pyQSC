@@ -6,6 +6,7 @@ from scipy.io import netcdf
 import numpy as np
 import logging
 from qsc.qsc import Qsc
+from qsc.util import to_Fourier
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -90,10 +91,14 @@ def compare_to_fortran(name, filename):
     """
     # Add the directory of this file to the specified filename:
     abs_filename = os.path.join(os.path.dirname(__file__), filename)
-    f = netcdf.netcdf_file(abs_filename, 'r')
-    nphi = f.variables['N_phi'][()]
+    f      = netcdf.netcdf_file(abs_filename, 'r')
+    nphi   = f.variables['N_phi'][()]
+    mpol   = f.variables['mpol'][()]
+    ntor   = f.variables['ntor'][()]
+    r      = f.variables['r'][()]
+    ntheta = 20
 
-    py = Qsc.from_paper(name, nphi=nphi)
+    py = Qsc.from_paper(name, nphi=nphi, order='r3')
     logger.info('Comparing to fortran file ' + abs_filename)
 
     def compare_field(fortran_name, py_field, rtol=1e-9, atol=1e-9):
@@ -125,7 +130,36 @@ def compare_to_fortran(name, filename):
         compare_field('grad_grad_B_inverse_scale_length', py.grad_grad_B_inverse_scale_length)
         #compare_field('r_singularity', py.r_singularity) # Could be different if Newton refinement was on in 1 but not the other
         compare_field('r_singularity_basic_vs_zeta', py.r_singularity_basic_vs_varphi)
-    
+    if hasattr(py, 'X3c1'):
+        compare_field('X3c1', py.X3c1)
+        compare_field('X3s1', py.X3s1)
+        compare_field('Y3c1', py.Y3c1)
+        compare_field('Y3s1', py.Y3s1)
+        compare_field('Z3c1', py.Z3c1)
+        compare_field('Z3s1', py.Z3s1)
+        compare_field('X3c3', py.X3c3)
+        compare_field('X3s3', py.X3s3)
+        compare_field('Y3c3', py.Y3c3)
+        compare_field('Y3s3', py.Y3s3)
+        compare_field('Z3c3', py.Z3c3)
+        compare_field('Z3s3', py.Z3s3)
+        compare_field('B0_order_a_squared_to_cancel', py.B0_order_a_squared_to_cancel)
+
+    logger.info('Creating RBC, RBS, ZBC and ZBS arrays')
+    R_2D, Z_2D, phi0_2D = py.Frenet_to_cylindrical(r=r, ntheta=ntheta)
+    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, py.nfp, mpol, ntor, py.lasym)
+
+    RBC = RBC.transpose()
+    ZBS = ZBS.transpose()
+    if py.lasym:
+        RBS = RBS.transpose()
+        ZBC = ZBC.transpose()
+
+    compare_field('RBC', RBC)
+    compare_field('RBS', RBS)
+    compare_field('ZBC', ZBC)
+    compare_field('ZBS', ZBS)
+
     f.close()
     
 class QscTests(unittest.TestCase):
