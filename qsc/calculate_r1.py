@@ -113,7 +113,7 @@ def r1_diagnostics(self):
     # is actually helical, with the theta=0 curve wrapping around the magnetic axis as you follow phi around toroidally. Therefore
     # here we convert to an untwisted poloidal angle, such that the theta=0 curve does not wrap around the axis.
     if self.helicity == 0:
-        self.X1s_untwisted = 0
+        self.X1s_untwisted = self.X1s
         self.X1c_untwisted = self.X1c
         self.Y1s_untwisted = self.Y1s
         self.Y1c_untwisted = self.Y1c

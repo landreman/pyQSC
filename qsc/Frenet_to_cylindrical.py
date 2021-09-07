@@ -125,14 +125,27 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
         sintheta = np.sin(theta[j_theta])
         X_at_this_theta = r * (self.X1c_untwisted * costheta + self.X1s_untwisted * sintheta)
         Y_at_this_theta = r * (self.Y1c_untwisted * costheta + self.Y1s_untwisted * sintheta)
-        Z_at_this_theta = 0*X_at_this_theta
+        Z_at_this_theta = 0 * X_at_this_theta
         if self.order != 'r1':
             # We need O(r^2) terms:
-            cos2theta = np.cos(2*theta[j_theta])
-            sin2theta = np.sin(2*theta[j_theta])
-            X_at_this_theta = X_at_this_theta + r*r*(self.X20_untwisted + self.X2c_untwisted * cos2theta + self.X2s_untwisted * sin2theta)
-            Y_at_this_theta = Y_at_this_theta + r*r*(self.Y20_untwisted + self.Y2c_untwisted * cos2theta + self.Y2s_untwisted * sin2theta)
-            Z_at_this_theta = Z_at_this_theta + r*r*(self.Z20_untwisted + self.Z2c_untwisted * cos2theta + self.Z2s_untwisted * sin2theta)
+            cos2theta = np.cos(2 * theta[j_theta])
+            sin2theta = np.sin(2 * theta[j_theta])
+            X_at_this_theta += r * r * (self.X20_untwisted + self.X2c_untwisted * cos2theta + self.X2s_untwisted * sin2theta)
+            Y_at_this_theta += r * r * (self.Y20_untwisted + self.Y2c_untwisted * cos2theta + self.Y2s_untwisted * sin2theta)
+            Z_at_this_theta += r * r * (self.Z20_untwisted + self.Z2c_untwisted * cos2theta + self.Z2s_untwisted * sin2theta)
+            if self.order == 'r3':
+                # We need O(r^3) terms:
+                costheta  = np.cos(theta[j_theta])
+                sintheta  = np.sin(theta[j_theta])
+                cos3theta = np.cos(3 * theta[j_theta])
+                sin3theta = np.sin(3 * theta[j_theta])
+                r3 = r * r * r
+                X_at_this_theta += r3 * (self.X3c1_untwisted * costheta + self.X3s1_untwisted * sintheta
+                                         + self.X3c3_untwisted * cos3theta + self.X3s3_untwisted * sin3theta)
+                Y_at_this_theta += r3 * (self.Y3c1_untwisted * costheta + self.Y3s1_untwisted * sintheta
+                                         + self.Y3c3_untwisted * cos3theta + self.Y3s3_untwisted * sin3theta)
+                Z_at_this_theta += r3 * (self.Z3c1_untwisted * costheta + self.Z3s1_untwisted * sintheta
+                                         + self.Z3c3_untwisted * cos3theta + self.Z3s3_untwisted * sin3theta)
         self.X_spline = self.convert_to_spline(X_at_this_theta)
         self.Y_spline = self.convert_to_spline(Y_at_this_theta)
         self.Z_spline = self.convert_to_spline(Z_at_this_theta)
@@ -148,4 +161,5 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
             R_2D[j_theta,j_phi] = final_R
             Z_2D[j_theta,j_phi] = final_z
             phi0_2D[j_theta,j_phi] = phi0_solution
+            
     return R_2D, Z_2D, phi0_2D

@@ -22,6 +22,7 @@ class Qsc():
         _determine_helicity, r1_diagnostics
     from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor
     from .calculate_r2 import calculate_r2
+    from .calculate_r3 import calculate_r3
     from .mercier import mercier
     from .r_singularity import calculate_r_singularity
     from .plot import plot, get_boundary, B_fieldline, B_contour, plot_axis
@@ -107,8 +108,10 @@ class Qsc():
         self.init_axis()
         self.solve_sigma_equation()
         self.r1_diagnostics()
-        if self.order == 'r2':
+        if self.order != 'r1':
             self.calculate_r2()
+            if self.order == 'r3':
+                self.calculate_r3()
     
     def get_dofs(self):
         """
@@ -154,34 +157,80 @@ class Qsc():
     def from_paper(cls, name, **kwargs):
         """
         Get one of the configurations that has been used in our papers.
+        Available values for ``name`` are
+        ``"r1 section 5.1"``,
+        ``"r1 section 5.2"``,
+        ``"r1 section 5.3"``,
+        ``"r2 section 5.1"``,
+        ``"r2 section 5.2"``,
+        ``"r2 section 5.3"``,
+        ``"r2 section 5.4"``, and
+        ``"r2 section 5.5"``.
+        These last 5 configurations can also be obtained by specifying an integer 1-5 for ``name``.
+        The configurations that begin with ``"r1"`` refer to sections in 
+        Landreman, Sengupta, and Plunk, Journal of Plasma Physics 85, 905850103 (2019).
+        The configurations that begin with ``"r2"`` refer to sections in 
+        Landreman and Sengupta, Journal of Plasma Physics 85, 815850601 (2019).
+
+        You can specify any other arguments of the ``Qsc`` constructor
+        in ``kwargs``. You can also use ``kwargs`` to override any of
+        the properties of the configurations from the papers. For
+        instance, you can modify the value of ``etabar`` in the first
+        example using
+
+        .. code-block::
+
+          q = qsc.Qsc.from_paper('r1 section 5.1', etabar=1.1)
         """
+
+        def add_default_args(kwargs_old, **kwargs_new):
+            """
+            Take any key-value arguments in ``kwargs_new`` and treat them as
+            defaults, adding them to the dict ``kwargs_old`` only if
+            they are not specified there.
+            """
+            for key in kwargs_new:
+                if key not in kwargs_old:
+                    kwargs_old[key] = kwargs_new[key]
+
+                    
         if name == "r1 section 5.1":
             """ The configuration from Landreman, Sengupta, Plunk (2019), section 5.1 """
-            return cls(rc=[1, 0.045], zs=[0, -0.045], nfp=3, etabar=-0.9, **kwargs)
+            add_default_args(kwargs, rc=[1, 0.045], zs=[0, -0.045], nfp=3, etabar=-0.9)
+                
         elif name == "r1 section 5.2":
             """ The configuration from Landreman, Sengupta, Plunk (2019), section 5.2 """
-            return cls(rc=[1, 0.265], zs=[0, -0.21], nfp=4, etabar=-2.25, **kwargs)
+            add_default_args(kwargs, rc=[1, 0.265], zs=[0, -0.21], nfp=4, etabar=-2.25)
+                
         elif name == "r1 section 5.3":
             """ The configuration from Landreman, Sengupta, Plunk (2019), section 5.3 """
-            return cls(rc=[1, 0.042], zs=[0, -0.042], zc=[0, -0.025], nfp=3, etabar=-1.1, sigma0=-0.6, **kwargs)
+            add_default_args(kwargs, rc=[1, 0.042], zs=[0, -0.042], zc=[0, -0.025], nfp=3, etabar=-1.1, sigma0=-0.6)
+                
         elif name == "r2 section 5.1" or name == '5.1' or name == 1:
             """ The configuration from Landreman & Sengupta (2019), section 5.1 """
-            return cls(rc=[1, 0.155, 0.0102], zs=[0, 0.154, 0.0111], nfp=2, etabar=0.64, order='r2', B2c=-0.00322, **kwargs)
+            add_default_args(kwargs, rc=[1, 0.155, 0.0102], zs=[0, 0.154, 0.0111], nfp=2, etabar=0.64, order='r3', B2c=-0.00322)
+            
         elif name == "r2 section 5.2" or name == '5.2' or name == 2:
             """ The configuration from Landreman & Sengupta (2019), section 5.2 """
-            return cls(rc=[1, 0.173, 0.0168, 0.00101], zs=[0, 0.159, 0.0165, 0.000985], nfp=2, etabar=0.632, order='r2', B2c=-0.158, **kwargs)
+            add_default_args(kwargs, rc=[1, 0.173, 0.0168, 0.00101], zs=[0, 0.159, 0.0165, 0.000985], nfp=2, etabar=0.632, order='r3', B2c=-0.158)
+                             
         elif name == "r2 section 5.3" or name == '5.3' or name == 3:
             """ The configuration from Landreman & Sengupta (2019), section 5.3 """
-            return cls(rc=[1, 0.09], zs=[0, -0.09], nfp=2, etabar=0.95, I2=0.9, order='r2', B2c=-0.7, p2=-600000., **kwargs)
+            add_default_args(kwargs, rc=[1, 0.09], zs=[0, -0.09], nfp=2, etabar=0.95, I2=0.9, order='r3', B2c=-0.7, p2=-600000.)
+                             
         elif name == "r2 section 5.4" or name == '5.4' or name == 4:
             """ The configuration from Landreman & Sengupta (2019), section 5.4 """
-            return cls(rc=[1, 0.17, 0.01804, 0.001409, 5.877e-05],
-                       zs=[0, 0.1581, 0.01820, 0.001548, 7.772e-05], nfp=4, etabar=1.569, order='r2', B2c=0.1348, **kwargs)
+            add_default_args(kwargs, rc=[1, 0.17, 0.01804, 0.001409, 5.877e-05],
+                       zs=[0, 0.1581, 0.01820, 0.001548, 7.772e-05], nfp=4, etabar=1.569, order='r3', B2c=0.1348)
+                             
         elif name == "r2 section 5.5" or name == '5.5' or name == 5:
             """ The configuration from Landreman & Sengupta (2019), section 5.5 """
-            return cls(rc=[1, 0.3], zs=[0, 0.3], nfp=5, etabar=2.5, sigma0=0.3, I2=1.6, order='r2', B2c=1., B2s=3., p2=-0.5e7, **kwargs)
+            add_default_args(kwargs, rc=[1, 0.3], zs=[0, 0.3], nfp=5, etabar=2.5, sigma0=0.3, I2=1.6, order='r3', B2c=1., B2s=3., p2=-0.5e7)
+                             
         else:
             raise ValueError('Unrecognized configuration name')
+
+        return cls(**kwargs)
 
     def min_R0_penalty(self):
         """

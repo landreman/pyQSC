@@ -182,11 +182,6 @@ def calculate_r2(self):
     self.d2_Y1c_d_varphi2 = np.matmul(d_d_varphi, self.d_Y1c_d_varphi)
     self.d2_Y1s_d_varphi2 = np.matmul(d_d_varphi, self.d_Y1s_d_varphi)
 
-    self.B0_order_a_squared_to_cancel = -sG * B0 * B0 * (self.G2 + I2 * self.N_helicity) * abs_G0_over_B0 / (2*G0*G0) \
-        -sG * spsi * B0 * 2 * (X2c * Y2s - X2s * Y2c) \
-        -sG * B0 * B0 / (2*G0) * (abs_G0_over_B0 * X20 * curvature - self.d_Z20_d_varphi) \
-        -sG * spsi * B0 * I2 / (4*G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1c*Y1c + Y1s*Y1s) + Y1c * self.d_X1c_d_varphi - X1c * self.d_Y1c_d_varphi)
-
     # Store all important results in self:
     self.V1 = V1
     self.V2 = V2
