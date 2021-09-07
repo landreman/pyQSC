@@ -2,8 +2,8 @@
 This module contains the calculation for the O(r^2) solution
 """
 
-import numpy as np
 import logging
+import numpy as np
 from .util import mu0
 
 #logging.basicConfig(level=logging.DEBUG)
@@ -182,11 +182,6 @@ def calculate_r2(self):
     self.d2_Y1c_d_varphi2 = np.matmul(d_d_varphi, self.d_Y1c_d_varphi)
     self.d2_Y1s_d_varphi2 = np.matmul(d_d_varphi, self.d_Y1s_d_varphi)
 
-    self.B0_order_a_squared_to_cancel = -sG * B0 * B0 * (self.G2 + I2 * self.N_helicity) * abs_G0_over_B0 / (2*G0*G0) \
-        -sG * spsi * B0 * 2 * (X2c * Y2s - X2s * Y2c) \
-        -sG * B0 * B0 / (2*G0) * (abs_G0_over_B0 * X20 * curvature - self.d_Z20_d_varphi) \
-        -sG * spsi * B0 * I2 / (4*G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1c*Y1c + Y1s*Y1s) + Y1c * self.d_X1c_d_varphi - X1c * self.d_Y1c_d_varphi)
-
     # Store all important results in self:
     self.V1 = V1
     self.V2 = V2
@@ -211,3 +206,28 @@ def calculate_r2(self):
     #self.grad_grad_B_inverse_scale_length = t.grad_grad_B_inverse_scale_length
     self.calculate_r_singularity()
 
+    if self.helicity == 0:
+        self.X20_untwisted = self.X20
+        self.X2s_untwisted = self.X2s
+        self.X2c_untwisted = self.X2c
+        self.Y20_untwisted = self.Y20
+        self.Y2s_untwisted = self.Y2s
+        self.Y2c_untwisted = self.Y2c
+        self.Z20_untwisted = self.Z20
+        self.Z2s_untwisted = self.Z2s
+        self.Z2c_untwisted = self.Z2c
+    else:
+        angle = -self.helicity * self.nfp * self.varphi
+        sinangle = np.sin(angle)
+        cosangle = np.cos(angle)
+        self.X20_untwisted = self.X20
+        self.Y20_untwisted = self.Y20
+        self.Z20_untwisted = self.Z20
+        sinangle = np.sin(2*angle)
+        cosangle = np.cos(2*angle)
+        self.X2s_untwisted = self.X2s *   cosangle  + self.X2c * sinangle
+        self.X2c_untwisted = self.X2s * (-sinangle) + self.X2c * cosangle
+        self.Y2s_untwisted = self.Y2s *   cosangle  + self.Y2c * sinangle
+        self.Y2c_untwisted = self.Y2s * (-sinangle) + self.Y2c * cosangle
+        self.Z2s_untwisted = self.Z2s *   cosangle  + self.Z2c * sinangle
+        self.Z2c_untwisted = self.Z2s * (-sinangle) + self.Z2c * cosangle
