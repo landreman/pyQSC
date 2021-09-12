@@ -123,6 +123,12 @@ def init_axis(self):
     self.d_phi = d_phi
     self.R0 = R0
     self.Z0 = Z0
+    self.R0p = R0p
+    self.Z0p = Z0p
+    self.R0pp = R0pp
+    self.Z0pp = Z0pp
+    self.R0ppp = R0ppp
+    self.Z0ppp = Z0ppp
     self.G0 = G0
     self.d_l_d_phi = d_l_d_phi
     self.axis_length = axis_length

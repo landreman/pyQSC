@@ -525,6 +525,7 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     squared = grad_grad_B * grad_grad_B
     norm_squared = np.sum(squared, axis=(1,2,3))
     self.grad_grad_B_inverse_scale_length_vs_varphi = np.sqrt(np.sqrt(norm_squared) / (4*B0))
+    self.L_grad_grad_B = 1 / self.grad_grad_B_inverse_scale_length_vs_varphi
     self.grad_grad_B_inverse_scale_length = np.max(self.grad_grad_B_inverse_scale_length_vs_varphi)
 
     if not two_ways:

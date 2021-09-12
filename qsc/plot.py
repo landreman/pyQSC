@@ -11,6 +11,98 @@ from matplotlib.colors import LightSource
 import matplotlib.ticker as tck
 from .util import to_Fourier
 
+def plot(self, show=True):
+    """
+    Generate a matplotlib figure with an array of plots, showing the
+    toroidally varying properties of the configuration.
+
+    Args:
+        show: Whether to call matplotlib's ``show()`` function after making the plots.
+    """
+    plt.figure(figsize=(14, 7))
+    plt.rcParams.update({'font.size': 6})
+    if self.order == 'r1':
+        nrows = 3
+        ncols = 6
+    elif self.order == 'r2':
+        nrows = 4
+        ncols = 8
+    elif self.order == 'r3':
+        nrows = 5
+        ncols = 7
+    else:
+        raise RuntimeError('Should not get here')
+    jplot = 1
+
+    def subplot(title, data=None, y0=False):
+        """
+        data is assumed to correspond to title, unless specified otherwise.
+        Set y0 to True to avoid suppressed 0 on the y axis.
+        """
+        nonlocal jplot
+        if data is None:
+            data = eval('self.' + title)
+        plt.subplot(nrows, ncols, jplot)
+        jplot = jplot + 1
+        plt.plot(self.phi, data, label=title)
+        plt.xlabel(r'$\phi$')
+        plt.title(title)
+        if y0:
+            plt.ylim(bottom=0)
+        plt.xlim((0, self.phi[-1]))
+
+    subplot('R0')
+    subplot('Z0')
+    subplot('R0p')
+    subplot('Z0p')
+    subplot('R0pp')
+    subplot('Z0pp')
+    subplot('R0ppp')
+    subplot('Z0ppp')
+    subplot('curvature', y0=True)
+    subplot('torsion')
+    subplot('sigma')
+    subplot('X1c')
+    subplot('Y1c')
+    subplot('Y1s')
+    subplot('elongation', y0=True)
+    subplot('L_grad_B', y0=True)
+    subplot('1/L_grad_B', data=self.inv_L_grad_B)
+    if self.order != 'r1':
+        jplot -= 2
+        subplot('L_grad_grad_B')
+        plt.title('scale lengths')
+        plt.legend(loc=0, fontsize=5)
+        plt.ylim(0, max(max(self.L_grad_B), max(self.L_grad_grad_B)))
+        
+        subplot('1/L_grad_grad_B', self.grad_grad_B_inverse_scale_length_vs_varphi)
+        plt.title('inv scale lengths')
+        plt.legend(loc=0, fontsize=5)
+        plt.ylim(0, max(max(self.inv_L_grad_B), max(self.grad_grad_B_inverse_scale_length_vs_varphi)))
+        
+        subplot('B20')
+        subplot('V1')
+        subplot('V2')
+        subplot('V3')
+        subplot('X20')
+        subplot('X2c')
+        subplot('X2s')
+        subplot('Y20')
+        subplot('Y2c')
+        subplot('Y2s')
+        subplot('Z20')
+        subplot('Z2c')
+        subplot('Z2s')
+        subplot('r_singularity_vs_varphi', y0=True)
+        if self.order != 'r2':
+            subplot('X3c1')
+            subplot('Y3c1')
+            subplot('Y3s1')
+
+    plt.tight_layout()
+    if show:
+        plt.show()
+    
 def set_axes_equal(ax):
     '''
     Make axes of 3D plot have equal scale so that spheres appear as spheres,
@@ -193,11 +285,11 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, n
 
     return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew
 
-def plot(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
+def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
          fieldlines=False, savefig=None, colormap=None, azim_default=None,
          show=True, **kwargs):
     """
-    Plot the near-axis configuration. There are two main ways of
+    Plot the boundary of the near-axis configuration. There are two main ways of
     running this function.
 
     If ``fieldlines=False`` (default), 2 matplotlib figures are generated:
