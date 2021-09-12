@@ -3,7 +3,7 @@ This module contains a function to plot a near-axis surface.
 """
 
 import numpy as np
-from scipy.interpolate import interp2d
+from scipy.interpolate import interp2d, interp1d
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib.colors as clr
@@ -93,7 +93,9 @@ def plot(self, show=True):
         subplot('Z20')
         subplot('Z2c')
         subplot('Z2s')
-        subplot('r_singularity_vs_varphi', y0=True)
+        data = self.r_singularity_vs_varphi
+        data[data > 1e20] = np.NAN
+        subplot('r_singularity', data=data, y0=True)
         if self.order != 'r2':
             subplot('X3c1')
             subplot('Y3c1')
@@ -267,20 +269,20 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, n
         RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
         ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
 
-    theta1D = np.linspace(0,2*np.pi,ntheta)
-    phi1D = np.linspace(0,2*np.pi,nphi)
-    phi2D, theta2D = np.meshgrid(phi1D,theta1D)
-    R_2Dnew = np.zeros((ntheta,nphi))
-    Z_2Dnew = np.zeros((ntheta,nphi))
-    for m in range(mpol+1):
-        for n in range(-ntor, ntor+1):
+    theta1D = np.linspace(0, 2*np.pi, ntheta)
+    phi1D = np.linspace(0, 2*np.pi, nphi)
+    phi2D, theta2D = np.meshgrid(phi1D, theta1D)
+    R_2Dnew = np.zeros((ntheta, nphi))
+    Z_2Dnew = np.zeros((ntheta, nphi))
+    for m in range(mpol + 1):
+        for n in range(-ntor, ntor + 1):
             angle = m * theta2D - n * self.nfp * phi2D
             R_2Dnew += RBC[n+ntor,m] * np.cos(angle) + RBS[n+ntor,m] * np.sin(angle)
             Z_2Dnew += ZBC[n+ntor,m] * np.cos(angle) + ZBS[n+ntor,m] * np.sin(angle)
 
     # X, Y, Z arrays for the whole surface
-    x_2D_plot = R_2Dnew*np.cos(phi1D)
-    y_2D_plot = R_2Dnew*np.sin(phi1D)
+    x_2D_plot = R_2Dnew * np.cos(phi1D)
+    y_2D_plot = R_2Dnew * np.sin(phi1D)
     z_2D_plot = Z_2Dnew
 
     return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew
@@ -336,7 +338,10 @@ def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections
        :width: 200
     """
     x_2D_plot, y_2D_plot, z_2D_plot, R_2D_plot = self.get_boundary(r=r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier)
-
+    phi = np.linspace(0, 2 * np.pi, nphi)  # Endpoint = true and no nfp factor, because this is what is used in get_boundary()
+    R_2D_spline = interp1d(phi, R_2D_plot, axis=1)
+    z_2D_spline = interp1d(phi, z_2D_plot, axis=1)
+    
     ## Poloidal plot
     phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
     fig = plt.figure(figsize=(6, 6), dpi=80)
@@ -356,9 +361,8 @@ def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections
         color = next(ax._get_lines.prop_cycler)['color']
         # Plot location of the axis
         plt.plot(self.R0_func(phi), self.Z0_func(phi), marker="x", linewidth=2, label=label, color=color)
-        # Plot location of the poloidal cross-sections
-        pos = int(phi / (2 * np.pi) * nphi)
-        plt.plot(R_2D_plot[:, pos].flatten(), z_2D_plot[:, pos].flatten(), color=color)
+        # Plot poloidal cross-section
+        plt.plot(R_2D_spline(phi), z_2D_spline(phi), color=color)
     plt.xlabel('R (meters)')
     plt.ylabel('Z (meters)')
     plt.legend()
