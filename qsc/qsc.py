@@ -227,7 +227,79 @@ class Qsc():
         elif name == "r2 section 5.5" or name == '5.5' or name == 5:
             """ The configuration from Landreman & Sengupta (2019), section 5.5 """
             add_default_args(kwargs, rc=[1, 0.3], zs=[0, 0.3], nfp=5, etabar=2.5, sigma0=0.3, I2=1.6, order='r3', B2c=1., B2s=3., p2=-0.5e7)
-                             
+
+        elif name == "LandremanPaul2021QA" or name == "precise QA":
+            """
+            A fit of the near-axis model to the quasi-axisymmetric
+            configuration in Landreman & Paul, arXiv:2108.03711 (2021).
+
+            The fit was performed to the boozmn data using the script
+            20200621-01-Extract_B0_B1_B2_from_boozxform
+            """
+            add_default_args(kwargs,
+                             nfp=2,
+                             rc=[1.0038581971135636, 0.18400998741139907, 0.021723381370503204, 0.0025968236014410812, 0.00030601568477064874, 3.5540509760304384e-05, 4.102693907398271e-06, 5.154300428457222e-07, 4.8802742243232844e-08, 7.3011320375259876e-09],
+                             zs=[0.0, -0.1581148860568176, -0.02060702320552523, -0.002558840496952667, -0.0003061368667524159, -3.600111450532304e-05, -4.174376962124085e-06, -4.557462755956434e-07, -8.173481495049928e-08, -3.732477282851326e-09],
+                             B0=1.006541121335688,
+                             etabar=-0.6783912804454629,
+                             B2c=0.26859318908803137,
+                             nphi=99,
+                             order='r3')
+
+        elif name == "precise QA+well":
+            """
+            A fit of the near-axis model to the precise quasi-axisymmetric
+            configuration from SIMSOPT with magnetic well.
+
+            The fit was performed to the boozmn data using the script
+            20200621-01-Extract_B0_B1_B2_from_boozxform
+            """
+            add_default_args(kwargs,
+                             nfp=2,
+                             rc=[1.0145598919163676, 0.2106377247598754, 0.025469267136340394, 0.0026773601516136727, 0.00021104172568911153, 7.891887175655046e-06, -8.216044358250985e-07, -2.379942694112007e-07, -2.5495108673798585e-08, 1.1679227114962395e-08, 8.961288962248274e-09],
+                             zs=[0.0, -0.14607192982551795, -0.021340448470388084, -0.002558983303282255, -0.0002355043952788449, -1.2752278964149462e-05, 3.673356209179739e-07, 9.261098628194352e-08, -7.976283362938471e-09, -4.4204430633540756e-08, -1.6019372369445714e-08],
+                             B0=1.0117071561808106,
+                             etabar=-0.5064143402495729,
+                             B2c=-0.2749140163639202,
+                             nphi=99,
+                             order='r3')
+            
+        elif name == "LandremanPaul2021QH" or name == "precise QH":
+            """
+            A fit of the near-axis model to the quasi-helically symmetric
+            configuration in Landreman & Paul, arXiv:2108.03711 (2021).
+
+            The fit was performed to the boozmn data using the script
+            20211001-02-Extract_B0_B1_B2_from_boozxform
+            """
+            add_default_args(kwargs,
+                             nfp=4,
+                             rc=[1.0033608429348413, 0.19993025252481125, 0.03142704185268144, 0.004672593645851904, 0.0005589954792333977, 3.298415996551805e-05, -7.337736061708705e-06, -2.8829857667619663e-06, -4.51059545517434e-07],
+                             zs=[0.0, 0.1788824025525348, 0.028597666614604524, 0.004302393796260442, 0.0005283708386982674, 3.5146899855826326e-05, -5.907671188908183e-06, -2.3945326611145963e-06, -6.87509350019021e-07],
+                             B0=1.003244143729638,
+                             etabar=-1.5002839921360023,
+                             B2c=0.37896407142157423,
+                             nphi=99,
+                             order='r3')
+
+        elif name == "precise QH+well":
+            """
+            A fit of the near-axis model to the precise quasi-helically symmetric
+            configuration from SIMSOPT with magnetic well.
+
+            The fit was performed to the boozmn data using the script
+            20211001-02-Extract_B0_B1_B2_from_boozxform
+            """
+            add_default_args(kwargs,
+                             nfp=4,
+                             rc=[1.000474932581454, 0.16345392520298313, 0.02176330066615466, 0.0023779201451133163, 0.00014141976024376502, -1.0595894482659743e-05, -2.9989267970578764e-06, 3.464574408947338e-08],
+                             zs=[0.0, 0.12501739099323073, 0.019051257169780858, 0.0023674771227236587, 0.0001865909743321566, -2.2659053455802824e-06, -2.368335337174369e-06, -1.8521248561490157e-08],
+                             B0=0.999440074325872,
+                             etabar=-1.2115187546668142,
+                             B2c=0.6916862277166693,
+                             nphi=99,
+                             order='r3')
+            
         else:
             raise ValueError('Unrecognized configuration name')
 

@@ -83,6 +83,10 @@ def calculate_r3(self):
     self.Z3c3 = 0
     self.Z3s3 = 0
 
+    self.d_X3c1_d_varphi = self.d_d_varphi @ self.X3c1
+    self.d_Y3c1_d_varphi = self.d_d_varphi @ self.Y3c1
+    self.d_Y3s1_d_varphi = self.d_d_varphi @ self.Y3s1
+
     # The expression below is derived in the O(r^2) paper, and in "20190318-01 Wrick's streamlined Garren-Boozer method, MHD.nb" in the section "Not assuming quasisymmetry".
     # Note Q = (1/2) * (XYEquation0 without X3 and Y3 terms) where XYEquation0 is the quantity in the above notebook.
     Q = -sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (self.iotaN * I2 + mu0 * self.p2 * G0 / (B0 * B0)) + 2 * (X2c * Y2s - X2s * Y2c) \

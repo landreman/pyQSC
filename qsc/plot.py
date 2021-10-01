@@ -11,15 +11,17 @@ from matplotlib.colors import LightSource
 import matplotlib.ticker as tck
 from .util import to_Fourier
 
-def plot(self, show=True):
+def plot(self, newfigure=True, show=True):
     """
     Generate a matplotlib figure with an array of plots, showing the
     toroidally varying properties of the configuration.
 
     Args:
+        newfigure: Whether to create a new matplotlib figure.
         show: Whether to call matplotlib's ``show()`` function after making the plots.
     """
-    plt.figure(figsize=(14, 7))
+    if newfigure:
+        plt.figure(figsize=(14, 7))
     plt.rcParams.update({'font.size': 6})
     if self.order == 'r1':
         nrows = 3
