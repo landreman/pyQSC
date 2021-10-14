@@ -136,6 +136,7 @@ def r1_diagnostics(self):
     self.max_elongation = -fourier_minimum(-self.elongation)
 
     self.d_X1c_d_varphi = np.matmul(self.d_d_varphi, self.X1c)
+    self.d_X1s_d_varphi = np.matmul(self.d_d_varphi, self.X1s)
     self.d_Y1s_d_varphi = np.matmul(self.d_d_varphi, self.Y1s)
     self.d_Y1c_d_varphi = np.matmul(self.d_d_varphi, self.Y1c)
 

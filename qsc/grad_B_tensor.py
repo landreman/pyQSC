@@ -32,8 +32,21 @@ def calculate_grad_B_tensor(self):
     tensor.nb = factor * (s.d_Y1c_d_varphi * s.Y1s - s.d_Y1s_d_varphi * s.Y1c \
                         + s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
                         + s.iotaN * (s.Y1s * s.Y1s + s.Y1c * s.Y1c))
+    tensor.tt = 0
 
     self.grad_B_tensor = tensor
+    
+    t = self.tangent_cylindrical.transpose()
+    n = self.normal_cylindrical.transpose()
+    b = self.binormal_cylindrical.transpose()
+    self.grad_B_tensor_alt = np.array([[
+                                  tensor.nn * n[i] * n[j] \
+                                + tensor.bn * b[i] * n[j] + tensor.nb * n[i] * b[j] \
+                                + tensor.bb * b[i] * b[j] \
+                                + tensor.tn * t[i] * n[j] + tensor.nt * n[i] * t[j] \
+                                + tensor.tt * t[i] * t[j]
+                            for i in range(3)] for j in range(3)])
+
     self.grad_B_colon_grad_B = tensor.tn * tensor.tn + tensor.nt * tensor.nt \
         + tensor.bb * tensor.bb + tensor.nn * tensor.nn \
         + tensor.nb * tensor.nb + tensor.bn * tensor.bn
@@ -1177,3 +1190,260 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     grad_grad_B_alt[:,2,2,2] =(-2*B0*curvature*curvature)/sign_G
 
     self.grad_grad_B_alt = grad_grad_B_alt
+
+
+def Bfield_cylindrical(self, r=0, theta=0):
+    '''
+    Function to calculate the magnetic field vector B=(B_R,B_phi,B_Z) at
+    every point along the axis (hence with nphi points) where R, phi and Z
+    are the standard cylindrical coordinates for a given
+    near-axis radius r and a Boozer poloidal angle vartheta (not theta).
+
+    Args:
+      r: the near-axis radius
+      theta: the Boozer poloidal angle vartheta (= theta-N*phi)
+    '''
+    
+    # Define auxiliary variables
+    t = self.tangent_cylindrical.transpose()
+    n = self.normal_cylindrical.transpose()
+    b = self.binormal_cylindrical.transpose()
+    B0 = self.B0
+    sG = self.sG
+    G0 = self.G0
+    X1c = self.X1c
+    X1s = self.X1s
+    Y1c = self.Y1c
+    Y1s = self.Y1s
+    d_l_d_varphi = self.d_l_d_varphi
+    curvature = self.curvature
+    torsion = self.torsion
+    iotaN = self.iotaN
+    d_X1c_d_varphi = self.d_X1c_d_varphi
+    d_X1s_d_varphi = self.d_X1s_d_varphi
+    d_Y1s_d_varphi = self.d_Y1s_d_varphi
+    d_Y1c_d_varphi = self.d_Y1c_d_varphi
+
+    B0_vector = sG * B0 * t
+
+    if r == 0:
+        return B0_vector
+    else:
+        factor = B0*B0/G0
+        B1_vector_t = factor * (X1c * np.cos(theta) + X1s * np.sin(theta)) * d_l_d_varphi * curvature
+        B1_vector_n = factor * (np.cos(theta)*(d_X1c_d_varphi - Y1c * d_l_d_varphi * torsion + iotaN * X1s) + np.sin(theta)*(d_X1s_d_varphi - Y1s * d_l_d_varphi * torsion - iotaN * X1c))
+        B1_vector_b = factor * (np.cos(theta)*(d_Y1c_d_varphi + X1c * d_l_d_varphi * torsion + iotaN * Y1s) + np.sin(theta)*(d_Y1s_d_varphi + X1s * d_l_d_varphi * torsion - iotaN * Y1c))
+
+        B1_vector = B1_vector_t * t + B1_vector_n * n + B1_vector_b * b
+        B_vector_cylindrical = B0_vector + r * B1_vector
+
+        return B_vector_cylindrical
+
+def Bfield_cartesian(self, r=0, theta=0):
+    '''
+    Function to calculate the magnetic field vector B=(B_x,B_y,B_z) at
+    every point along the axis (hence with nphi points) where x, y and z
+    are the standard cartesian coordinates for a given
+    near-axis radius r and a Boozer poloidal angle vartheta (not theta).
+
+    Args:
+      r: the near-axis radius
+      theta: the Boozer poloidal angle vartheta (= theta-N*phi)
+    '''
+    B_vector_cylindrical = self.Bfield_cylindrical(r,theta)
+    phi = self.phi
+
+    B_x = np.cos(phi) * B_vector_cylindrical[0] - np.sin(phi) * B_vector_cylindrical[1]
+    B_y = np.sin(phi) * B_vector_cylindrical[0] + np.cos(phi) * B_vector_cylindrical[1]
+    B_z = B_vector_cylindrical[2]
+
+    B_vector_cartesian = np.array([B_x, B_y, B_z])
+
+    return B_vector_cartesian
+
+def Bfield_gradient_cylindrical(self):
+    '''
+    Function to calculate the gradient of the magnetic field vector B=(B_R,B_phi,B_Z)
+    at every point along the axis (hence with nphi points) where R, phi and Z
+    are the standard cylindrical coordinates.
+    '''
+    
+    # Define auxiliary variables
+    t = self.tangent_cylindrical.transpose()
+    n = self.normal_cylindrical.transpose()
+    b = self.binormal_cylindrical.transpose()
+    Bbar = self.Bbar
+    B0 = self.B0
+    sG = self.sG
+    G0 = self.G0
+    X1c = self.X1c
+    X1s = self.X1s
+    Y1c = self.Y1c
+    Y1s = self.Y1s
+    d_l_d_varphi = self.d_l_d_varphi
+    curvature = self.curvature
+    torsion = self.torsion
+    iotaN = self.iotaN
+    d_X1c_d_varphi = self.d_X1c_d_varphi
+    d_X1s_d_varphi = self.d_X1s_d_varphi
+    d_Y1s_d_varphi = self.d_Y1s_d_varphi
+    d_Y1c_d_varphi = self.d_Y1c_d_varphi
+
+    factor = B0*B0/Bbar/d_l_d_varphi
+    grad_B_vector_nn = factor * (d_X1c_d_varphi * Y1s - d_X1s_d_varphi * Y1c + iotaN * (X1s * Y1s + X1c * Y1c))
+    grad_B_vector_bn = factor * (X1c * d_X1s_d_varphi - X1s * d_X1c_d_varphi - sG * Bbar * d_l_d_varphi * torsion / B0 - iotaN * (X1s * X1s + X1c * X1c))
+    grad_B_vector_nb = factor * (d_Y1c_d_varphi * Y1s - d_Y1s_d_varphi * Y1c + sG * Bbar * d_l_d_varphi * torsion / B0 + iotaN * (Y1s * Y1s + Y1c * Y1c))
+    grad_B_vector_bb = factor * (X1c * d_Y1s_d_varphi - X1s * d_Y1c_d_varphi - iotaN * (X1s * Y1s + X1c * Y1c))
+    grad_B_vector_tn = sG * B0 * curvature
+    grad_B_vector_nt = sG * B0 * curvature
+    grad_B_vector_tt = 0#sG * np.matmul(self.d_d_varphi,B0)/d_l_d_varphi
+
+    grad_B_vector_cylindrical = np.array([[
+                                  grad_B_vector_nn * n[i] * n[j] \
+                                + grad_B_vector_bn * b[i] * n[j] + grad_B_vector_nb * n[i] * b[j] \
+                                + grad_B_vector_bb * b[i] * b[j] \
+                                + grad_B_vector_tn * t[i] * n[j] + grad_B_vector_nt * n[i] * t[j] \
+                                + grad_B_vector_tt * t[i] * t[j]
+                                for i in range(3)] for j in range(3)])
+
+    return grad_B_vector_cylindrical
+
+def Bfield_gradient_cartesian(self):
+    '''
+    Function to calculate the gradient of the magnetic field vector B=(B_x,B_y,B_z)
+    at every point along the axis (hence with nphi points) where x, y and z
+    are the standard cartesian coordinates.
+    '''
+
+    B0, B1, B2 = self.Bfield_cylindrical()
+    nablaB = self.Bfield_gradient_cylindrical()
+    cosphi = np.cos(self.phi)
+    sinphi = np.sin(self.phi)
+
+    grad_B_vector_cartesian = np.array([
+    [B1*cosphi*sinphi + B0*sinphi**2 + cosphi**2*nablaB[0, 0] - cosphi*sinphi*nablaB[0, 1] - cosphi*sinphi*nablaB[1, 0] + sinphi**2*nablaB[1, 1], 
+     sinphi*(cosphi*nablaB[0, 0] - sinphi*nablaB[0, 1]) - cosphi*(B1*cosphi + B0*sinphi - cosphi*nablaB[1, 0] + sinphi*nablaB[1, 1]), 
+     cosphi*nablaB[2, 0] - sinphi*nablaB[2, 1]], 
+    [cosphi*(sinphi*nablaB[0, 0] + cosphi*nablaB[0, 1]) - sinphi*(B0*cosphi - B1*sinphi + sinphi*nablaB[1, 0] + cosphi*nablaB[1, 1]), 
+     sinphi*(sinphi*nablaB[0, 0] + cosphi*nablaB[0, 1]) + cosphi*(B0*cosphi - B1*sinphi + sinphi*nablaB[1, 0] + cosphi*nablaB[1, 1]), 
+     sinphi*nablaB[2, 0] + cosphi*nablaB[2, 1]], 
+    [cosphi*nablaB[0, 2] - sinphi*nablaB[1, 2],
+     sinphi*nablaB[0, 2] + cosphi*nablaB[1, 2],
+     nablaB[2, 2]]
+    ])
+
+    return grad_B_vector_cartesian
+
+def Bfield_gradient_gradient_cylindrical(self):
+    '''
+    Function to calculate the gradient of of the gradient the magnetic field
+    vector B=(B_R,B_phi,B_Z) at every point along the axis (hence with nphi points)
+    where R, phi and Z are the standard cylindrical coordinates.
+    '''
+    return self.grad_grad_B_alt
+
+def Bfield_gradient_gradient_cartesian(self):
+    '''
+    Function to calculate the gradient of of the gradient the magnetic field
+    vector B=(B_x,B_y,B_z) at every point along the axis (hence with nphi points)
+    where x, y and z are the standard cartesian coordinates.
+    '''
+    B0, B1, B2 = self.Bfield_cylindrical()
+    nablaB = self.Bfield_gradient_cylindrical()
+    nablanablaB = self.Bfield_gradient_gradient_cylindrical()
+    cosphi = np.cos(self.phi)
+    sinphi = np.sin(self.phi)
+
+    grad_grad_B_vector_cartesian = np.array([
+      [[-2*B0*cosphi*sinphi**2 + B1*(-(cosphi**2*sinphi) + sinphi**3) + 
+        3*cosphi*sinphi**2*nablaB[0, 0] + 2*cosphi**2*sinphi*nablaB[0, 1] - 
+        sinphi**3*nablaB[0, 1] + cosphi**2*sinphi*nablaB[1, 0] - 2*sinphi**3*nablaB[1, 0] - 
+        3*cosphi*sinphi**2*nablaB[1, 1] - cosphi**2*sinphi*nablanablaB[1] - 
+        2*cosphi**2*sinphi*nablanablaB[10] + 2*cosphi*sinphi**2*nablanablaB[11] + 
+        cosphi*sinphi**2*nablanablaB[110] - sinphi**3*nablanablaB[111] + 
+        cosphi**3*nablanablaB[0, 0, 0], 2*B0*cosphi**2*sinphi + 
+        B1*(cosphi**3 - cosphi*sinphi**2) - 2*cosphi**2*sinphi*nablaB[0, 0] + 
+        sinphi**3*nablaB[0, 0] - cosphi**3*nablaB[0, 1] + 2*cosphi*sinphi**2*nablaB[0, 1] - 
+        cosphi**3*nablaB[1, 0] + 2*cosphi*sinphi**2*nablaB[1, 0] + 
+        3*cosphi**2*sinphi*nablaB[1, 1] - cosphi*sinphi**2*nablanablaB[1] + 
+        cosphi**3*nablanablaB[10] - cosphi*sinphi**2*nablanablaB[10] - 
+        cosphi**2*sinphi*nablanablaB[11] + sinphi**3*nablanablaB[11] - 
+        cosphi**2*sinphi*nablanablaB[110] + cosphi*sinphi**2*nablanablaB[111] + 
+        cosphi**2*sinphi*nablanablaB[0, 0, 0], cosphi**2*nablanablaB[20] + 
+        cosphi*sinphi*(nablaB[2, 1] - nablanablaB[21] - nablanablaB[120]) + 
+        sinphi**2*(nablaB[2, 0] + nablanablaB[121])], 
+       [-2*B1*cosphi*sinphi**2 + B0*sinphi*(cosphi**2 - sinphi**2) - 
+        2*cosphi**2*sinphi*nablaB[0, 0] + sinphi**3*nablaB[0, 0] - cosphi**3*nablaB[0, 1] + 
+        2*cosphi*sinphi**2*nablaB[0, 1] + 3*cosphi*sinphi**2*nablaB[1, 0] + 
+        2*cosphi**2*sinphi*nablaB[1, 1] - sinphi**3*nablaB[1, 1] - 
+        cosphi*sinphi**2*nablanablaB[1] + cosphi**3*nablanablaB[10] - 
+        cosphi*sinphi**2*nablanablaB[10] - cosphi**2*sinphi*nablanablaB[11] + 
+        sinphi**3*nablanablaB[11] - cosphi**2*sinphi*nablanablaB[110] + 
+        cosphi*sinphi**2*nablanablaB[111] + cosphi**2*sinphi*nablanablaB[0, 0, 0], 
+        -(B0*cosphi**3) + 2*B1*cosphi**2*sinphi + B0*cosphi*sinphi**2 + cosphi**3*nablaB[0, 0] - 
+        2*cosphi*sinphi**2*nablaB[0, 0] - 3*cosphi**2*sinphi*nablaB[0, 1] - 
+        3*cosphi**2*sinphi*nablaB[1, 0] - 2*cosphi**3*nablaB[1, 1] + 
+        cosphi*sinphi**2*nablaB[1, 1] - sinphi**3*nablanablaB[1] + 
+        2*cosphi**2*sinphi*nablanablaB[10] - 2*cosphi*sinphi**2*nablanablaB[11] + 
+        cosphi**3*nablanablaB[110] - cosphi**2*sinphi*nablanablaB[111] + 
+        cosphi*sinphi**2*nablanablaB[0, 0, 0], -(sinphi**2*nablanablaB[21]) + 
+        cosphi**2*(-nablaB[2, 1] + nablanablaB[120]) - 
+        cosphi*sinphi*(nablaB[2, 0] - nablanablaB[20] + nablanablaB[121])], 
+       [cosphi**2*nablanablaB[20] + cosphi*sinphi*(nablaB[2, 1] - nablanablaB[21] - 
+        nablanablaB[120]) + sinphi**2*(nablaB[2, 0] + nablanablaB[121]), 
+        -(sinphi**2*nablanablaB[21]) + cosphi**2*(-nablaB[2, 1] + nablanablaB[120]) - 
+        cosphi*sinphi*(nablaB[2, 0] - nablanablaB[20] + nablanablaB[121]), 
+        cosphi*nablanablaB[220] - sinphi*nablanablaB[221]]], 
+      [[-2*B1*cosphi*sinphi**2 + B0*sinphi*(cosphi**2 - sinphi**2) - 
+        2*cosphi**2*sinphi*nablaB[0, 0] + sinphi**3*nablaB[0, 0] + 
+        3*cosphi*sinphi**2*nablaB[0, 1] + 3*cosphi*sinphi**2*nablaB[1, 0] + 
+        cosphi**2*sinphi*nablaB[1, 1] - 2*sinphi**3*nablaB[1, 1] + cosphi**3*nablanablaB[1] - 
+        2*cosphi*sinphi**2*nablanablaB[10] - 2*cosphi**2*sinphi*nablanablaB[11] + 
+        sinphi**3*nablanablaB[110] + cosphi*sinphi**2*nablanablaB[111] + 
+        cosphi**2*sinphi*nablanablaB[0, 0, 0], 
+        -(cosphi*(-2*B1*cosphi*sinphi + B0*(cosphi**2 - sinphi**2) - cosphi**2*nablaB[0, 0] + 
+        sinphi**2*nablaB[0, 0] + 2*cosphi*sinphi*nablaB[0, 1] + 
+        3*cosphi*sinphi*nablaB[1, 0] + cosphi**2*nablaB[1, 1] - 2*sinphi**2*nablaB[1, 1] - 
+        cosphi*sinphi*nablanablaB[10] - cosphi**2*nablanablaB[11] + 
+        sinphi**2*nablanablaB[110] + cosphi*sinphi*nablanablaB[111])) + 
+        sinphi*(cosphi**2*nablanablaB[1] + sinphi**2*(nablaB[0, 1] - nablanablaB[10]) - 
+        cosphi*sinphi*(nablaB[0, 0] + nablanablaB[11] - nablanablaB[0, 0, 0])), 
+        cosphi**2*nablanablaB[21] + sinphi**2*(nablaB[2, 1] - nablanablaB[120]) - 
+        cosphi*sinphi*(nablaB[2, 0] - nablanablaB[20] + nablanablaB[121])], 
+       [-(sinphi*(-2*B0*cosphi*sinphi + B1*(-cosphi**2 + sinphi**2) + 
+        2*cosphi*sinphi*nablaB[0, 0] + cosphi**2*nablaB[0, 1] - sinphi**2*nablaB[0, 1] + 
+        2*cosphi**2*nablaB[1, 0] - sinphi**2*nablaB[1, 0] - 3*cosphi*sinphi*nablaB[1, 1] + 
+        sinphi**2*nablanablaB[10] + cosphi*sinphi*nablanablaB[11] + 
+        cosphi*sinphi*nablanablaB[110] + cosphi**2*nablanablaB[111])) + 
+        cosphi*(cosphi*sinphi*(-nablaB[0, 1] + nablanablaB[1] + nablanablaB[10]) + 
+        cosphi**2*(nablaB[0, 0] + nablanablaB[11]) + sinphi**2*nablanablaB[0, 0, 0]), 
+        -(B1*cosphi**3) - 2*B0*cosphi**2*sinphi + B1*cosphi*sinphi**2 + 
+        3*cosphi**2*sinphi*nablaB[0, 0] + cosphi**3*nablaB[0, 1] - 
+        2*cosphi*sinphi**2*nablaB[0, 1] + 2*cosphi**3*nablaB[1, 0] - 
+        cosphi*sinphi**2*nablaB[1, 0] - 3*cosphi**2*sinphi*nablaB[1, 1] + 
+        cosphi*sinphi**2*nablanablaB[1] + 2*cosphi*sinphi**2*nablanablaB[10] + 
+        2*cosphi**2*sinphi*nablanablaB[11] + cosphi**2*sinphi*nablanablaB[110] + 
+        cosphi**3*nablanablaB[111] + sinphi**3*nablanablaB[0, 0, 0], 
+        sinphi**2*nablanablaB[20] + cosphi*sinphi*(-nablaB[2, 1] + nablanablaB[21] + 
+        nablanablaB[120]) + cosphi**2*(nablaB[2, 0] + nablanablaB[121])], 
+       [cosphi**2*nablanablaB[21] + sinphi**2*(nablaB[2, 1] - nablanablaB[120]) - 
+        cosphi*sinphi*(nablaB[2, 0] - nablanablaB[20] + nablanablaB[121]), 
+        sinphi**2*nablanablaB[20] + cosphi*sinphi*(-nablaB[2, 1] + nablanablaB[21] + 
+        nablanablaB[120]) + cosphi**2*(nablaB[2, 0] + nablanablaB[121]), 
+        sinphi*nablanablaB[220] + cosphi*nablanablaB[221]]], 
+      [[cosphi**2*nablanablaB[2] + cosphi*sinphi*(nablaB[1, 2] - 2*nablanablaB[12]) + 
+        sinphi**2*(nablaB[0, 2] + nablanablaB[112]), -(sinphi**2*nablanablaB[12]) + 
+        cosphi**2*(-nablaB[1, 2] + nablanablaB[12]) - 
+        cosphi*sinphi*(nablaB[0, 2] - nablanablaB[2] + nablanablaB[112]), 
+        cosphi*nablanablaB[22] - sinphi*nablanablaB[122]], 
+       [sinphi**2*(nablaB[1, 2] - nablanablaB[12]) + cosphi**2*nablanablaB[12] - 
+        cosphi*sinphi*(nablaB[0, 2] - nablanablaB[2] + nablanablaB[112]), 
+        sinphi**2*nablanablaB[2] - cosphi*sinphi*(nablaB[1, 2] - 2*nablanablaB[12]) + 
+        cosphi**2*(nablaB[0, 2] + nablanablaB[112]), sinphi*nablanablaB[22] + 
+        cosphi*nablanablaB[122]],
+       [cosphi*nablanablaB[22] - sinphi*nablanablaB[122], 
+        sinphi*nablanablaB[22] + cosphi*nablanablaB[122],
+        nablanablaB[222]]
+      ]])
+
+    return grad_grad_B_vector_cartesian

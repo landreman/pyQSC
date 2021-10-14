@@ -121,5 +121,20 @@ class GradGradBTensorTests(unittest.TestCase):
                         np.testing.assert_allclose(s.grad_grad_B_alt[:,0,2,0], np.full(nphi, val), rtol=rtol, atol=atol)
                         np.testing.assert_allclose(s.grad_grad_B_alt[:,0,0,2], np.full(nphi, val), rtol=rtol, atol=atol)
                         
+
+class MagneticFieldTests(unittest.TestCase):
+
+    def test_magnetic_field(self):
+        """
+        Test the magnetic field vector and its derivative
+        for a known quasisymmetric field
+        """
+        stel = Qsc.from_paper(1, nphi=31)
+        stel.Bfield_cylindrical()
+        stel.Bfield_cartesian()
+        stel.Bfield_gradient_cylindrical()
+        stel.Bfield_gradient_cartesian()
+        np.testing.assert_almost_equal(stel.Bfield_gradient_cylindrical(),stel.grad_B_tensor_alt)
+                
 if __name__ == "__main__":
     unittest.main()
