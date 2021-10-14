@@ -124,17 +124,60 @@ class GradGradBTensorTests(unittest.TestCase):
 
 class MagneticFieldTests(unittest.TestCase):
 
-    def test_magnetic_field(self):
+    def test_magnetic_field_nabla(self):
         """
-        Test the magnetic field vector and its derivative
-        for a known quasisymmetric field
+        Test the magnetic field vector and its derivatives
         """
-        stel = Qsc.from_paper(1, nphi=31)
-        stel.Bfield_cylindrical()
-        stel.Bfield_cartesian()
-        stel.Bfield_gradient_cylindrical()
-        stel.Bfield_gradient_cartesian()
-        np.testing.assert_almost_equal(stel.Bfield_gradient_cylindrical(),stel.grad_B_tensor_alt)
+        # Test nablaB in axisymmetry, including symmetry in both indices
+        Rmajor = np.random.rand() * 2 + 0.3
+        B0 = np.random.rand() * 2 + 1.0
+        stel = Qsc(rc=[Rmajor,0.],zs=[0,0.],etabar=1.0,B0=B0)
+        factor = stel.B0/Rmajor
+        dBdx_cylindrical = stel.Bfield_gradient_cylindrical()
+        np.testing.assert_almost_equal(dBdx_cylindrical[0,0],np.zeros(stel.nphi))
+        np.testing.assert_almost_equal(dBdx_cylindrical[0,1],np.full(stel.nphi,-factor))
+        np.testing.assert_almost_equal(dBdx_cylindrical[1,1],np.zeros(stel.nphi))
+        np.testing.assert_almost_equal(dBdx_cylindrical,dBdx_cylindrical.transpose(1,0,2))
+        np.testing.assert_almost_equal(dBdx_cylindrical,stel.grad_B)
+        dBdx_cartesian = stel.Bfield_gradient_cartesian()
+        np.testing.assert_almost_equal(dBdx_cartesian[0,0],np.full(stel.nphi,factor*np.sin(2*stel.phi)))
+        np.testing.assert_almost_equal(dBdx_cartesian[0,1],np.full(stel.nphi,-factor*np.cos(2*stel.phi)))
+        np.testing.assert_almost_equal(dBdx_cartesian[1,1],np.full(stel.nphi,-factor*np.sin(2*stel.phi)))
+        np.testing.assert_almost_equal(dBdx_cartesian,dBdx_cartesian.transpose(1,0,2))
+
+        # Test nablaB for another configuration, including symmetry in both indices
+        stel = Qsc.from_paper(1)
+        dBdx_cylindrical = stel.Bfield_gradient_cylindrical()
+        np.testing.assert_almost_equal(dBdx_cylindrical,dBdx_cylindrical.transpose(1,0,2))
+        np.testing.assert_almost_equal(dBdx_cylindrical,stel.grad_B)
+        dBdx_cartesian = stel.Bfield_gradient_cartesian()
+        np.testing.assert_almost_equal(dBdx_cartesian,dBdx_cartesian.transpose(1,0,2))
+
+        # Test nablanablaB, including symmetry in three indices
+        dBdxdx_cylindrical = stel.Bfield_gradient_gradient_cylindrical()
+        np.testing.assert_almost_equal(np.transpose(stel.grad_grad_B,(1,2,3,0)),dBdxdx_cylindrical)
+        dBdxdx_cylindrical_transpose_1 = dBdxdx_cylindrical.transpose(0,2,1,3)
+        dBdxdx_cylindrical_transpose_2 = dBdxdx_cylindrical.transpose(1,0,2,3)
+        dBdxdx_cylindrical_transpose_3 = dBdxdx_cylindrical.transpose(1,2,0,3)
+        dBdxdx_cylindrical_transpose_4 = dBdxdx_cylindrical.transpose(2,0,1,3)
+        dBdxdx_cylindrical_transpose_5 = dBdxdx_cylindrical.transpose(2,1,0,3)
+        np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_1,dBdxdx_cylindrical)
+        np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_2,dBdxdx_cylindrical)
+        np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_3,dBdxdx_cylindrical)
+        np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_4,dBdxdx_cylindrical)
+        np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_5,dBdxdx_cylindrical)
+
+        dBdxdx_cartesian = stel.Bfield_gradient_gradient_cartesian()
+        dBdxdx_cartesian_transpose_1 = dBdxdx_cartesian.transpose(0,2,1,3)
+        dBdxdx_cartesian_transpose_2 = dBdxdx_cartesian.transpose(1,0,2,3)
+        dBdxdx_cartesian_transpose_3 = dBdxdx_cartesian.transpose(1,2,0,3)
+        dBdxdx_cartesian_transpose_4 = dBdxdx_cartesian.transpose(2,0,1,3)
+        dBdxdx_cartesian_transpose_5 = dBdxdx_cartesian.transpose(2,1,0,3)
+        np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_1,dBdxdx_cartesian)
+        np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_2,dBdxdx_cartesian)
+        np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_3,dBdxdx_cartesian)
+        np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_4,dBdxdx_cartesian)
+        np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_5,dBdxdx_cartesian)
                 
 if __name__ == "__main__":
     unittest.main()

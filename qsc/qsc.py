@@ -22,7 +22,8 @@ class Qsc():
     from .calculate_r1 import _residual, _jacobian, solve_sigma_equation, \
         _determine_helicity, r1_diagnostics
     from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor, \
-        Bfield_cylindrical, Bfield_cartesian, Bfield_gradient_cylindrical, Bfield_gradient_cartesian
+        Bfield_cylindrical, Bfield_cartesian, Bfield_gradient_cylindrical, Bfield_gradient_cartesian, \
+        Bfield_gradient_gradient_cylindrical, Bfield_gradient_gradient_cartesian
     from .calculate_r2 import calculate_r2
     from .calculate_r3 import calculate_r3
     from .mercier import mercier
