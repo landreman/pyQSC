@@ -371,7 +371,7 @@ def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections
     plt.tight_layout()
     ax.set_aspect('equal')
     if savefig != None:
-        fig.savefig(savefig + '_poloidal.png')
+        fig.savefig(savefig + '_poloidal.pdf')
 
     ## 3D plot
     # Set the default azimuthal angle of view in the 3D plot

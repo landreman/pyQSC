@@ -34,7 +34,7 @@ def newton(f, x0, jac, niter=20, tol=1e-13, nlinesearch=5):
             newton_tolerance_achieved = True
             break
 
-        j = jac(x0)
+        j = jac(x)
         x0 = np.copy(x)
         logger.info('Newton iteration {}'.format(jnewton))
         step_direction = -np.linalg.solve(j, residual)
