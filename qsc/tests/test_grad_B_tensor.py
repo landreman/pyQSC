@@ -52,7 +52,7 @@ class GradGradBTensorTests(unittest.TestCase):
                     s = Qsc.from_paper(config, sG=sG, spsi=spsi, B0=B0, nphi=65)
                     s.calculate_grad_grad_B_tensor(two_ways=True)
                     logger.info("Max difference between Matt and Rogerio's derivation for config {} is {}".format(config, np.max(np.abs(s.grad_grad_B - s.grad_grad_B_alt))))
-                    np.testing.assert_allclose(s.grad_grad_B, s.grad_grad_B_alt, rtol=1e-8, atol=1e-8)
+                    np.testing.assert_allclose(s.grad_grad_B, s.grad_grad_B_alt, rtol=1e-7, atol=1e-7)
                     for i in range(3):
                         for j in range(3):
                             for k in range(3):
