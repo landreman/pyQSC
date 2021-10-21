@@ -16,6 +16,8 @@ def calculate_grad_B_tensor(self, two_ways=False):
     Compute the components of the grad B tensor, and the scale
     length L grad B associated with the Frobenius norm of this
     tensor.
+    Formulas for grad B tensor in
+    Landreman (2021): Figures of merit for stellarators near the magnetic axis, JPP
 
     self should be an instance of Qsc with X1c, Y1s etc populated.
     """
@@ -97,6 +99,8 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     length L grad grad B associated with the Frobenius norm of this
     tensor.
     self should be an instance of Qsc with X1c, Y1s etc populated.
+    Formulas for grad grad B tensor in
+    Landreman (2021): Figures of merit for stellarators near the magnetic axis, JPP
     """
 
     # Shortcuts
@@ -1234,6 +1238,8 @@ def Bfield_cylindrical(self, r=0, theta=0):
     every point along the axis (hence with nphi points) where R, phi and Z
     are the standard cylindrical coordinates for a given
     near-axis radius r and a Boozer poloidal angle vartheta (not theta).
+    Equations for Bfield present in
+    Landreman (2021): Figures of merit for stellarators near the magnetic axis, JPP
 
     Args:
       r: the near-axis radius
