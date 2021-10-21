@@ -158,7 +158,7 @@ class MagneticFieldTests(unittest.TestCase):
         np.testing.assert_almost_equal(dBdx_cartesian,dBdx_cartesian.transpose(1,0,2))
 
         # Test nablanablaB, including symmetry in three indices
-        dBdxdx_cylindrical = stel.Bfield_gradient_gradient_cylindrical()
+        dBdxdx_cylindrical = stel.grad_grad_B_tensor_cylindrical()
         np.testing.assert_almost_equal(np.transpose(stel.grad_grad_B,(1,2,3,0)),dBdxdx_cylindrical)
         dBdxdx_cylindrical_transpose_1 = dBdxdx_cylindrical.transpose(0,2,1,3)
         dBdxdx_cylindrical_transpose_2 = dBdxdx_cylindrical.transpose(1,0,2,3)
