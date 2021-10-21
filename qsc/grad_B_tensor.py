@@ -42,6 +42,9 @@ def calculate_grad_B_tensor(self, two_ways=False):
     d_X1s_d_varphi = s.d_X1s_d_varphi
     d_Y1s_d_varphi = s.d_Y1s_d_varphi
     d_Y1c_d_varphi = s.d_Y1c_d_varphi
+    t = s.tangent_cylindrical.transpose()
+    n = s.normal_cylindrical.transpose()
+    b = s.binormal_cylindrical.transpose()
 
     tensor = Struct()
     
@@ -59,6 +62,14 @@ def calculate_grad_B_tensor(self, two_ways=False):
 
     self.grad_B_tensor = tensor
     
+    self.grad_B_tensor_cylindrical = np.array([[
+                              tensor.nn * n[i] * n[j] \
+                            + tensor.bn * b[i] * n[j] + tensor.nb * n[i] * b[j] \
+                            + tensor.bb * b[i] * b[j] \
+                            + tensor.tn * t[i] * n[j] + tensor.nt * n[i] * t[j] \
+                            + tensor.tt * t[i] * t[j]
+                        for i in range(3)] for j in range(3)])
+    
     if two_ways:
         tensor_alternative = Struct()
         factor = s.spsi * s.B0 / s.d_l_d_varphi
@@ -73,17 +84,13 @@ def calculate_grad_B_tensor(self, two_ways=False):
                             + s.iotaN * (s.Y1s * s.Y1s + s.Y1c * s.Y1c))
         tensor_alternative.tt = 0
         self.grad_B_tensor_alternative = tensor_alternative
-    
-    t = self.tangent_cylindrical.transpose()
-    n = self.normal_cylindrical.transpose()
-    b = self.binormal_cylindrical.transpose()
-    self.grad_B_tensor_cylindrical = np.array([[
-                              tensor.nn * n[i] * n[j] \
-                            + tensor.bn * b[i] * n[j] + tensor.nb * n[i] * b[j] \
-                            + tensor.bb * b[i] * b[j] \
-                            + tensor.tn * t[i] * n[j] + tensor.nt * n[i] * t[j] \
-                            + tensor.tt * t[i] * t[j]
-                        for i in range(3)] for j in range(3)])
+        self.grad_B_tensor_cylindrical_alternative = np.array([[
+                          tensor_alternative.nn * n[i] * n[j] \
+                        + tensor_alternative.bn * b[i] * n[j] + tensor_alternative.nb * n[i] * b[j] \
+                        + tensor_alternative.bb * b[i] * b[j] \
+                        + tensor_alternative.tn * t[i] * n[j] + tensor_alternative.nt * n[i] * t[j] \
+                        + tensor_alternative.tt * t[i] * t[j]
+                    for i in range(3)] for j in range(3)])
 
     self.grad_B_colon_grad_B = tensor.tn * tensor.tn + tensor.nt * tensor.nt \
         + tensor.bb * tensor.bb + tensor.nn * tensor.nn \

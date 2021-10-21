@@ -140,7 +140,7 @@ class MagneticFieldTests(unittest.TestCase):
         np.testing.assert_almost_equal(dBdx_cylindrical[0,1],np.full(stel.nphi,-factor))
         np.testing.assert_almost_equal(dBdx_cylindrical[1,1],np.zeros(stel.nphi))
         np.testing.assert_almost_equal(dBdx_cylindrical,dBdx_cylindrical.transpose(1,0,2))
-        np.testing.assert_almost_equal(stel.grad_B_tensor,stel.grad_B_tensor_alternative)
+        np.testing.assert_almost_equal(stel.grad_B_tensor_cylindrical,stel.grad_B_tensor_cylindrical_alternative)
         dBdx_cartesian = stel.grad_B_tensor_cartesian()
         np.testing.assert_almost_equal(dBdx_cartesian[0,0],np.full(stel.nphi,factor*np.sin(2*stel.phi)))
         np.testing.assert_almost_equal(dBdx_cartesian[0,1],np.full(stel.nphi,-factor*np.cos(2*stel.phi)))
@@ -152,7 +152,7 @@ class MagneticFieldTests(unittest.TestCase):
         stel.calculate_grad_B_tensor(two_ways=True)
         dBdx_cylindrical = stel.grad_B_tensor_cylindrical
         np.testing.assert_almost_equal(dBdx_cylindrical,dBdx_cylindrical.transpose(1,0,2))
-        np.testing.assert_almost_equal(stel.grad_B_tensor,stel.grad_B_tensor_alternative)
+        np.testing.assert_almost_equal(stel.grad_B_tensor_cylindrical,stel.grad_B_tensor_cylindrical_alternative)
         dBdx_cartesian = stel.grad_B_tensor_cartesian()
         np.testing.assert_almost_equal(dBdx_cartesian,dBdx_cartesian.transpose(1,0,2))
 
