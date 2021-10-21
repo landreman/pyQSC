@@ -171,7 +171,7 @@ class MagneticFieldTests(unittest.TestCase):
         np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_4,dBdxdx_cylindrical)
         np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_5,dBdxdx_cylindrical)
 
-        dBdxdx_cartesian = stel.Bfield_gradient_gradient_cartesian()
+        dBdxdx_cartesian = stel.grad_grad_B_tensor_cartesian()
         dBdxdx_cartesian_transpose_1 = dBdxdx_cartesian.transpose(0,2,1,3)
         dBdxdx_cartesian_transpose_2 = dBdxdx_cartesian.transpose(1,0,2,3)
         dBdxdx_cartesian_transpose_3 = dBdxdx_cartesian.transpose(1,2,0,3)
