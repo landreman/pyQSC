@@ -39,13 +39,13 @@ def calculate_grad_B_tensor(self):
     t = self.tangent_cylindrical.transpose()
     n = self.normal_cylindrical.transpose()
     b = self.binormal_cylindrical.transpose()
-    self.grad_B = np.array([[
+    self.grad_B_tensor_cylindrical = np.array([[
                               tensor.nn * n[i] * n[j] \
                             + tensor.bn * b[i] * n[j] + tensor.nb * n[i] * b[j] \
                             + tensor.bb * b[i] * b[j] \
                             + tensor.tn * t[i] * n[j] + tensor.nt * n[i] * t[j] \
                             + tensor.tt * t[i] * t[j]
-                    for i in range(3)] for j in range(3)])
+                        for i in range(3)] for j in range(3)])
 
     self.grad_B_colon_grad_B = tensor.tn * tensor.tn + tensor.nt * tensor.nt \
         + tensor.bb * tensor.bb + tensor.nn * tensor.nn \
