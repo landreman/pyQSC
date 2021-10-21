@@ -132,13 +132,15 @@ class MagneticFieldTests(unittest.TestCase):
         Rmajor = np.random.rand() * 2 + 0.3
         B0 = np.random.rand() * 2 + 1.0
         stel = Qsc(rc=[Rmajor,0.],zs=[0,0.],etabar=1.0,B0=B0)
+        stel.calculate_grad_B_tensor(two_ways=True)
         factor = stel.B0/Rmajor
-        dBdx_cylindrical = stel.Bfield_gradient_cylindrical()
+        dBdx_cylindrical = stel.grad_B_tensor
         np.testing.assert_almost_equal(dBdx_cylindrical[0,0],np.zeros(stel.nphi))
         np.testing.assert_almost_equal(dBdx_cylindrical[0,1],np.full(stel.nphi,-factor))
         np.testing.assert_almost_equal(dBdx_cylindrical[1,1],np.zeros(stel.nphi))
         np.testing.assert_almost_equal(dBdx_cylindrical,dBdx_cylindrical.transpose(1,0,2))
-        np.testing.assert_almost_equal(dBdx_cylindrical,stel.grad_B)
+        np.testing.assert_almost_equal(dBdx_cylindrical,stel.grad_B_tensor_cylindrical)
+        np.testing.assert_almost_equal(stel.grad_B_tensor,stel.grad_B_tensor_alternative)
         dBdx_cartesian = stel.Bfield_gradient_cartesian()
         np.testing.assert_almost_equal(dBdx_cartesian[0,0],np.full(stel.nphi,factor*np.sin(2*stel.phi)))
         np.testing.assert_almost_equal(dBdx_cartesian[0,1],np.full(stel.nphi,-factor*np.cos(2*stel.phi)))
@@ -147,9 +149,11 @@ class MagneticFieldTests(unittest.TestCase):
 
         # Test nablaB for another configuration, including symmetry in both indices
         stel = Qsc.from_paper(1)
-        dBdx_cylindrical = stel.Bfield_gradient_cylindrical()
+        stel.calculate_grad_B_tensor(two_ways=True)
+        dBdx_cylindrical = stel.grad_B_tensor
         np.testing.assert_almost_equal(dBdx_cylindrical,dBdx_cylindrical.transpose(1,0,2))
-        np.testing.assert_almost_equal(dBdx_cylindrical,stel.grad_B)
+        np.testing.assert_almost_equal(dBdx_cylindrical,stel.grad_B_tensor_cylindrical)
+        np.testing.assert_almost_equal(stel.grad_B_tensor,stel.grad_B_tensor_alternative)
         dBdx_cartesian = stel.Bfield_gradient_cartesian()
         np.testing.assert_almost_equal(dBdx_cartesian,dBdx_cartesian.transpose(1,0,2))
 

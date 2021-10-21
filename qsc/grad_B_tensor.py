@@ -11,7 +11,7 @@ from .util import Struct, fourier_minimum
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def calculate_grad_B_tensor(self):
+def calculate_grad_B_tensor(self, two_ways=False):
     """
     Compute the components of the grad B tensor, and the scale
     length L grad B associated with the Frobenius norm of this
@@ -19,22 +19,58 @@ def calculate_grad_B_tensor(self):
 
     self should be an instance of Qsc with X1c, Y1s etc populated.
     """
-    s = self # Shorthand
+
+    # Define auxiliary variables
+    s = self
+    t = s.tangent_cylindrical.transpose()
+    n = s.normal_cylindrical.transpose()
+    b = s.binormal_cylindrical.transpose()
+    Bbar = s.Bbar
+    B0 = s.B0
+    sG = s.sG
+    X1c = s.X1c
+    X1s = s.X1s
+    Y1c = s.Y1c
+    Y1s = s.Y1s
+    d_l_d_varphi = s.d_l_d_varphi
+    curvature = s.curvature
+    torsion = s.torsion
+    iotaN = s.iotaN
+    d_X1c_d_varphi = s.d_X1c_d_varphi
+    d_X1s_d_varphi = s.d_X1s_d_varphi
+    d_Y1s_d_varphi = s.d_Y1s_d_varphi
+    d_Y1c_d_varphi = s.d_Y1c_d_varphi
+
     tensor = Struct()
     
-    factor = s.spsi * s.B0 / s.d_l_d_varphi
-    tensor.tn = s.sG * s.B0 * s.curvature
-    tensor.nt = tensor.tn
-    tensor.bb = factor * (s.X1c * s.d_Y1s_d_varphi - s.iotaN * s.X1c * s.Y1c)
-    tensor.nn = factor * (s.d_X1c_d_varphi * s.Y1s + s.iotaN * s.X1c * s.Y1c)
-    tensor.bn = factor * (-s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
-                        - s.iotaN * s.X1c * s.X1c)
-    tensor.nb = factor * (s.d_Y1c_d_varphi * s.Y1s - s.d_Y1s_d_varphi * s.Y1c \
-                        + s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
-                        + s.iotaN * (s.Y1s * s.Y1s + s.Y1c * s.Y1c))
-    tensor.tt = 0
+    factor = B0*B0/Bbar/d_l_d_varphi
+    tensor.nn = factor * (d_X1c_d_varphi * Y1s - d_X1s_d_varphi * Y1c + iotaN * (X1s * Y1s + X1c * Y1c))
+    tensor.bn = factor * (X1c * d_X1s_d_varphi - X1s * d_X1c_d_varphi - sG * Bbar * d_l_d_varphi * torsion / B0 - iotaN * (X1s * X1s + X1c * X1c))
+    tensor.nb = factor * (d_Y1c_d_varphi * Y1s - d_Y1s_d_varphi * Y1c + sG * Bbar * d_l_d_varphi * torsion / B0 + iotaN * (Y1s * Y1s + Y1c * Y1c))
+    tensor.bb = factor * (X1c * d_Y1s_d_varphi - X1s * d_Y1c_d_varphi - iotaN * (X1s * Y1s + X1c * Y1c))
+    tensor.tn = sG * B0 * curvature
+    tensor.nt = sG * B0 * curvature
+    if len(B0)==1:
+        tensor.tt = 0#sG * np.matmul(self.d_d_varphi,B0)/d_l_d_varphi
+    else:
+        tensor.tt = sG * np.matmul(self.d_d_varphi,B0)/d_l_d_varphi
 
     self.grad_B_tensor = tensor
+    
+    if two_ways:
+        tensor_alternative = Struct()
+        factor = s.spsi * s.B0 / s.d_l_d_varphi
+        tensor_alternative.tn = s.sG * s.B0 * s.curvature
+        tensor_alternative.nt = tensor.tn
+        tensor_alternative.bb = factor * (s.X1c * s.d_Y1s_d_varphi - s.iotaN * s.X1c * s.Y1c)
+        tensor_alternative.nn = factor * (s.d_X1c_d_varphi * s.Y1s + s.iotaN * s.X1c * s.Y1c)
+        tensor_alternative.bn = factor * (-s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
+                            - s.iotaN * s.X1c * s.X1c)
+        tensor_alternative.nb = factor * (s.d_Y1c_d_varphi * s.Y1s - s.d_Y1s_d_varphi * s.Y1c \
+                            + s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
+                            + s.iotaN * (s.Y1s * s.Y1s + s.Y1c * s.Y1c))
+        tensor_alternative.tt = 0
+        self.grad_B_tensor_alternative = tensor_alternative
     
     t = self.tangent_cylindrical.transpose()
     n = self.normal_cylindrical.transpose()
@@ -1261,53 +1297,6 @@ def Bfield_cartesian(self, r=0, theta=0):
 
     return B_vector_cartesian
 
-def Bfield_gradient_cylindrical(self):
-    '''
-    Function to calculate the gradient of the magnetic field vector B=(B_R,B_phi,B_Z)
-    at every point along the axis (hence with nphi points) where R, phi and Z
-    are the standard cylindrical coordinates.
-    '''
-    
-    # Define auxiliary variables
-    t = self.tangent_cylindrical.transpose()
-    n = self.normal_cylindrical.transpose()
-    b = self.binormal_cylindrical.transpose()
-    Bbar = self.Bbar
-    B0 = self.B0
-    sG = self.sG
-    G0 = self.G0
-    X1c = self.X1c
-    X1s = self.X1s
-    Y1c = self.Y1c
-    Y1s = self.Y1s
-    d_l_d_varphi = self.d_l_d_varphi
-    curvature = self.curvature
-    torsion = self.torsion
-    iotaN = self.iotaN
-    d_X1c_d_varphi = self.d_X1c_d_varphi
-    d_X1s_d_varphi = self.d_X1s_d_varphi
-    d_Y1s_d_varphi = self.d_Y1s_d_varphi
-    d_Y1c_d_varphi = self.d_Y1c_d_varphi
-
-    factor = B0*B0/Bbar/d_l_d_varphi
-    grad_B_vector_nn = factor * (d_X1c_d_varphi * Y1s - d_X1s_d_varphi * Y1c + iotaN * (X1s * Y1s + X1c * Y1c))
-    grad_B_vector_bn = factor * (X1c * d_X1s_d_varphi - X1s * d_X1c_d_varphi - sG * Bbar * d_l_d_varphi * torsion / B0 - iotaN * (X1s * X1s + X1c * X1c))
-    grad_B_vector_nb = factor * (d_Y1c_d_varphi * Y1s - d_Y1s_d_varphi * Y1c + sG * Bbar * d_l_d_varphi * torsion / B0 + iotaN * (Y1s * Y1s + Y1c * Y1c))
-    grad_B_vector_bb = factor * (X1c * d_Y1s_d_varphi - X1s * d_Y1c_d_varphi - iotaN * (X1s * Y1s + X1c * Y1c))
-    grad_B_vector_tn = sG * B0 * curvature
-    grad_B_vector_nt = sG * B0 * curvature
-    grad_B_vector_tt = 0#sG * np.matmul(self.d_d_varphi,B0)/d_l_d_varphi
-
-    grad_B_vector_cylindrical = np.array([[
-                                  grad_B_vector_nn * n[i] * n[j] \
-                                + grad_B_vector_bn * b[i] * n[j] + grad_B_vector_nb * n[i] * b[j] \
-                                + grad_B_vector_bb * b[i] * b[j] \
-                                + grad_B_vector_tn * t[i] * n[j] + grad_B_vector_nt * n[i] * t[j] \
-                                + grad_B_vector_tt * t[i] * t[j]
-                                for i in range(3)] for j in range(3)])
-
-    return grad_B_vector_cylindrical
-
 def Bfield_gradient_cartesian(self):
     '''
     Function to calculate the gradient of the magnetic field vector B=(B_x,B_y,B_z)
@@ -1316,7 +1305,7 @@ def Bfield_gradient_cartesian(self):
     '''
 
     B0, B1, B2 = self.Bfield_cylindrical()
-    nablaB = self.Bfield_gradient_cylindrical()
+    nablaB = self.grad_B_tensor_cylindrical
     cosphi = np.cos(self.phi)
     sinphi = np.sin(self.phi)
     R0 = self.R0
@@ -1349,8 +1338,6 @@ def Bfield_gradient_gradient_cartesian(self):
     vector B=(B_x,B_y,B_z) at every point along the axis (hence with nphi points)
     where x, y and z are the standard cartesian coordinates.
     '''
-    B0, B1, B2 = self.Bfield_cylindrical()
-    nablaB = self.Bfield_gradient_cylindrical()
     nablanablaB = self.Bfield_gradient_gradient_cylindrical()
     cosphi = np.cos(self.phi)
     sinphi = np.sin(self.phi)
