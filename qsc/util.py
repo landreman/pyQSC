@@ -58,7 +58,7 @@ def fourier_minimum(y):
         pass
 
     logger.info('bracket={}, f(bracket)={}'.format(bracket, [func(bracket[0]), func(bracket[1]), func(bracket[2])]))
-    #solution = scipy.optimize.minimize_scalar(func, bracket=bracket, options=["disp": True])
+    #solution = scipy.optimize.minimize_scalar(func, bracket=bracket, options={"disp": True})
     solution = scipy.optimize.minimize_scalar(func, bracket=bracket)
     return solution.fun
 
@@ -136,7 +136,7 @@ def B_mag(self, r, theta, phi, Boozer_toroidal = False):
 
     B = self.B0*(1 + r * self.etabar * np.cos(thetaN))
 
-    # Add O(r**2) terms if necessary:
+    # Add O(r^2) terms if necessary:
     if self.order != 'r1':
         if Boozer_toroidal == False:
             self.B20_spline = self.convert_to_spline(self.B20)
