@@ -39,7 +39,7 @@ def fourier_minimum(y):
 
     def func(x):
         interp = fourier_interpolation(y, np.array([x]))
-        logger.debug('fourier_minimum.func called at x={}, y={}}'.format(x, interp[0]))
+        logger.debug('fourier_minimum.func called at x={}, y={}'.format(x, interp[0]))
         return interp[0]
 
     # Try to find a bracketing interval, using successively wider
