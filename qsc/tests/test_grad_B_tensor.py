@@ -126,7 +126,8 @@ class MagneticFieldTests(unittest.TestCase):
 
     def test_magnetic_field_nabla(self):
         """
-        Test the magnetic field vector and its derivatives
+        Test the accuracy and the symmetry in the the cylindrical and Cartesian
+        versions of the grad B and grad grad B tensors.
         """
         # Test nablaB in axisymmetry, including symmetry in both indices
         Rmajor = np.random.rand() * 2 + 0.3
