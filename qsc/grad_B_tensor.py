@@ -1351,7 +1351,7 @@ def grad_grad_B_tensor_cartesian(self):
     vector B=(B_x,B_y,B_z) at every point along the axis (hence with nphi points)
     where x, y and z are the standard cartesian coordinates.
     '''
-    nablanablaB = self.Bfield_gradient_gradient_cylindrical()
+    nablanablaB = self.grad_grad_B_tensor_cylindrical()
     cosphi = np.cos(self.phi)
     sinphi = np.sin(self.phi)
 
