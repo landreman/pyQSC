@@ -1303,7 +1303,7 @@ def Bfield_cartesian(self, r=0, theta=0):
 
     return B_vector_cartesian
 
-def Bfield_gradient_cartesian(self):
+def grad_B_tensor_cartesian(self):
     '''
     Function to calculate the gradient of the magnetic field vector B=(B_x,B_y,B_z)
     at every point along the axis (hence with nphi points) where x, y and z
