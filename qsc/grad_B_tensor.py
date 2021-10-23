@@ -11,57 +11,40 @@ from .util import Struct, fourier_minimum
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def calculate_grad_B_tensor(self, two_ways=False):
+def calculate_grad_B_tensor(self):
     """
     Compute the components of the grad B tensor, and the scale
     length L grad B associated with the Frobenius norm of this
     tensor.
-    Formulas for grad B tensor in
+    The formula for the grad B tensor is eq (3.12) of
     Landreman (2021): Figures of merit for stellarators near the magnetic axis, JPP
 
     self should be an instance of Qsc with X1c, Y1s etc populated.
     """
 
-    # Define auxiliary variables
-    s = self
-    t = s.tangent_cylindrical.transpose()
-    n = s.normal_cylindrical.transpose()
-    b = s.binormal_cylindrical.transpose()
-    Bbar = s.Bbar
-    B0 = s.B0
-    sG = s.sG
-    X1c = s.X1c
-    X1s = s.X1s
-    Y1c = s.Y1c
-    Y1s = s.Y1s
-    d_l_d_varphi = s.d_l_d_varphi
-    curvature = s.curvature
-    torsion = s.torsion
-    iotaN = s.iotaN
-    d_X1c_d_varphi = s.d_X1c_d_varphi
-    d_X1s_d_varphi = s.d_X1s_d_varphi
-    d_Y1s_d_varphi = s.d_Y1s_d_varphi
-    d_Y1c_d_varphi = s.d_Y1c_d_varphi
-    t = s.tangent_cylindrical.transpose()
-    n = s.normal_cylindrical.transpose()
-    b = s.binormal_cylindrical.transpose()
-
+    s = self # Shorthand
     tensor = Struct()
     
-    factor = B0*B0/Bbar/d_l_d_varphi
-    tensor.nn = factor * (d_X1c_d_varphi * Y1s - d_X1s_d_varphi * Y1c + iotaN * (X1s * Y1s + X1c * Y1c))
-    tensor.bn = factor * (X1c * d_X1s_d_varphi - X1s * d_X1c_d_varphi - sG * Bbar * d_l_d_varphi * torsion / B0 - iotaN * (X1s * X1s + X1c * X1c))
-    tensor.nb = factor * (d_Y1c_d_varphi * Y1s - d_Y1s_d_varphi * Y1c + sG * Bbar * d_l_d_varphi * torsion / B0 + iotaN * (Y1s * Y1s + Y1c * Y1c))
-    tensor.bb = factor * (X1c * d_Y1s_d_varphi - X1s * d_Y1c_d_varphi - iotaN * (X1s * Y1s + X1c * Y1c))
-    tensor.tn = sG * B0 * curvature
-    tensor.nt = sG * B0 * curvature
-    if hasattr(B0, "__len__"): # if B0 is an array (in quasisymmetry B0 is a scalar)
-        tensor.tt = sG * np.matmul(self.d_d_varphi,B0)/d_l_d_varphi
+    factor = s.spsi * s.B0 / s.d_l_d_varphi
+    tensor.tn = s.sG * s.B0 * s.curvature
+    tensor.nt = tensor.tn
+    tensor.bb = factor * (s.X1c * s.d_Y1s_d_varphi - s.iotaN * s.X1c * s.Y1c)
+    tensor.nn = factor * (s.d_X1c_d_varphi * s.Y1s + s.iotaN * s.X1c * s.Y1c)
+    tensor.bn = factor * (-s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
+                          - s.iotaN * s.X1c * s.X1c)
+    tensor.nb = factor * (s.d_Y1c_d_varphi * s.Y1s - s.d_Y1s_d_varphi * s.Y1c \
+                          + s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
+                          + s.iotaN * (s.Y1s * s.Y1s + s.Y1c * s.Y1c))
+    if hasattr(s.B0, "__len__"): # if B0 is an array (in quasisymmetry B0 is a scalar)
+        tensor.tt = s.sG * np.matmul(s.d_d_varphi, s.B0) / s.d_l_d_varphi
     else:
         tensor.tt = 0
 
     self.grad_B_tensor = tensor
     
+    t = s.tangent_cylindrical.transpose()
+    n = s.normal_cylindrical.transpose()
+    b = s.binormal_cylindrical.transpose()
     self.grad_B_tensor_cylindrical = np.array([[
                               tensor.nn * n[i] * n[j] \
                             + tensor.bn * b[i] * n[j] + tensor.nb * n[i] * b[j] \
@@ -69,32 +52,11 @@ def calculate_grad_B_tensor(self, two_ways=False):
                             + tensor.tn * t[i] * n[j] + tensor.nt * n[i] * t[j] \
                             + tensor.tt * t[i] * t[j]
                         for i in range(3)] for j in range(3)])
-    
-    if two_ways:
-        tensor_alternative = Struct()
-        factor = s.spsi * s.B0 / s.d_l_d_varphi
-        tensor_alternative.tn = s.sG * s.B0 * s.curvature
-        tensor_alternative.nt = tensor.tn
-        tensor_alternative.bb = factor * (s.X1c * s.d_Y1s_d_varphi - s.iotaN * s.X1c * s.Y1c)
-        tensor_alternative.nn = factor * (s.d_X1c_d_varphi * s.Y1s + s.iotaN * s.X1c * s.Y1c)
-        tensor_alternative.bn = factor * (-s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
-                            - s.iotaN * s.X1c * s.X1c)
-        tensor_alternative.nb = factor * (s.d_Y1c_d_varphi * s.Y1s - s.d_Y1s_d_varphi * s.Y1c \
-                            + s.sG * s.spsi * s.d_l_d_varphi * s.torsion \
-                            + s.iotaN * (s.Y1s * s.Y1s + s.Y1c * s.Y1c))
-        tensor_alternative.tt = 0
-        self.grad_B_tensor_alternative = tensor_alternative
-        self.grad_B_tensor_cylindrical_alternative = np.array([[
-                          tensor_alternative.nn * n[i] * n[j] \
-                        + tensor_alternative.bn * b[i] * n[j] + tensor_alternative.nb * n[i] * b[j] \
-                        + tensor_alternative.bb * b[i] * b[j] \
-                        + tensor_alternative.tn * t[i] * n[j] + tensor_alternative.nt * n[i] * t[j] \
-                        + tensor_alternative.tt * t[i] * t[j]
-                    for i in range(3)] for j in range(3)])
 
     self.grad_B_colon_grad_B = tensor.tn * tensor.tn + tensor.nt * tensor.nt \
         + tensor.bb * tensor.bb + tensor.nn * tensor.nn \
-        + tensor.nb * tensor.nb + tensor.bn * tensor.bn
+        + tensor.nb * tensor.nb + tensor.bn * tensor.bn \
+        + tensor.tt * tensor.tt
 
     self.L_grad_B = s.B0 * np.sqrt(2 / self.grad_B_colon_grad_B)
     self.inv_L_grad_B = 1.0 / self.L_grad_B
@@ -106,8 +68,12 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     length L grad grad B associated with the Frobenius norm of this
     tensor.
     self should be an instance of Qsc with X1c, Y1s etc populated.
-    Formulas for grad grad B tensor in
+    The grad grad B tensor in discussed around eq (3.13)
     Landreman (2021): Figures of merit for stellarators near the magnetic axis, JPP
+    although an explicit formula is not given there.
+
+    If ``two_ways`` is ``True``, an independent calculation of
+    the tensor is also computed, to confirm the answer is the same.
     """
 
     # Shortcuts
@@ -1245,7 +1211,7 @@ def Bfield_cylindrical(self, r=0, theta=0):
     every point along the axis (hence with nphi points) where R, phi and Z
     are the standard cylindrical coordinates for a given
     near-axis radius r and a Boozer poloidal angle vartheta (not theta).
-    Equations for Bfield present in
+    The formulae implemented here are eq (3.5) and (3.6) of
     Landreman (2021): Figures of merit for stellarators near the magnetic axis, JPP
 
     Args:
@@ -1278,10 +1244,12 @@ def Bfield_cylindrical(self, r=0, theta=0):
     if r == 0:
         return B0_vector
     else:
-        factor = B0*B0/G0
+        factor = B0 * B0 / G0
         B1_vector_t = factor * (X1c * np.cos(theta) + X1s * np.sin(theta)) * d_l_d_varphi * curvature
-        B1_vector_n = factor * (np.cos(theta)*(d_X1c_d_varphi - Y1c * d_l_d_varphi * torsion + iotaN * X1s) + np.sin(theta)*(d_X1s_d_varphi - Y1s * d_l_d_varphi * torsion - iotaN * X1c))
-        B1_vector_b = factor * (np.cos(theta)*(d_Y1c_d_varphi + X1c * d_l_d_varphi * torsion + iotaN * Y1s) + np.sin(theta)*(d_Y1s_d_varphi + X1s * d_l_d_varphi * torsion - iotaN * Y1c))
+        B1_vector_n = factor * (np.cos(theta) * (d_X1c_d_varphi - Y1c * d_l_d_varphi * torsion + iotaN * X1s) \
+                                + np.sin(theta) * (d_X1s_d_varphi - Y1s * d_l_d_varphi * torsion - iotaN * X1c))
+        B1_vector_b = factor * (np.cos(theta) * (d_Y1c_d_varphi + X1c * d_l_d_varphi * torsion + iotaN * Y1s) \
+                                + np.sin(theta) * (d_Y1s_d_varphi + X1s * d_l_d_varphi * torsion - iotaN * Y1c))
 
         B1_vector = B1_vector_t * t + B1_vector_n * n + B1_vector_b * b
         B_vector_cylindrical = B0_vector + r * B1_vector
