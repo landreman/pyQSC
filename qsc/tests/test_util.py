@@ -17,7 +17,6 @@ class FourierMinimizeTests(unittest.TestCase):
                     y = const + amplitude * np.sin(x - 1.7)
                     min = fourier_minimum(y)
                     self.assertAlmostEqual(min, const - amplitude, places=14)
-                
-                
+
 if __name__ == "__main__":
     unittest.main()
