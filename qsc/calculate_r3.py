@@ -144,7 +144,7 @@ def calculate_r3(self):
 
 def calculate_shear(self,B31c = 0):
     """
-    Compute the magnetic shear iota_2 (so iota=iota0+psi*iota2) which comes
+    Compute the magnetic shear iota_2 (so iota=iota0+r^2*iota2) which comes
     from the solvability condition of the generalised sigma equation at order
     O(r**3), as detailed in Rodriguez et al., to be published (2021). 
     This calculation is taken for a standard MHS equilibrium configuration. 
@@ -156,7 +156,7 @@ def calculate_shear(self,B31c = 0):
     # Shorthand introduced: we also have to ransform to 1/B**2 expansion parameters, taking into account the 
     # difference in the definition of the radial coordinate. In the work of Rodriguez et al.,
     # Phys. Plasmas, (2021), epsilon=sqrt(psi) while in the work of Landreman et al.,
-    # J. Plasma Physics (2019) it is defined r=\sqrt(2*psi/B0). Need to transfoem between the
+    # J. Plasma Physics (2019) it is defined r=\sqrt(2*psi/B0). Need to transform between the
     # two.
 
     eps_scale = np.sqrt(2/self.B0) 
@@ -270,5 +270,5 @@ def calculate_shear(self,B31c = 0):
         2*Y2c*dY2sdp + Y1c*dY31sdp - 2*Z2s*dZ2cdp + 2*Z2c*dZ2sdp)
     
     expSig = np.exp(2*iota*integ.cumtrapz(self.sigma,self.varphi,initial=0))
-    self.shear = integ.trapz(expSig*LamTilde,self.varphi)/integ.trapz(expSig*(X1c**2 + Y1c**2 + Y1s**2)/Y1s**2,self.varphi)
+    self.iota2 = self.B0/2*integ.trapz(expSig*LamTilde,self.varphi)/integ.trapz(expSig*(X1c**2 + Y1c**2 + Y1s**2)/Y1s**2,self.varphi)
     
