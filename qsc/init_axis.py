@@ -107,9 +107,10 @@ def init_axis(self):
     self.etabar_squared_over_curvature_squared = self.etabar * self.etabar / (curvature * curvature)
 
     self.d_d_phi = spectral_diff_matrix(self.nphi, xmax=2 * np.pi / self.nfp)
+    self.d_varphi_d_phi = B0_over_abs_G0 * d_l_d_phi
     self.d_d_varphi = np.zeros((nphi, nphi))
     for j in range(nphi):
-        self.d_d_varphi[j,:] = self.d_d_phi[j,:] / (B0_over_abs_G0 * d_l_d_phi[j])
+        self.d_d_varphi[j,:] = self.d_d_phi[j,:] / self.d_varphi_d_phi[j]
 
     # Compute the Boozer toroidal angle:
     self.varphi = np.zeros(nphi)

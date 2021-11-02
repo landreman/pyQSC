@@ -144,7 +144,7 @@ def calculate_r3(self):
 
 def calculate_shear(self,B31c = 0):
     """
-    Compute the magnetic shear iota_2 (so iota=iota0+psi*iota2) which comes
+    Compute the magnetic shear iota_2 (so iota=iota0+r^2*iota2) which comes
     from the solvability condition of the generalised sigma equation at order
     O(r**3), as detailed in Rodriguez et al., to be published (2021). 
     This calculation is taken for a standard MHS equilibrium configuration. 
@@ -156,7 +156,7 @@ def calculate_shear(self,B31c = 0):
     # Shorthand introduced: we also have to ransform to 1/B**2 expansion parameters, taking into account the 
     # difference in the definition of the radial coordinate. In the work of Rodriguez et al.,
     # Phys. Plasmas, (2021), epsilon=sqrt(psi) while in the work of Landreman et al.,
-    # J. Plasma Physics (2019) it is defined r=\sqrt(2*psi/B0). Need to transfoem between the
+    # J. Plasma Physics (2019) it is defined r=\sqrt(2*psi/B0). Need to transform between the
     # two.
 
     eps_scale = np.sqrt(2/self.B0) 
@@ -268,7 +268,28 @@ def calculate_shear(self,B31c = 0):
         2*X2s*Y2c + X31c*Y1s + 2*X2c*Y2s + X1c*Y31s) + curvature*(-2*X2s*Z2c + 2*X2c*Z2s + X1c*Z31s)) -
         X31s*dXc1v - 2*X2s*dX2cdp + 2*X2c*dX2sdp + X1c*dX31sdp - Y31s*dY1cdp - 2*Y2s*dY2cdp +
         2*Y2c*dY2sdp + Y1c*dY31sdp - 2*Z2s*dZ2cdp + 2*Z2c*dZ2sdp)
+
+    # Need to compute the integration factor necessary for computing the shear
+    DMred = d_d_varphi[1:,1:]   # The differentiation matrix has a linearly dependent row, focus on submatrix
+
+    # Distinguish between the stellarator symmetric case self.sigma0 = 0 and the non-symmetric ones.
+    # Distinction leads to the expSig function being periodic (stell. sym.) or not.
+    if self.sigma0 == 0:
+        integSig = np.linalg.solve(DMred,self.sigma[1:])   # Invert differentiation matrix: as if first entry a zero, need to add it later
+        integSig = np.insert(integSig,0,0)  # Add the first entry 0
+        expSig = np.exp(2*iota*integSig)
+        # d_phi_d_varphi = 1 + np.matmul(d_d_varphi,self.phi-self.varphi)
+        self.iota2 = self.B0/2*sum(expSig*LamTilde*self.d_varphi_d_phi)/sum(expSig*(X1c**2 + Y1c**2 + Y1s**2)/Y1s**2*self.d_varphi_d_phi) 
+    else:
+        # d_phi_d_varphi = 1 + np.matmul(d_d_varphi,self.phi-self.varphi)
+        avSig = sum(self.sigma*self.d_varphi_d_phi)/len(self.sigma)     # Separate the piece that gives secular part, so all things periodic
+        integSigPer = np.linalg.solve(DMred,self.sigma[1:]-avSig)   # Invert differentiation matrix: as if first entry a zero, need to add it later
+        integSig = integSigPer + avSig*self.varphi[1:]  # Include the secular piece
+        integSig = np.insert(integSig,0,0)  # Add the first entry 0
+        expSig_ext = np.append(np.exp(2*iota*integSig),np.exp(2*iota*(avSig*2*np.pi/self.nfp))) # Add endpoint at 2*pi for better integration
+        LamTilde_ext = np.append(LamTilde,LamTilde[0])
+        facDenom = np.append((X1c**2 + Y1c**2 + Y1s**2)/Y1s**2,(X1c[0]**2 + Y1c[0]**2 + Y1s[0]**2)/Y1s[0]**2)
+        self.iota2 = self.B0/2*integ.trapz(expSig_ext*LamTilde_ext,self.varphi)/integ.trapz(expSig_ext*facDenom,self.varphi)
     
-    expSig = np.exp(2*iota*integ.cumtrapz(self.sigma,self.varphi,initial=0))
-    self.shear = integ.trapz(expSig*LamTilde,self.varphi)/integ.trapz(expSig*(X1c**2 + Y1c**2 + Y1s**2)/Y1s**2,self.varphi)
-    
+    # Using cumtrapz without exploiting periodicity
+    # expSig = np.exp(2*iota*integ.cumtrapz(self.sigma,self.varphi,initial=0))
