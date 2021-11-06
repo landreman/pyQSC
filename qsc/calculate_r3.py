@@ -100,8 +100,10 @@ def calculate_r3(self):
         -sign_G * B0 * B0 / (2*G0) * (abs_G0_over_B0 * X20 * curvature - d_Z20_d_varphi) \
         -sign_G * sign_psi * B0 * I2 / (4*G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1c*Y1c + Y1s*Y1s) + Y1c * d_X1c_d_varphi - X1c * d_Y1c_d_varphi)
 
-    logger.debug('max|flux_constraint_coefficient - predicted_flux_constraint_coefficient|:',np.max(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient)))
-    logger.debug('max|flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0)|:',np.max(abs(flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0))))
+    logger.debug('max|flux_constraint_coefficient - predicted_flux_constraint_coefficient|: '
+                 f'{np.max(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient))}')
+    logger.debug('max|flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0)|: '
+                 f'{np.max(abs(flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0)))}')
 
     if np.max(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient)) > 1e-7 \
     or np.max(abs(flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0))) > 1e-7:
@@ -288,8 +290,12 @@ def calculate_shear(self,B31c = 0):
         integSig = np.insert(integSig,0,0)  # Add the first entry 0
         expSig_ext = np.append(np.exp(2*iota*integSig),np.exp(2*iota*(avSig*2*np.pi/self.nfp))) # Add endpoint at 2*pi for better integration
         LamTilde_ext = np.append(LamTilde,LamTilde[0])
-        facDenom = np.append((X1c**2 + Y1c**2 + Y1s**2)/Y1s**2,(X1c[0]**2 + Y1c[0]**2 + Y1s[0]**2)/Y1s[0]**2)
-        self.iota2 = self.B0/2*integ.trapz(expSig_ext*LamTilde_ext,self.varphi)/integ.trapz(expSig_ext*facDenom,self.varphi)
+        fac_denom = (X1c**2 + Y1c**2 + Y1s**2) / Y1s**2
+        fac_denom_ext = np.append(fac_denom, fac_denom[0])
+        varphi_ext = np.append(self.varphi, 2 * np.pi / self.nfp)
+        self.iota2 = self.B0 / 2 \
+            * integ.trapz(expSig_ext * LamTilde_ext, varphi_ext) \
+            / integ.trapz(expSig_ext * fac_denom_ext, varphi_ext)
     
     # Using cumtrapz without exploiting periodicity
     # expSig = np.exp(2*iota*integ.cumtrapz(self.sigma,self.varphi,initial=0))
