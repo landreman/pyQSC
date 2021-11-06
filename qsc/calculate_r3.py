@@ -274,15 +274,17 @@ def calculate_shear(self,B31c = 0):
     # Need to compute the integration factor necessary for computing the shear
     DMred = d_d_varphi[1:,1:]   # The differentiation matrix has a linearly dependent row, focus on submatrix
 
-    # Distinguish between the stellarator symmetric case self.sigma0 = 0 and the non-symmetric ones.
+    # Distinguish between the stellarator symmetric case and the non-symmetric one at order r^1.
     # Distinction leads to the expSig function being periodic (stell. sym.) or not.
-    if self.sigma0 == 0:
+    if self.sigma0 == 0 and np.max(np.abs(self.rs)) == 0 and np.max(np.abs(self.zc)) == 0:
+        # Case in which sigma is stellarator-symmetric:
         integSig = np.linalg.solve(DMred,self.sigma[1:])   # Invert differentiation matrix: as if first entry a zero, need to add it later
         integSig = np.insert(integSig,0,0)  # Add the first entry 0
         expSig = np.exp(2*iota*integSig)
         # d_phi_d_varphi = 1 + np.matmul(d_d_varphi,self.phi-self.varphi)
         self.iota2 = self.B0/2*sum(expSig*LamTilde*self.d_varphi_d_phi)/sum(expSig*(X1c**2 + Y1c**2 + Y1s**2)/Y1s**2*self.d_varphi_d_phi) 
     else:
+        # Case in which sigma is not stellarator-symmetric:
         # d_phi_d_varphi = 1 + np.matmul(d_d_varphi,self.phi-self.varphi)
         avSig = sum(self.sigma*self.d_varphi_d_phi)/len(self.sigma)     # Separate the piece that gives secular part, so all things periodic
         integSigPer = np.linalg.solve(DMred,self.sigma[1:]-avSig)   # Invert differentiation matrix: as if first entry a zero, need to add it later

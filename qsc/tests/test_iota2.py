@@ -40,5 +40,36 @@ class Iota2Tests(unittest.TestCase):
                          f'rel diff={(q1.iota2 - q2.iota2) / q1.iota2}')
             self.assertAlmostEqual(q1.iota2, q2.iota2, delta=abs(q1.iota2) / 1.0e-4)
 
+    def test_stellarator_symmetry(self):
+        """
+        Breaking stellarator symmetry by a negligible amount should cause
+        iota2 to change a little, since a different integration method
+        is used, but iota2 should not change by much.
+        """
+
+        q1 = Qsc.from_paper('precise QA')
+        q1.calculate_shear()
+        
+        q2 = Qsc.from_paper('precise QA', sigma0=1e-100)
+        q2.calculate_shear()
+        logging.info(f'iota2 sym={q1.iota2} sigma0 nonsym={q2.iota2} diff={q1.iota2 - q2.iota2}')
+        self.assertGreater(np.abs((q1.iota2 - q2.iota2) / q1.iota2), 1e-10)
+        self.assertLess(np.abs((q1.iota2 - q2.iota2) / q1.iota2), 1e-2)
+        
+        q3 = Qsc.from_paper('precise QA', rs=[1.0e-100])
+        q3.calculate_shear()
+        logging.info(f'iota2 sym={q1.iota2} rs nonsym={q3.iota2} diff={q1.iota2 - q3.iota2}')
+        self.assertGreater(np.abs((q1.iota2 - q3.iota2) / q1.iota2), 1e-10)
+        self.assertLess(np.abs((q1.iota2 - q3.iota2) / q1.iota2), 1e-2)
+        
+        q4 = Qsc.from_paper('precise QA', zc=[1.0e-100])
+        q4.calculate_shear()
+        logging.info(f'iota2 sym={q1.iota2} zc nonsym={q4.iota2} diff={q1.iota2 - q4.iota2}')
+        self.assertGreater(np.abs((q1.iota2 - q4.iota2) / q1.iota2), 1e-10)
+        self.assertLess(np.abs((q1.iota2 - q4.iota2) / q1.iota2), 1e-2)
+        
+        self.assertAlmostEqual(q2.iota2, q3.iota2, delta=abs(q2.iota2) * 1.0e-10)
+        self.assertAlmostEqual(q2.iota2, q4.iota2, delta=abs(q2.iota2) * 1.0e-10)
+
 if __name__ == "__main__":
     unittest.main()
