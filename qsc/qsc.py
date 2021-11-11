@@ -31,6 +31,7 @@ class Qsc():
     from .plot import plot, plot_boundary, get_boundary, B_fieldline, B_contour, plot_axis
     from .Frenet_to_cylindrical import Frenet_to_cylindrical
     from .to_vmec import to_vmec
+    from .to_spec import to_spec
     from .util import B_mag
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
