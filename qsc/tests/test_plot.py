@@ -81,7 +81,7 @@ class PlotTests(unittest.TestCase):
 
     def test_flux_tube(self):
         stel = Qsc.from_paper(4, order='r2')
-        stel.flux_tube()
+        stel.flux_tube(show=False)
 
 if __name__ == "__main__":
     unittest.main()
