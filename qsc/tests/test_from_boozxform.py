@@ -36,7 +36,7 @@ def compare_from_boozxform(name, r=0.005, nphi=151):
     # Run BOOZ_XFORM
     b1 = bx.Booz_xform()
     b1.read_wout(woutFile)
-    b1.compute_surfs = [5,10,15,20,30,40,50,60,80,100]
+    b1.compute_surfs = [5,10,15,20,25,35,45,60,75,90]
     b1.mboz = 120
     b1.nboz = 40
     b1.run()
