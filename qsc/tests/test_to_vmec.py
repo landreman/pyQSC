@@ -24,8 +24,7 @@ def compare_to_vmec(name, r=0.005, nphi=151):
     abs_filename = os.path.join(os.path.dirname(__file__), inputFile)
     # Run pyQsc and create a VMEC input file
     logger.info('Creating pyQSC configuration')
-    order = 'r2' if name[1] == '2' else 'r1'
-    py = Qsc.from_paper(name, nphi=nphi, order=order)
+    py = Qsc.from_paper(name, nphi=nphi)
     logger.info('Outputing to VMEC')
     py.to_vmec(inputFile,r)
     # Run VMEC
