@@ -135,7 +135,7 @@ def set_axes_equal(ax):
     ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
     ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
-def create_subplot(ax, x_2D_plot, y_2D_plot, z_2D_plot, colormap, elev=90, azim=45, dist=7, **kwargs):
+def create_subplot(ax, x_2D_plot, y_2D_plot, z_2D_plot, colormap, elev=90, azim=45, dist=7, alpha=1, **kwargs):
     '''
     Construct the surface given a surface in cartesian coordinates
     x_2D_plot, y_2D_plot, z_2D_plot already with phi=[0,2*pi].
@@ -150,10 +150,11 @@ def create_subplot(ax, x_2D_plot, y_2D_plot, z_2D_plot, colormap, elev=90, azim=
         elev: elevation angle for the camera view
         azim: azim angle for the camera view
         distance: distance parameter for the camera view
+        alpha: opacity of the surface
     '''
     ax.plot_surface(x_2D_plot, y_2D_plot, z_2D_plot, facecolors=colormap,
                     rstride=1, cstride=1, antialiased=False,
-                    linewidth=0, alpha=1., shade=False, **kwargs)
+                    linewidth=0, alpha=alpha, shade=False, **kwargs)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.dist = dist
@@ -640,3 +641,79 @@ def plot_axis(self, nphi=100, frenet=True, nphi_frenet=80, frenet_factor=0.12, s
         if show:
             # Show figure
             plt.show()
+
+def flux_tube(self, r=0.12, alpha=0, delta_r=0.03, delta_alpha=0.2, delta_phi=4*np.pi, ntheta=80, nphi=150, ntheta_fourier=20, nphi_tube=2000,
+         savefig=None, show=True, **kwargs):
+    '''
+    Plot the flux tube at a specific alpha and psi
+    with a volume of delta alpha, delta psi and delta phi.
+    The variable alpha is the field-line label
+    alpha=theta-q varphi with theta and varphi the poloidal
+    and toroidal Boozer angles. Phi is the cylindrical
+    toroidal angle and psi=Bbar r^2/2
+
+    Args:
+      r (float): radial location of the field-line
+      alpha (float): field-line label for the field-line
+      delta_r (float): radial length of the field-line
+      delta_alpha (float): poloidal length of the field-line
+      delta_phi (float): toroidal length of the field-line
+      ntheta (int): Number of grid points to plot in the poloidal angle.
+      nphi   (int): Number of grid points to plot in the toroidal angle.
+      ntheta_fourier (int): Resolution in the Fourier transform to cylindrical coordinates
+      nphi_tube (int): Resolution of the field-lines in the flux tube plot
+      savefig (str): Filename prefix for the png files to save.
+        Note that a suffix including ``.png`` will be appended.
+        If ``None``, no figure files will be saved.
+      show (bool): Whether or not to call the matplotlib/mayavi ``show()`` command.
+    '''
+
+    x_2D_plot, y_2D_plot, z_2D_plot, R_2D_plot = self.get_boundary(r=r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier)
+    # Define the magnetic field modulus and create its theta,phi array
+    # The norm instance will be used as the colormap for the surface
+    theta1D = np.linspace(0, 2 * np.pi, ntheta)
+    phi1D = np.linspace(0, 2 * np.pi, nphi)
+    phi2D, theta2D = np.meshgrid(phi1D, theta1D)
+    # Create a color map similar to viridis 
+    Bmag = self.B_mag(r, theta2D, phi2D)
+    norm = clr.Normalize(vmin=Bmag.min(), vmax=Bmag.max())
+    cmap = cm.plasma
+    # Add a light source so the surface looks brighter
+    ls = LightSource(azdeg=0, altdeg=10)
+    cmap_plot = ls.shade(Bmag, cmap, norm=norm)
+    fig = plt.figure(constrained_layout=False, figsize=(5, 4))
+    ax = plt.axes(projection='3d')
+    # Set the default azimuthal angle of view in the 3D plot
+    # QH stellarators look rotated in the phi direction when
+    # azim_default = 0
+    if self.helicity == 0:
+        azim_default = 0
+    else:
+        azim_default = 45
+    create_subplot(ax, x_2D_plot, y_2D_plot, z_2D_plot, cmap_plot, elev=35, azim=azim_default, alpha=0.08, dist=5, **kwargs)
+
+    # Create the field line arrays
+    fieldline_X, fieldline_Y, fieldline_Z = create_field_lines(self, [alpha], x_2D_plot, y_2D_plot, z_2D_plot, phimax=delta_phi, nphi=nphi_tube)
+    fieldline_X_delta_alpha, fieldline_Y_delta_alpha, fieldline_Z_delta_alpha = create_field_lines(self, [alpha+delta_alpha], x_2D_plot, y_2D_plot, z_2D_plot, phimax=delta_phi, nphi=nphi_tube)
+
+    x_2D_plot_delta_r, y_2D_plot_delta_r, z_2D_plot_delta_r, R_2D_plot_delta_r = self.get_boundary(r=r-delta_r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier)
+    fieldline_X_delta_r, fieldline_Y_delta_r, fieldline_Z_delta_r = create_field_lines(self, [alpha], x_2D_plot_delta_r, y_2D_plot_delta_r, z_2D_plot_delta_r, phimax=delta_phi, nphi=nphi_tube)
+    fieldline_X_delta_r_delta_alpha, fieldline_Y_delta_r_delta_alpha, fieldline_Z_delta_r_delta_alpha = create_field_lines(self, [alpha+delta_alpha], x_2D_plot_delta_r, y_2D_plot_delta_r, z_2D_plot_delta_r, phimax=delta_phi, nphi=nphi_tube)
+    
+    # Plot the flux tube
+    for i in range(len(fieldline_X[0])):
+        x_array = [fieldline_X[0][i],fieldline_X_delta_r[0][i],fieldline_X_delta_alpha[0][i],fieldline_X_delta_r_delta_alpha[0][i]]
+        y_array = [fieldline_Y[0][i],fieldline_Y_delta_r[0][i],fieldline_Y_delta_alpha[0][i],fieldline_Y_delta_r_delta_alpha[0][i]]
+        z_array = [fieldline_Z[0][i],fieldline_Z_delta_r[0][i],fieldline_Z_delta_alpha[0][i],fieldline_Z_delta_r_delta_alpha[0][i]]
+        ax.plot(x_array, y_array, z_array, 'k-', linewidth=1, alpha=0.3)
+    # Plot the field lines
+    ax.plot(fieldline_X[0], fieldline_Y[0], fieldline_Z[0], 'k-', linewidth=1)
+    ax.plot(fieldline_X_delta_r[0], fieldline_Y_delta_r[0], fieldline_Z_delta_r[0], 'k-', linewidth=1)
+    ax.plot(fieldline_X_delta_alpha[0], fieldline_Y_delta_alpha[0], fieldline_Z_delta_alpha[0], 'k-', linewidth=1)
+    ax.plot(fieldline_X_delta_r_delta_alpha[0], fieldline_Y_delta_r_delta_alpha[0], fieldline_Z_delta_r_delta_alpha[0], 'k-', linewidth=1)
+    
+    if savefig != None:
+        fig.savefig(savefig + 'flux_tube.png')
+    if show:
+        # Show figures
+        plt.show()

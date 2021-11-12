@@ -79,5 +79,9 @@ class PlotTests(unittest.TestCase):
         stel.B_contour(show=False)
         plt.close()
 
+    def test_flux_tube(self):
+        stel = Qsc.from_paper(4, order='r2')
+        stel.flux_tube(show=False)
+
 if __name__ == "__main__":
     unittest.main()
