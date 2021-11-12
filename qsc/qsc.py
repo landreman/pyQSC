@@ -372,7 +372,7 @@ class Qsc():
         return np.max((0, self.min_R0_threshold - self.min_R0)) ** 2
         
     @classmethod
-    def from_vmec(cls, vmec_file, booz_xform_file, max_s_for_fit = 0.5, N_phi = 200):
+    def from_boozxform(cls, booz_xform_file, max_s_for_fit = 0.5, N_phi = 200, vmec_file=None, rc=[], rs=[], zc=[], zs=[]):
         """
         Load a configuration from a VMEC and a BOOZ_XFORM output files
         """
@@ -389,14 +389,25 @@ class Qsc():
         iotaVMECt=f.variables['iota_b'][()][1]
         f.close()
 
-        # Read properties of VMEC output file
-        f = netcdf.netcdf_file(vmec_file,'r',mmap=False)
-        rc = f.variables['raxis_cc'][()]
-        zs = f.variables['zaxis_cs'][()]
-        f.close()
+        if vmec_file!=None:
+            # Read axis-shape from VMEC output file
+            f = netcdf.netcdf_file(vmec_file,'r',mmap=False)
+            rc = f.variables['raxis_cc'][()]
+            rs = f.variables['raxis_cs'][()]
+            zc = f.variables['zaxis_cc'][()]
+            zs = f.variables['zaxis_cs'][()]
+            f.close()
+        elif rc!=None:
+            # Read axis-shape from specified rc
+            rc=rc
+            rs=rs
+            zc=zc
+            zs=zs
+        else:
+            raise Exception("Axis shape not specified")
 
         # Calculate nNormal
-        stel = Qsc(rc=rc,zs=zs)
+        stel = Qsc(rc=rc,rs=rs,zc=zc,zs=zs)
         nNormal = stel.iota - stel.iotaN
 
         # Prepare coordinates for fit
