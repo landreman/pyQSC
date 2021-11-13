@@ -65,10 +65,16 @@ def compare_from_boozxform(name, r=0.008, nphi=151):
     logger.info('Final   etabar = '+str(stel.etabar)+'for case '+name)
     assert np.isclose(py.etabar,stel.etabar,rtol=2e-2)
     if stel.order != 'r1':
+        logger.info('Initial B20 mean = '+str(py.B20_mean)+'for case '+name)
+        logger.info('Final   B20 mean = '+str(stel.B20_mean)+'for case '+name)
+        logger.info('Initial B20 variation = '+str(py.B20_variation)+'for case '+name)
+        logger.info('Final   B20 variation = '+str(stel.B20_variation)+'for case '+name)
         logger.info('Initial B2c = '+str(py.B2c)+'for case '+name)
         logger.info('Final   B2c = '+str(stel.B2c)+'for case '+name)
         logger.info('Initial B2s = '+str(py.B2s)+'for case '+name)
         logger.info('Final   B2s = '+str(stel.B2s)+'for case '+name)
+        assert np.isclose(py.B20_mean,stel.B20_mean,rtol=1e-2,atol=5e-3)
+        assert np.isclose(py.B20_variation,stel.B20_variation,rtol=1e-2,atol=5e-3)
         assert np.isclose(py.B2c,stel.B2c,rtol=2e-2,atol=5e-3)
         assert np.isclose(py.B2s,stel.B2s,rtol=1e-3,atol=1e-3)
 
@@ -78,8 +84,9 @@ class FromBoozxformTests(unittest.TestCase):
         super(FromBoozxformTests, self).__init__(*args, **kwargs)
         logger = logging.getLogger('qsc.qsc')
         logger.setLevel(1)
-        self.cases=["r1 section 5.1","r1 section 5.2","r1 section 5.3",\
-                    "r2 section 5.1","r2 section 5.2","r2 section 5.3","r2 section 5.4","r2 section 5.5"]
+        # self.cases=["r1 section 5.1","r1 section 5.2","r1 section 5.3",\
+        #             "r2 section 5.1","r2 section 5.2","r2 section 5.3","r2 section 5.4","r2 section 5.5"]
+        self.cases=["r2 section 5.1"]
 
     def test_from_boozxform(self):
         """
