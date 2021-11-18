@@ -100,8 +100,10 @@ def calculate_r3(self):
         -sign_G * B0 * B0 / (2*G0) * (abs_G0_over_B0 * X20 * curvature - d_Z20_d_varphi) \
         -sign_G * sign_psi * B0 * I2 / (4*G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1c*Y1c + Y1s*Y1s) + Y1c * d_X1c_d_varphi - X1c * d_Y1c_d_varphi)
 
-    logger.debug('max|flux_constraint_coefficient - predicted_flux_constraint_coefficient|:',np.max(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient)))
-    logger.debug('max|flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0)|:',np.max(abs(flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0))))
+    logger.debug('max|flux_constraint_coefficient - predicted_flux_constraint_coefficient|: '
+                 f'{np.max(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient))}')
+    logger.debug('max|flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0)|: '
+                 f'{np.max(abs(flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0)))}')
 
     if np.max(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient)) > 1e-7 \
     or np.max(abs(flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0))) > 1e-7:
@@ -272,15 +274,17 @@ def calculate_shear(self,B31c = 0):
     # Need to compute the integration factor necessary for computing the shear
     DMred = d_d_varphi[1:,1:]   # The differentiation matrix has a linearly dependent row, focus on submatrix
 
-    # Distinguish between the stellarator symmetric case self.sigma0 = 0 and the non-symmetric ones.
+    # Distinguish between the stellarator symmetric case and the non-symmetric one at order r^1.
     # Distinction leads to the expSig function being periodic (stell. sym.) or not.
-    if self.sigma0 == 0:
+    if self.sigma0 == 0 and np.max(np.abs(self.rs)) == 0 and np.max(np.abs(self.zc)) == 0:
+        # Case in which sigma is stellarator-symmetric:
         integSig = np.linalg.solve(DMred,self.sigma[1:])   # Invert differentiation matrix: as if first entry a zero, need to add it later
         integSig = np.insert(integSig,0,0)  # Add the first entry 0
         expSig = np.exp(2*iota*integSig)
         # d_phi_d_varphi = 1 + np.matmul(d_d_varphi,self.phi-self.varphi)
         self.iota2 = self.B0/2*sum(expSig*LamTilde*self.d_varphi_d_phi)/sum(expSig*(X1c**2 + Y1c**2 + Y1s**2)/Y1s**2*self.d_varphi_d_phi) 
     else:
+        # Case in which sigma is not stellarator-symmetric:
         # d_phi_d_varphi = 1 + np.matmul(d_d_varphi,self.phi-self.varphi)
         avSig = sum(self.sigma*self.d_varphi_d_phi)/len(self.sigma)     # Separate the piece that gives secular part, so all things periodic
         integSigPer = np.linalg.solve(DMred,self.sigma[1:]-avSig)   # Invert differentiation matrix: as if first entry a zero, need to add it later
@@ -288,8 +292,12 @@ def calculate_shear(self,B31c = 0):
         integSig = np.insert(integSig,0,0)  # Add the first entry 0
         expSig_ext = np.append(np.exp(2*iota*integSig),np.exp(2*iota*(avSig*2*np.pi/self.nfp))) # Add endpoint at 2*pi for better integration
         LamTilde_ext = np.append(LamTilde,LamTilde[0])
-        facDenom = np.append((X1c**2 + Y1c**2 + Y1s**2)/Y1s**2,(X1c[0]**2 + Y1c[0]**2 + Y1s[0]**2)/Y1s[0]**2)
-        self.iota2 = self.B0/2*integ.trapz(expSig_ext*LamTilde_ext,self.varphi)/integ.trapz(expSig_ext*facDenom,self.varphi)
+        fac_denom = (X1c**2 + Y1c**2 + Y1s**2) / Y1s**2
+        fac_denom_ext = np.append(fac_denom, fac_denom[0])
+        varphi_ext = np.append(self.varphi, 2 * np.pi / self.nfp)
+        self.iota2 = self.B0 / 2 \
+            * integ.trapz(expSig_ext * LamTilde_ext, varphi_ext) \
+            / integ.trapz(expSig_ext * fac_denom_ext, varphi_ext)
     
     # Using cumtrapz without exploiting periodicity
     # expSig = np.exp(2*iota*integ.cumtrapz(self.sigma,self.varphi,initial=0))
