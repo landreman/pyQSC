@@ -28,7 +28,7 @@ class Qsc():
     from .calculate_r3 import calculate_r3, calculate_shear
     from .mercier import mercier
     from .r_singularity import calculate_r_singularity
-    from .plot import plot, plot_boundary, get_boundary, B_fieldline, B_contour, plot_axis
+    from .plot import plot, plot_boundary, get_boundary, B_fieldline, B_contour, plot_axis, flux_tube
     from .Frenet_to_cylindrical import Frenet_to_cylindrical
     from .to_vmec import to_vmec
     from .util import B_mag
