@@ -25,7 +25,7 @@ class Qsc():
         Bfield_cylindrical, Bfield_cartesian, grad_B_tensor_cartesian, \
         grad_grad_B_tensor_cylindrical, grad_grad_B_tensor_cartesian
     from .calculate_r2 import calculate_r2
-    from .calculate_r3 import calculate_r3
+    from .calculate_r3 import calculate_r3, calculate_shear
     from .mercier import mercier
     from .r_singularity import calculate_r_singularity
     from .plot import plot, plot_boundary, get_boundary, B_fieldline, B_contour, plot_axis, flux_tube
