@@ -107,7 +107,7 @@ def calculate_r3(self):
 
     if np.max(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient)) > 1e-7 \
     or np.max(abs(flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0))) > 1e-7:
-        print("WARNING!!! Methods of computing lambda disagree!! Higher nphi resolution might be needed.")
+        logger.warning("Methods of computing lambda disagree!! Higher nphi resolution might be needed.")
 
     self.flux_constraint_coefficient = flux_constraint_coefficient
     self.B0_order_a_squared_to_cancel = B0_order_a_squared_to_cancel

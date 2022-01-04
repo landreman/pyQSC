@@ -8,7 +8,7 @@ from scipy.io import netcdf
 import matplotlib.pyplot as plt
 from qsc.qsc import Qsc
 
-logging.basicConfig(level=logging.INFO)
+#logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 cases = ['r1 section 5.1', 'r1 section 5.2', 'r1 section 5.3',

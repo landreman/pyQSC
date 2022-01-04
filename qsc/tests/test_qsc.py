@@ -8,7 +8,7 @@ import logging
 from qsc.qsc import Qsc
 from qsc.util import to_Fourier
 
-logging.basicConfig(level=logging.INFO)
+#logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def check_r2(s):

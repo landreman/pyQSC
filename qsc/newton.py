@@ -8,7 +8,7 @@ import numpy as np
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def newton(f, x0, jac, niter=20, tol=1e-13, nlinesearch=5):
+def newton(f, x0, jac, niter=20, tol=1e-13, nlinesearch=10):
     """
     Solve a system of nonlinear equations using Newton's method with a
     line search.
@@ -54,4 +54,9 @@ def newton(f, x0, jac, niter=20, tol=1e-13, nlinesearch=5):
         if residual_norm >= last_residual_norm:
             logger.info('Line search failed to reduce residual')
             break
+
+    if last_residual_norm > tol * 1e4:
+        logger.warning('Newton solve did not get close to desired tolerance. '
+                       f'Final residual: {last_residual_norm}')
+
     return x_best
