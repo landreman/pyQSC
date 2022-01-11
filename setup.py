@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="qsc",
-    version="0.0.5",
+    version="0.1.0",
     author="Matt Landreman",
     author_email="matt.landreman@gmail.com",
     description="Quasisymmetric Stellarator Construction",
