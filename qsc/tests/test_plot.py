@@ -8,7 +8,7 @@ from scipy.io import netcdf
 import matplotlib.pyplot as plt
 from qsc.qsc import Qsc
 
-logging.basicConfig(level=logging.INFO)
+#logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 cases = ['r1 section 5.1', 'r1 section 5.2', 'r1 section 5.3',
@@ -78,6 +78,10 @@ class PlotTests(unittest.TestCase):
         plt.close()
         stel.B_contour(show=False)
         plt.close()
+
+    def test_flux_tube(self):
+        stel = Qsc.from_paper(4, order='r2')
+        stel.flux_tube(show=False)
 
 if __name__ == "__main__":
     unittest.main()

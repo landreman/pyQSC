@@ -107,9 +107,10 @@ def init_axis(self):
     self.etabar_squared_over_curvature_squared = self.etabar * self.etabar / (curvature * curvature)
 
     self.d_d_phi = spectral_diff_matrix(self.nphi, xmax=2 * np.pi / self.nfp)
+    self.d_varphi_d_phi = B0_over_abs_G0 * d_l_d_phi
     self.d_d_varphi = np.zeros((nphi, nphi))
     for j in range(nphi):
-        self.d_d_varphi[j,:] = self.d_d_phi[j,:] / (B0_over_abs_G0 * d_l_d_phi[j])
+        self.d_d_varphi[j,:] = self.d_d_phi[j,:] / self.d_varphi_d_phi[j]
 
     # Compute the Boozer toroidal angle:
     self.varphi = np.zeros(nphi)
@@ -143,8 +144,11 @@ def init_axis(self):
     self.Bbar = self.spsi * self.B0
     self.abs_G0_over_B0 = abs_G0_over_B0
 
-    # The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero
-    self.lasym = np.max(np.abs(self.rs))>0 or np.max(np.abs(self.zc))>0 or np.abs(self.sigma0)>0
+    # The output is not stellarator-symmetric if (1) R0s is nonzero,
+    # (2) Z0c is nonzero, (3) sigma_initial is nonzero, or (B2s is
+    # nonzero and order != 'r1')
+    self.lasym = np.max(np.abs(self.rs)) > 0 or np.max(np.abs(self.zc)) > 0 \
+        or self.sigma0 != 0 or (self.order != 'r1' and self.B2s != 0)
 
     # Functions that converts a toroidal angle phi0 on the axis to the axis radial and vertical coordinates
     self.R0_func = self.convert_to_spline(sum([self.rc[i]*np.cos(i*self.nfp*self.phi) +\

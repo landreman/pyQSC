@@ -10,7 +10,7 @@ from qsc.qsc import Qsc
 from mpi4py import MPI
 import vmec
 
-logging.basicConfig(level=logging.INFO)
+#logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def compare_to_vmec(name, r=0.005, nphi=151):

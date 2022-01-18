@@ -21,12 +21,14 @@ class Qsc():
     from .init_axis import init_axis, convert_to_spline
     from .calculate_r1 import _residual, _jacobian, solve_sigma_equation, \
         _determine_helicity, r1_diagnostics
-    from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor
+    from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor, \
+        Bfield_cylindrical, Bfield_cartesian, grad_B_tensor_cartesian, \
+        grad_grad_B_tensor_cylindrical, grad_grad_B_tensor_cartesian
     from .calculate_r2 import calculate_r2
-    from .calculate_r3 import calculate_r3
+    from .calculate_r3 import calculate_r3, calculate_shear
     from .mercier import mercier
     from .r_singularity import calculate_r_singularity
-    from .plot import plot, plot_boundary, get_boundary, B_fieldline, B_contour, plot_axis
+    from .plot import plot, plot_boundary, get_boundary, B_fieldline, B_contour, plot_axis, flux_tube
     from .Frenet_to_cylindrical import Frenet_to_cylindrical, to_RZ
     from .to_vmec import to_vmec
     from .util import B_mag
