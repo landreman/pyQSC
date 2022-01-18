@@ -99,8 +99,9 @@ def Frenet_to_cylindrical_1_point(phi0, qsc):
         total_z = total_z + Z_at_phi0 * tangent_z
 
     total_R = np.sqrt(total_x * total_x + total_y * total_y)
+    total_phi=np.arctan2(total_y, total_x)
 
-    return total_R, total_z
+    return total_R, total_z, total_phi
 
 def Frenet_to_cylindrical(self, r, ntheta=20):
     """
@@ -157,7 +158,7 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
             res = root_scalar(Frenet_to_cylindrical_residual_func, xtol=1e-15, rtol=1e-15, maxiter=1000,\
                               args=(phi_target, self), bracket=[phi0_rootSolve_min, phi0_rootSolve_max], x0=phi_target)
             phi0_solution = res.root
-            final_R, final_z = Frenet_to_cylindrical_1_point(phi0_solution, self)
+            final_R, final_z, _ = Frenet_to_cylindrical_1_point(phi0_solution, self)
             R_2D[j_theta,j_phi] = final_R
             Z_2D[j_theta,j_phi] = final_z
             phi0_2D[j_theta,j_phi] = phi0_solution
@@ -178,6 +179,7 @@ def to_RZ(self,points):
     """
     R = []
     Z = []
+    phi = []
     for point in points:
         r      = point[0]
         theta  = point[1]
@@ -208,11 +210,9 @@ def to_RZ(self,points):
         self.X_spline = self.convert_to_spline(X_at_this_theta)
         self.Y_spline = self.convert_to_spline(Y_at_this_theta)
         self.Z_spline = self.convert_to_spline(Z_at_this_theta)
-        final_R, final_Z = Frenet_to_cylindrical_1_point(phi0, self)
+        final_R, final_Z, final_phi = Frenet_to_cylindrical_1_point(phi0, self)
         R.append(final_R)
         Z.append(final_Z)
-    #     # On the axis, phi=phi0
-    #     phi_cylindrical = phi0
-    #     xyz.append([R*np.cos(phi_cylindrical),R*np.sin(phi_cylindrical),Z])
-    # return np.array(xyz)
-    return R, Z
+        phi.append(final_phi)
+
+    return R, Z, phi
