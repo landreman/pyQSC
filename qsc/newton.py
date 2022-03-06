@@ -8,7 +8,7 @@ import numpy as np
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def newton(f, x0, jac, niter=20, tol=1e-13, nlinesearch=20):
+def newton(f, x0, jac, niter=20, tol=1e-13, nlinesearch=10):
     """
     Solve a system of nonlinear equations using Newton's method with a
     line search.
@@ -18,7 +18,6 @@ def newton(f, x0, jac, niter=20, tol=1e-13, nlinesearch=20):
     jac = function providing the Jacobian.
     niter = max number of Newton iterations.
     tol = stop when the residual norm is less than this.
-    nlinesearch = max number of traceback halvings
     """
 
     x = np.copy(x0)
