@@ -30,6 +30,7 @@ class Qsc():
     from .r_singularity import calculate_r_singularity
     from .plot import plot, plot_boundary, get_boundary, B_fieldline, B_contour, plot_axis, flux_tube
     from .Frenet_to_cylindrical import Frenet_to_cylindrical
+    from .make_nae_model import read_vmec, read_boozxform
     from .to_vmec import to_vmec
     from .util import B_mag
     
@@ -109,12 +110,13 @@ class Qsc():
         Driver for the main calculations.
         """
         self.init_axis()
-        self.solve_sigma_equation()
-        self.r1_diagnostics()
-        if self.order != 'r1':
-            self.calculate_r2()
-            if self.order == 'r3':
-                self.calculate_r3()
+        if self.order != 'r0':
+            self.solve_sigma_equation()
+            self.r1_diagnostics()
+            if self.order != 'r1':
+                self.calculate_r2()
+                if self.order == 'r3':
+                    self.calculate_r3()
     
     def get_dofs(self):
         """
