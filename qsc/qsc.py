@@ -30,8 +30,12 @@ class Qsc():
     from .r_singularity import calculate_r_singularity
     from .plot import plot, plot_boundary, get_boundary, B_fieldline, B_contour, plot_axis, flux_tube
 <<<<<<< HEAD
+<<<<<<< HEAD
     from .Frenet_to_cylindrical import Frenet_to_cylindrical, to_RZ
     from .make_nae_model import read_vmec, read_boozxform
+=======
+    from .Frenet_to_cylindrical import Frenet_to_cylindrical
+>>>>>>> parent of 3602c26 (Added simple NAE model construction from equilibria)
 =======
     from .Frenet_to_cylindrical import Frenet_to_cylindrical
 >>>>>>> parent of 3602c26 (Added simple NAE model construction from equilibria)
