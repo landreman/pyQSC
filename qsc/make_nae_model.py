@@ -1,5 +1,5 @@
 """
-This module contains a function to plot a near-axis surface.
+This module contains a function to read VMEC and BOOZXFORM to construct NAE.
 """
 import os
 import numpy as np
