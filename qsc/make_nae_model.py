@@ -21,7 +21,7 @@ def read_vmec(file_name, path = os.path.dirname(__file__)):
     Zaxis = f.variables['zaxis_cs'][()]
     nfp = f.variables['nfp'][()]
     psi = f.variables['phi'][()]/2/np.pi
-    
+    f.close()
     
     return nfp, psi, Raxis, Zaxis
 
@@ -39,6 +39,7 @@ def read_boozxform(file_name, path = os.path.dirname(__file__), helicity=0):
     ixm_b = f.variables['ixm_b'][()]
     ixn_b = f.variables['ixn_b'][()]
     jlist = f.variables['jlist'][()]
+    f.close()
     for i in range(np.size(jlist)):
         if ixm_b[i] == 1 and ixn_b[i]-ixm_b[i]*helicity==0:
             b_cos = bmnc_b[:,i]

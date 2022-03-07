@@ -150,7 +150,7 @@ def calculate_shear(self,B31c = 0):
     from the solvability condition of the generalised sigma equation at order
     O(r**3), as detailed in Rodriguez et al., to be published (2021). 
     This calculation is taken for a standard MHS equilibrium configuration. 
-    B31c can be given as an input. 
+    B31c can be given as an input (component of 1/B**2). 
     One may generalise this calculation straightforwardly.
     """
     logger.debug('Calculating magnetic shear...')
