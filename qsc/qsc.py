@@ -7,6 +7,7 @@ import logging
 import numpy as np
 from scipy.io import netcdf
 import matplotlib.pyplot as plt
+from sympy import im
 
 #from numba import jit
 
@@ -30,7 +31,7 @@ class Qsc():
     from .calculate_r3 import calculate_r3, calculate_shear
     from .mercier import mercier
     from .r_singularity import calculate_r_singularity
-    from .plot import plot, plot_boundary, get_boundary, B_fieldline, B_contour, plot_axis, flux_tube
+    from .plot import plot, plot_boundary, get_boundary, get_boundary_vmec, B_fieldline, B_contour, plot_axis, flux_tube
     from .Frenet_to_cylindrical import Frenet_to_cylindrical
     from .make_nae_model import read_vmec, read_boozxform
     from .to_vmec import to_vmec
@@ -376,7 +377,7 @@ class Qsc():
         return np.max((0, self.min_R0_threshold - self.min_R0)) ** 2
         
     @classmethod
-    def from_boozxform(cls, vmec_file, booz_xform_file, order='r2', max_s_for_fit = 0.4, N_phi = [],
+    def from_boozxform(cls, vmec_file, booz_xform_file, order='r2', max_s_for_fit = 0.4, N_phi = [], N_axis = [],
                         rc=[], rs=[], zc=[], zs=[], sigma0=0, I2=0, p2=0):
         """
         Load a configuration from a VMEC and a BOOZ_XFORM output files
@@ -394,14 +395,26 @@ class Qsc():
         f = netcdf.netcdf_file(vmec_file,'r',mmap=False)
         am = f.variables['am'][()] # Pressure profile polynomial
         rc = f.variables['raxis_cc'][()]
-        zs = -f.variables['zaxis_cs'][()]
+        zs = f.variables['zaxis_cs'][()]
+        cls.s_n = rc*(1+nfp**2*np.arange(0,np.size(rc),1)**2)/rc[0]
+        if N_axis:
+            rc = rc[0:N_axis-1]
+            zs = zs[0:N_axis-1]
         psi = f.variables['phi'][()]/2/np.pi
         psi_edge = np.abs(psi[-1])
         bsubumnc = f.variables['bsubumnc'][()]   
-        bsubvmnc = f.variables['bsubvmnc'][()]   
+        bsubvmnc = f.variables['bsubvmnc'][()] 
+        rmnc = f.variables['rmnc'][()]
+        zmns = -f.variables['zmns'][()] 
+        xm_vmec = f.variables['xm'][()]
+        xn_vmec = f.variables['xn'][()]
+        iota_vmec = f.variables['iotas'][()] 
         try:
             rs = -f.variables['raxis_cs'][()]
             zc = f.variables['zaxis_cc'][()]
+            if N_axis:
+                rs = rs[0:N_axis-1]
+                zc = zc[0:N_axis-1]
             logger.info('Non stellarator symmetric configuration')
         except:
             rs=[]
@@ -417,8 +430,8 @@ class Qsc():
         psi_booz = np.abs(psi[jlist-1])
         sqrt_psi_booz = np.sqrt(psi_booz)
         mask = psi_booz/psi_edge < max_s_for_fit
-        psi_booz_VMEC = np.abs(psi)
-        mask_VMEC = psi_booz_VMEC/psi_edge < max_s_for_fit
+        psi_booz_vmec = np.abs(psi)
+        mask_vmec = psi_booz_vmec/psi_edge < max_s_for_fit
         # s_fine = np.linspace(0,1,400)
         # sqrts_fine = s_fine
         if N_phi:
@@ -464,10 +477,10 @@ class Qsc():
             if m==2:
                 # For m=2, fit a polynomial in s (not sqrt(s)) that does need to go through the origin.
                 if ixn[jmn]-ixm[jmn]*helicity==0:
-                    z = np.polynomial.polynomial.polyfit(psi_booz[mask], bmnc[mask,jmn], [2,1,0])
+                    z = np.polynomial.polynomial.polyfit(psi_booz[mask], bmnc[mask,jmn], [2,1])
                     B2c = z[1]/2*B0
                 if chck_phi==1:
-                    z = np.polynomial.polynomial.polyfit(psi_booz[mask], bmnc[mask,jmn], [2,1,0])
+                    z = np.polynomial.polynomial.polyfit(psi_booz[mask], bmnc[mask,jmn], [2,1])
                     B2c_phi += z[1] * np.cos((n-2*helicity)*phi)/2*B0
                     B2s_phi += z[1] * np.sin((n-2*helicity)*phi)/2*B0
 
@@ -476,7 +489,7 @@ class Qsc():
         # to be too reliable (perhaps need a larger s_max for the fit). Often better to take B31c=0 for shear
         B20c = 4*B0**4*(0.75*B0*etabar**2-B20)
         B22c = 4*B0**4*(0.75*B0*etabar**2-B2c)
-        eta = etabar*np.sqrt(B0/2)
+        eta = etabar*np.sqrt(2/B0)
         B31c = -2/B0**2*(B31cp/B0+1.5*eta*(B20c*B0**2+B22c/2*B0**2)-15*eta**3/8)
         # print(B31c)
 
@@ -486,9 +499,9 @@ class Qsc():
                 m = ixm[jmn]
                 n = ixn[jmn]
                 if m==0 and n==0:
-                    G_psi = bsubvmnc[mask_VMEC,jmn]
-                    I_psi = bsubumnc[mask_VMEC,jmn]
-                    z = np.polynomial.polynomial.polyfit(psi_booz_VMEC[mask_VMEC], I_psi, [2,1,0])
+                    G_psi = bsubvmnc[mask_vmec,jmn]
+                    I_psi = bsubumnc[mask_vmec,jmn]
+                    z = np.polynomial.polynomial.polyfit(psi_booz_vmec[mask_vmec], I_psi, [2,1,0])
                     I2 = z[1]*B0/2
                     if I2<1e-10:
                         I2=0
@@ -502,6 +515,12 @@ class Qsc():
             q = cls(rc=rc,rs=rs,zc=zc,zs=zs,etabar=etabar,nphi=N_phi,nfp=nfp,B0=B0,sigma0=sigma0, I2=I2)
         else:
             q = cls(rc=rc,rs=rs,zc=zc,zs=zs,etabar=etabar,nphi=N_phi,nfp=nfp,B0=B0,sigma0=sigma0, I2=I2, B2c=B2c, order=order)
+        q.rmnc_vmec = rmnc
+        q.zmns_vmec = zmns
+        q.xm_vmec = xm_vmec
+        q.xn_vmec = xn_vmec
+        q.psi_vmec = psi_booz_vmec
+        q.iota_vmec = iota_vmec
         if chck_phi==1:
             q.B0_boozxform_array=B0_phi
             q.B1c_boozxform_array=B1c_phi

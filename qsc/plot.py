@@ -290,9 +290,53 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, n
 
     return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew
 
+def get_boundary_vmec(self, r=0.1, ntheta=40, nphi=130):
+    '''
+    Function that, for a given near-axis radial coordinate r, outputs
+    the [X,Y,Z,R] components of the boundary. The resolution along the toroidal
+    angle phi is equal to the resolution nphi for the axis, while ntheta
+    is specified by the used.
+
+    Args:
+      r (float): near-axis radius r where to create the surface
+      ntheta (int): Number of grid points to plot in the poloidal angle.
+      nphi   (int): Number of grid points to plot in the toroidal angle.
+      ntheta_fourier (int): Resolution in the Fourier transform to cylindrical coordinates
+      mpol: resolution in poloidal Fourier space
+      ntor: resolution in toroidal Fourier space
+    '''
+    # Get surface shape at fixed off-axis toroidal angle phi
+    # R_2D, Z_2D, _ = self.Frenet_to_cylindrical(r, ntheta=ntheta_fourier)
+    flux_surf = np.argmin(np.abs(r**2*self.B0/2-np.abs(self.psi_vmec)))
+    RBC = self.rmnc_vmec[flux_surf,:]
+    ZBS = self.zmns_vmec[flux_surf,:]
+    # RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, mpol=mpol, ntor=ntor, lasym=self.lasym)
+    # if not self.lasym:
+    #     RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
+    #     ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
+    theta1D = np.linspace(0, 2*np.pi, ntheta)
+    phi1D = np.linspace(0, 2*np.pi, nphi)
+    phi2D, theta2D = np.meshgrid(phi1D, theta1D)
+    R_2Dnew = np.zeros((ntheta, nphi))
+    Z_2Dnew = np.zeros((ntheta, nphi))
+    # Get Fourier coefficients in order to plot with arbitrary resolution
+    for jmn in range(len(self.xm_vmec)):
+            m = self.xm_vmec[jmn]
+            n = self.xn_vmec[jmn]
+            angle = m * theta2D - n * phi2D
+            R_2Dnew += RBC[jmn] * np.cos(angle)
+            Z_2Dnew += ZBS[jmn] * np.sin(angle)
+
+    # X, Y, Z arrays for the whole surface
+    x_2D_plot = R_2Dnew * np.cos(phi1D)
+    y_2D_plot = R_2Dnew * np.sin(phi1D)
+    z_2D_plot = Z_2Dnew
+
+    return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew
+
 def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8, mpol=13, ntor=25,
-         fieldlines=False, savefig=None, colormap=None, azim_default=None,
-         show=True, **kwargs):
+         fieldlines=False, savefig=None, colormap=None, azim_default=None, legend=True,
+         show=True, existing_axis = [], plot_3d = True, vmec = False, **kwargs):
     """
     Plot the boundary of the near-axis configuration. There are two main ways of
     running this function.
@@ -340,15 +384,22 @@ def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections
     .. image:: poloidalplot.png
        :width: 200
     """
-    x_2D_plot, y_2D_plot, z_2D_plot, R_2D_plot = self.get_boundary(r=r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier, mpol = mpol, ntor = ntor)
+    if vmec:
+        x_2D_plot, y_2D_plot, z_2D_plot, R_2D_plot = self.get_boundary_vmec(r=r, ntheta=ntheta, nphi=nphi)
+    else:
+        x_2D_plot, y_2D_plot, z_2D_plot, R_2D_plot = self.get_boundary(r=r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier, mpol = mpol, ntor = ntor)
     phi = np.linspace(0, 2 * np.pi, nphi)  # Endpoint = true and no nfp factor, because this is what is used in get_boundary()
     R_2D_spline = interp1d(phi, R_2D_plot, axis=1)
     z_2D_spline = interp1d(phi, z_2D_plot, axis=1)
     
     ## Poloidal plot
     phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
-    fig = plt.figure(figsize=(6, 6), dpi=80)
-    ax  = plt.gca()
+    if not existing_axis:
+        fig = plt.figure(figsize=(6, 6), dpi=80)
+        ax  = plt.gca()
+    else:
+        ax = existing_axis
+        plt.gca().set_prop_cycle(None)
     for i, phi in enumerate(phi1dplot_RZ):
         phinorm = phi * self.nfp / (2 * np.pi)
         if phinorm == 0:
@@ -365,114 +416,120 @@ def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections
         # Plot location of the axis
         plt.plot(self.R0_func(phi), self.Z0_func(phi), marker="x", linewidth=2, label=label, color=color)
         # Plot poloidal cross-section
-        plt.plot(R_2D_spline(phi), z_2D_spline(phi), color=color)
+        if vmec:
+            plt.plot(R_2D_spline(phi), z_2D_spline(phi), '--', color=color)
+        else:
+            plt.plot(R_2D_spline(phi), z_2D_spline(phi), color=color)
     plt.xlabel('R (meters)')
     plt.ylabel('Z (meters)')
-    plt.legend()
+    if legend:
+        plt.legend()
     plt.tight_layout()
     ax.set_aspect('equal')
     if savefig != None:
         fig.savefig(savefig + '_poloidal.pdf')
 
-    ## 3D plot
-    # Set the default azimuthal angle of view in the 3D plot
-    # QH stellarators look rotated in the phi direction when
-    # azim_default = 0
-    if azim_default == None:
-        if self.helicity == 0:
-            azim_default = 0
+    if plot_3d:
+        ## 3D plot
+        # Set the default azimuthal angle of view in the 3D plot
+        # QH stellarators look rotated in the phi direction when
+        # azim_default = 0
+        if azim_default == None:
+            if self.helicity == 0:
+                azim_default = 0
+            else:
+                azim_default = 45
+        # Define the magnetic field modulus and create its theta,phi array
+        # The norm instance will be used as the colormap for the surface
+        theta1D = np.linspace(0, 2 * np.pi, ntheta)
+        phi1D = np.linspace(0, 2 * np.pi, nphi)
+        phi2D, theta2D = np.meshgrid(phi1D, theta1D)
+        # Create a color map similar to viridis 
+        Bmag = self.B_mag(r, theta2D, phi2D)
+        norm = clr.Normalize(vmin=Bmag.min(), vmax=Bmag.max())
+        if fieldlines==False:
+            if colormap==None:
+                # Cmap similar to quasisymmetry papers
+                # cmap = clr.LinearSegmentedColormap.from_list('qs_papers',['#4423bb','#4940f4','#2e6dff','#0097f2','#00bacc','#00cb93','#00cb93','#7ccd30','#fbdc00','#f9fc00'], N=256)
+                cmap = cm.viridis
+                # Add a light source so the surface looks brighter
+                ls = LightSource(azdeg=0, altdeg=10)
+                cmap_plot = ls.shade(Bmag, cmap, norm=norm)
+            # Create the 3D figure and choose the following parameters:
+            # gsParams: extension in the top, bottom, left right directions for each subplot
+            # elevParams: elevation (distance to the plot) for each subplot
+            fig = plt.figure(constrained_layout=False, figsize=(4.5, 8))
+            gsParams = [[1.02,-0.3,0.,0.85], [1.09,-0.3,0.,0.85], [1.12,-0.15,0.,0.85]]
+            elevParams = [90, 30, 5]
+            for i in range(len(gsParams)):
+                gs = fig.add_gridspec(nrows=3, ncols=1,
+                                    top=gsParams[i][0], bottom=gsParams[i][1],
+                                    left=gsParams[i][2], right=gsParams[i][3],
+                                    hspace=0.0, wspace=0.0)
+                ax = fig.add_subplot(gs[i, 0], projection='3d')
+                create_subplot(ax, x_2D_plot, y_2D_plot, z_2D_plot, cmap_plot, elev=elevParams[i], azim=azim_default, **kwargs)
+            # Create color bar with axis placed on the right
+            cbar_ax = fig.add_axes([0.85, 0.2, 0.03, 0.6])
+            m = cm.ScalarMappable(cmap=cmap, norm=norm)
+            m.set_array([])
+            cbar = plt.colorbar(m, cax=cbar_ax)
+            cbar.ax.set_title(r'$|B| [T]$')
+            # Save figure
+            if savefig != None:
+                fig.savefig(savefig + '3D.png')
+            if show:
+                # Show figures
+                plt.show()
+                # Close figures
+                plt.close()
         else:
-            azim_default = 45
-    # Define the magnetic field modulus and create its theta,phi array
-    # The norm instance will be used as the colormap for the surface
-    theta1D = np.linspace(0, 2 * np.pi, ntheta)
-    phi1D = np.linspace(0, 2 * np.pi, nphi)
-    phi2D, theta2D = np.meshgrid(phi1D, theta1D)
-    # Create a color map similar to viridis 
-    Bmag = self.B_mag(r, theta2D, phi2D)
-    norm = clr.Normalize(vmin=Bmag.min(), vmax=Bmag.max())
-    if fieldlines==False:
-        if colormap==None:
-            # Cmap similar to quasisymmetry papers
-            # cmap = clr.LinearSegmentedColormap.from_list('qs_papers',['#4423bb','#4940f4','#2e6dff','#0097f2','#00bacc','#00cb93','#00cb93','#7ccd30','#fbdc00','#f9fc00'], N=256)
-            cmap = cm.viridis
-            # Add a light source so the surface looks brighter
-            ls = LightSource(azdeg=0, altdeg=10)
-            cmap_plot = ls.shade(Bmag, cmap, norm=norm)
-        # Create the 3D figure and choose the following parameters:
-        # gsParams: extension in the top, bottom, left right directions for each subplot
-        # elevParams: elevation (distance to the plot) for each subplot
-        fig = plt.figure(constrained_layout=False, figsize=(4.5, 8))
-        gsParams = [[1.02,-0.3,0.,0.85], [1.09,-0.3,0.,0.85], [1.12,-0.15,0.,0.85]]
-        elevParams = [90, 30, 5]
-        for i in range(len(gsParams)):
-            gs = fig.add_gridspec(nrows=3, ncols=1,
-                                  top=gsParams[i][0], bottom=gsParams[i][1],
-                                  left=gsParams[i][2], right=gsParams[i][3],
-                                  hspace=0.0, wspace=0.0)
-            ax = fig.add_subplot(gs[i, 0], projection='3d')
-            create_subplot(ax, x_2D_plot, y_2D_plot, z_2D_plot, cmap_plot, elev=elevParams[i], azim=azim_default, **kwargs)
-        # Create color bar with axis placed on the right
-        cbar_ax = fig.add_axes([0.85, 0.2, 0.03, 0.6])
-        m = cm.ScalarMappable(cmap=cmap, norm=norm)
-        m.set_array([])
-        cbar = plt.colorbar(m, cax=cbar_ax)
-        cbar.ax.set_title(r'$|B| [T]$')
-        # Save figure
-        if savefig != None:
-            fig.savefig(savefig + '3D.png')
-        if show:
-            # Show figures
-            plt.show()
-            # Close figures
-            plt.close()
-    else:
-        ## X, Y, Z arrays for the field lines
-        # Plot different field lines corresponding to different alphas
-        # where alpha=theta-iota*varphi with (theta,varphi) the Boozer angles
-        #alphas = [0, np.pi/4, np.pi/2, 3*np.pi/4, np.pi, 5*np.pi/4, 3*np.pi/2, 7*np.pi/4]
-        alphas = np.linspace(0, 2 * np.pi, 8, endpoint=False)
-        # Create the field line arrays
-        fieldline_X, fieldline_Y, fieldline_Z = create_field_lines(self, alphas, x_2D_plot, y_2D_plot, z_2D_plot)
-        # Define the rotation arrays for the subplots
-        degrees_array_x = [0., -66., 81.] # degrees for rotation in x
-        degrees_array_z = [azim_default, azim_default, azim_default] # degrees for rotation in z
-        shift_array   = [-1.0, 0.7, 1.8]
-        # Import mayavi and rotation packages (takes a few seconds)
-        from mayavi import mlab
-        from scipy.spatial.transform import Rotation as R
-        if show:
-            # Show RZ plot
-            plt.show()
-            # Close RZ plot
-            plt.close()
-        # Create 3D figure
-        fig = mlab.figure(bgcolor=(1,1,1), size=(430,720))
-        # Create subplots
-        create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot,
-                              fieldline_X, fieldline_Y, fieldline_Z,
-                              Bmag, degrees_array_x, degrees_array_z, shift_array)
-        # Create a good camera angle
-        mlab.view(azimuth=0, elevation=0, distance=8.5, focalpoint=(-0.15,0,0), figure=fig)
-        # Create the colorbar and change its properties
-        cb = mlab.colorbar(orientation='vertical', title='|B| [T]', nb_labels=7)
-        cb.scalar_bar.unconstrained_font_size = True
-        cb.label_text_property.font_family = 'times'
-        cb.label_text_property.bold = 0
-        cb.label_text_property.font_size=24
-        cb.label_text_property.color=(0,0,0)
-        cb.title_text_property.font_family = 'times'
-        cb.title_text_property.font_size=34
-        cb.title_text_property.color=(0,0,0)
-        cb.title_text_property.bold = 1
-        # Save figure
-        if savefig != None:
-            mlab.savefig(filename=savefig+'3D_fieldlines.png', figure=fig)
-        if show:
-            # Show mayavi plot
-            mlab.show()
-            # Close mayavi plots
-            mlab.close(all=True)
+            ## X, Y, Z arrays for the field lines
+            # Plot different field lines corresponding to different alphas
+            # where alpha=theta-iota*varphi with (theta,varphi) the Boozer angles
+            #alphas = [0, np.pi/4, np.pi/2, 3*np.pi/4, np.pi, 5*np.pi/4, 3*np.pi/2, 7*np.pi/4]
+            alphas = np.linspace(0, 2 * np.pi, 8, endpoint=False)
+            # Create the field line arrays
+            fieldline_X, fieldline_Y, fieldline_Z = create_field_lines(self, alphas, x_2D_plot, y_2D_plot, z_2D_plot)
+            # Define the rotation arrays for the subplots
+            degrees_array_x = [0., -66., 81.] # degrees for rotation in x
+            degrees_array_z = [azim_default, azim_default, azim_default] # degrees for rotation in z
+            shift_array   = [-1.0, 0.7, 1.8]
+            # Import mayavi and rotation packages (takes a few seconds)
+            from mayavi import mlab
+            from scipy.spatial.transform import Rotation as R
+            if show:
+                # Show RZ plot
+                plt.show()
+                # Close RZ plot
+                plt.close()
+            # Create 3D figure
+            fig = mlab.figure(bgcolor=(1,1,1), size=(430,720))
+            # Create subplots
+            create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot,
+                                fieldline_X, fieldline_Y, fieldline_Z,
+                                Bmag, degrees_array_x, degrees_array_z, shift_array)
+            # Create a good camera angle
+            mlab.view(azimuth=0, elevation=0, distance=8.5, focalpoint=(-0.15,0,0), figure=fig)
+            # Create the colorbar and change its properties
+            cb = mlab.colorbar(orientation='vertical', title='|B| [T]', nb_labels=7)
+            cb.scalar_bar.unconstrained_font_size = True
+            cb.label_text_property.font_family = 'times'
+            cb.label_text_property.bold = 0
+            cb.label_text_property.font_size=24
+            cb.label_text_property.color=(0,0,0)
+            cb.title_text_property.font_family = 'times'
+            cb.title_text_property.font_size=34
+            cb.title_text_property.color=(0,0,0)
+            cb.title_text_property.bold = 1
+            # Save figure
+            if savefig != None:
+                mlab.savefig(filename=savefig+'3D_fieldlines.png', figure=fig)
+            if show:
+                # Show mayavi plot
+                mlab.show()
+                # Close mayavi plots
+                mlab.close(all=True)
+
 
 def B_fieldline(self, r=0.1, alpha=0, phimax=None, nphi=400, show=True):
     '''
