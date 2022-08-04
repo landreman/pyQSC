@@ -104,16 +104,24 @@ def Frenet_to_cylindrical_1_point(phi0, qsc):
     return total_R, total_z, total_phi
 
 def Frenet_to_cylindrical(self, r, ntheta=20):
-    """
-    Function to convert the near-axis coordinate system to
-    a cylindrical one for a surface at a particular radius,
-    outputing the following arrays: R(theta,varphi),
-    phi(theta,varphi) and Z(theta,varphi) with R,phi,Z cylindrical
-    coordinates and theta and varphi Boozer coordinates
-
+    r"""
+    For a given minor radius coordinate :math:`r`, compute the
+    shape of the flux surface in standard cylindrical coordinates
+    :math:`(R, \phi, Z)`.  This function returns :math:`R` and
+    :math:`Z` as 2D arrays corresponding to dimensions ``(theta,
+    phi)``, where ``theta`` is the Boozer poloidal angle and ``phi``
+    is the standard toroidal angle.  Also returned is ``phi0(theta,
+    phi)``, defined as follows: for given ``(theta, phi)``, move to
+    the magnetic axis while holding the Boozer poloidal and toroidal
+    angles fixed; the standard toroidal angle at that resulting point
+    on the axis is ``phi0``.
+    
     Args:
-        r:  near-axis radius r of the desired boundary surface
+        r: near-axis radius r of the desired boundary surface
         ntheta: resolution in the poloidal angle theta
+
+    Returns: 3 element tuple containing ``(R, Z, phi0)``. Each entry has shape ``(ntheta, nphi)``.
+
     """
     nphi_conversion = self.nphi
     theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
