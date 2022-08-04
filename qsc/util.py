@@ -148,3 +148,13 @@ def B_mag(self, r, theta, phi, Boozer_toroidal = False):
         B += (r**2) * (self.B20_spline(phi) + self.B2c * np.cos(2 * thetaN) + self.B2s * np.sin(2 * thetaN))
 
     return B
+
+def rotate(self):
+    '''
+    Rotate the configuration by half a field period.
+    '''
+    for j in range(len(self.rc)):
+        if np.mod(j, 2) == 1:
+            self.rc[j] *= -1
+            self.zs[j] *= -1
+    self.calculate()

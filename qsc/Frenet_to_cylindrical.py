@@ -153,8 +153,8 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
         for j_phi in range(nphi_conversion):
             # Solve for the phi0 such that r0 + X1 n + Y1 b has the desired phi
             phi_target = phi_conversion[j_phi]
-            phi0_rootSolve_min = phi_target - 1.0 / self.nfp
-            phi0_rootSolve_max = phi_target + 1.0 / self.nfp
+            phi0_rootSolve_min = phi_target - 1.5 / self.nfp
+            phi0_rootSolve_max = phi_target + 1.5 / self.nfp
             res = root_scalar(Frenet_to_cylindrical_residual_func, xtol=1e-15, rtol=1e-15, maxiter=1000,\
                               args=(phi_target, self), bracket=[phi0_rootSolve_min, phi0_rootSolve_max], x0=phi_target)
             phi0_solution = res.root
