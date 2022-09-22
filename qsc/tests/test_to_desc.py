@@ -30,7 +30,7 @@ def compare_desc_to_vmec(name, r=0.005, nphi=151):
     py = Qsc.from_paper(name, nphi=nphi, order=order)
     logger.info("Outputing to VMEC")
     py.to_vmec(inputFile_vmec, r)
-    py.to_desc(inputFile_vmec, r)
+    py.to_desc(inputFile_desc, r)
     inputs_vmec = InputReader(inputFile_vmec).inputs
     inputs_desc = InputReader(inputFile_desc).inputs
     for arg in ["sym", "NFP", "Psi", "pressure", "iota", "current", "surface", "axis"]:
