@@ -5,11 +5,16 @@ import logging
 import numpy as np
 from qsc.qsc import Qsc
 from qsc.to_desc import ptolemy_identity
-from desc.io import InputReader
 
 # logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+try:
+    from desc.io import InputReader
+    desc_loaded = True
+except ImportError as e:
+    logger.debug(str(e))
+    desc_loaded = False
 
 def compare_desc_to_vmec(name, r=0.005, nphi=151):
     """
@@ -53,9 +58,10 @@ class ToDescTests(unittest.TestCase):
         Verify that DESC can actually read the generated input files
         and it gives the same input data as to VMEC.
         """
-        for case in self.cases:
-            logger.info("Going through case " + case)
-            compare_desc_to_vmec(case)
+        if desc_loaded:
+            for case in self.cases:
+                logger.info("Going through case " + case)
+                compare_desc_to_vmec(case)
 
     def test_ptolemy_identity(self):
         """
