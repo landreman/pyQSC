@@ -71,7 +71,7 @@ def to_desc(self, filename, r=0.1, params=dict(), ntheta=21, ntorMax=14):
     file_object.write("\n# global parameters\n")
     file_object.write("sym = {}\n".format(sym))
     file_object.write("NFP = {}\n".format(NFP))
-    file_object.write("Psi = {}\n".format(Psi))
+    file_object.write("Psi = {:15.8E}\n".format(Psi))
     file_object.write("\n# spectral resolution\n")
     if "L_rad" in params.keys():
         file_object.write(
@@ -112,60 +112,50 @@ def to_desc(self, filename, r=0.1, params=dict(), ntheta=21, ntorMax=14):
         )
     file_object.write("\n# solver tolerances\n")
     if "ftol" in params.keys():
-        (
-            file_object.write(
-                "ftol = " + " ".join(map(str, np.atleast_1d(params["ftol"])))
-            )
-            + "\n"
+        file_object.write(
+            "ftol = " + " ".join(map(str, np.atleast_1d(params["ftol"]))) + "\n"
         )
     if "xtol" in params.keys():
-        (
-            file_object.write(
-                "xtol = " + " ".join(map(str, np.atleast_1d(params["xtol"])))
-            )
-            + "\n"
+        file_object.write(
+            "xtol = " + " ".join(map(str, np.atleast_1d(params["xtol"]))) + "\n"
         )
     if "gtol" in params.keys():
-        (
-            file_object.write(
-                "gtol = " + " ".join(map(str, np.atleast_1d(params["gtol"])))
-            )
-            + "\n"
+        file_object.write(
+            "gtol = " + " ".join(map(str, np.atleast_1d(params["gtol"]))) + "\n"
         )
     if "nfev" in params.keys():
-        (
-            file_object.write(
-                "nfev = " + " ".join(map(str, np.atleast_1d(params["nfev"])))
-            )
-            + "\n"
+        file_object.write(
+            "nfev = " + " ".join(map(str, np.atleast_1d(params["nfev"]))) + "\n"
         )
     file_object.write("\n# solver methods\n")
     if "optimizer" in params.keys():
         file_object.write("optimizer = {}\n".format(params["optimizer"]))
     if "objective" in params.keys():
-        file_object.write("optimizer = {}\n".format(params["objective"]))
+        file_object.write("objective = {}\n".format(params["objective"]))
     if "spectral_indexing" in params.keys():
-        file_object.write("optimizer = {}\n".format(params["spectral_indexing"]))
+        file_object.write(
+            "spectral_indexing = {}\n".format(params["spectral_indexing"])
+        )
     if "node_pattern" in params.keys():
-        file_object.write("optimizer = {}\n".format(params["node_pattern"]))
+        file_object.write("node_pattern = {}\n".format(params["node_pattern"]))
     file_object.write("\n# pressure and current profiles\n")
-    file_object.write("l: {:3d}  p = {:16.8E}  c = {:16.8E}\n".format(0, p0, c0))
-    file_object.write("l: {:3d}  p = {:16.8E}\n".format(2, -p0))
+    file_object.write("l: {:3d}  p = {:15.8E}  c = {:15.8E}\n".format(0, p0, 0))
+    file_object.write("l: {:3d}  p = {:15.8E}  c = {:15.8E}\n".format(2, -p0, c0))
     file_object.write("\n# magnetic axis initial guess\n")
     for n in range(self.zs.size - 1, 0, -1):
         file_object.write(
-            "n: {:3d}  R0 = {:16.8E}  Z0 = {:16.8E}\n".format(
+            "n: {:3d}  R0 = {:15.8E}  Z0 = {:15.8E}\n".format(
                 -n, self.rs[n], self.zs[n]
             )
         )
     for n in range(self.rc.size):
         file_object.write(
-            "n: {:3d}  R0 = {:16.8E}  Z0 = {:16.8E}\n".format(n, self.rc[n], self.zc[n])
+            "n: {:3d}  R0 = {:15.8E}  Z0 = {:15.8E}\n".format(n, self.rc[n], self.zc[n])
         )
     file_object.write("\n# fixed-boundary surface shape\n")
     for k in range(len(m_pol)):
         file_object.write(
-            "m: {:3d}\tn: {:3d}\tR1 = {:16.8E}\tZ1 = {:16.8E}\n".format(
+            "m: {:3d}\tn: {:3d}\tR1 = {:15.8E}\tZ1 = {:15.8E}\n".format(
                 int(m_pol[k]), int(n_tor[k]), R_mn[k], Z_mn[k]
             )
         )
@@ -209,7 +199,7 @@ def ptolemy_identity(s, c):
     M = int(s.shape[1] - 1)
     N = int((s.shape[0] - 1) / 2)
 
-    m_pol = np.arange(M)
+    m_pol = np.arange(M + 1)
     n_tor = np.arange(-N, N + 1)
 
     mn = np.array([[m - M, n - N] for m in range(2 * M + 1) for n in range(2 * N + 1)])
