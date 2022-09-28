@@ -31,15 +31,16 @@ def from_paper(cls, name, **kwargs):
        "2022 QH nfp4 well"
        "2022 QH nfp4 Mercier"
        "2022 QH nfp7"
-    
-    The configurations that begin with ``"r1"`` refer to sections in
-    Landreman, Sengupta, and Plunk, "Direct construction of optimized
-    stellarator shapes. Part 2. Numerical quasisymmetric solutions",
-    Journal of Plasma Physics 85, 905850103 (2019).  The
-    configurations that begin with ``"r2"`` refer to sections in
-    Landreman and Sengupta, "Constructing stellarators with
-    quasisymmetry to high order", Journal of Plasma Physics 85,
-    815850601 (2019).  The configurations that begin with
+
+    The list of available configurations is also available as
+    ``Qsc.configurations``.  The configurations that begin with
+    ``"r1"`` refer to sections in Landreman, Sengupta, and Plunk,
+    "Direct construction of optimized stellarator shapes. Part
+    2. Numerical quasisymmetric solutions", Journal of Plasma Physics
+    85, 905850103 (2019).  The configurations that begin with ``"r2"``
+    refer to sections in Landreman and Sengupta, "Constructing
+    stellarators with quasisymmetry to high order", Journal of Plasma
+    Physics 85, 815850601 (2019).  The configurations that begin with
     ``"precise"`` are fits to the configurations in Landreman and
     Paul, "Magnetic Fields with Precise Quasisymmetry for Plasma
     Confinement", Physical Review Letters 128, 035001 (2022).  The
@@ -370,3 +371,12 @@ def from_paper(cls, name, **kwargs):
         raise ValueError('Unrecognized configuration name')
 
     return cls(**kwargs)
+
+# Extract the available configurations from the docstring:
+configurations = []
+docstring = from_paper.__doc__.split("\n")
+startline = '       "'  # Grab lines that start with this string.
+for line in docstring:
+    if line[:len(startline)] == startline:
+        # Remove the whitespace and quote marks:
+        configurations.append(line[len(startline) : -1])
