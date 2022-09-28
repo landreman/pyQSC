@@ -380,3 +380,6 @@ for line in docstring:
     if line[:len(startline)] == startline:
         # Remove the whitespace and quote marks:
         configurations.append(line[len(startline) : -1])
+print("$$$ from_paper.__doc__:", from_paper.__doc__)
+print("$$$ docstring:", docstring)
+print("$$$ configurations:", configurations, flush=True)

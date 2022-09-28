@@ -161,6 +161,14 @@ class ConfigurationsTests(unittest.TestCase):
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 4.85287603883526, places=places2)
             check_r2(stel)
 
+            # Landreman, arXiv:2209.11849 (2022)
+            stel = Qsc.from_paper("2022 QA", nphi=nphi)
+            self.assertEqual(stel.helicity, 0)
+            self.assertAlmostEqual(stel.iota, 0.41900572366804, places=places)
+            self.assertAlmostEqual(stel.d2_volume_d_psi2, -19.9522218635808, places=places)
+            check_r2(stel)
+            
+
                 
 if __name__ == "__main__":
     unittest.main()
