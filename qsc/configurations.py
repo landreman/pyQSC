@@ -374,7 +374,7 @@ def from_paper(cls, name, **kwargs):
 
 # Extract the available configurations from the docstring:
 configurations = []
-docstring = from_paper.__doc__.split("\n")
+docstring = from_paper.__func__.__doc__.split("\n")
 startline = '       "'  # Grab lines that start with this string.
 for line in docstring:
     if line[:len(startline)] == startline:
