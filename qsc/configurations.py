@@ -33,7 +33,7 @@ def from_paper(cls, name, **kwargs):
        "2022 QH nfp7"
 
     The list of available configurations is also available as
-    ``Qsc.configurations``.  The configurations that begin with
+    :obj:`Qsc.configurations`.  The configurations that begin with
     ``"r1"`` refer to sections in Landreman, Sengupta, and Plunk,
     "Direct construction of optimized stellarator shapes. Part
     2. Numerical quasisymmetric solutions", Journal of Plasma Physics
@@ -380,6 +380,3 @@ for line in docstring:
     if line[:len(startline)] == startline:
         # Remove the whitespace and quote marks:
         configurations.append(line[len(startline) : -1])
-print("$$$ from_paper.__doc__:", from_paper.__doc__)
-print("$$$ docstring:", docstring)
-print("$$$ configurations:", configurations, flush=True)

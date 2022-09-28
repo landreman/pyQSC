@@ -161,11 +161,68 @@ class ConfigurationsTests(unittest.TestCase):
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 4.85287603883526, places=places2)
             check_r2(stel)
 
-            # Landreman, arXiv:2209.11849 (2022)
+            # Landreman, arXiv:2209.11849 (2022), section 5.1:
             stel = Qsc.from_paper("2022 QA", nphi=nphi)
             self.assertEqual(stel.helicity, 0)
             self.assertAlmostEqual(stel.iota, 0.41900572366804, places=places)
             self.assertAlmostEqual(stel.d2_volume_d_psi2, -19.9522218635808, places=places)
+            self.assertAlmostEqual(stel.r_singularity, 0.372988558216609, places=places2)
+            check_r2(stel)
+            
+            # Landreman, arXiv:2209.11849 (2022), section 5.2:
+            stel = Qsc.from_paper("2022 QH nfp2", nphi=nphi)
+            self.assertEqual(stel.helicity, 1)
+            self.assertAlmostEqual(stel.iota, -0.954236580482566, places=places)
+            self.assertAlmostEqual(stel.d2_volume_d_psi2, 125.832934212705, places=places)
+            self.assertAlmostEqual(stel.r_singularity, 0.57380081585628, places=places2)
+            check_r2(stel)
+            
+            # Landreman, arXiv:2209.11849 (2022), section 5.3:
+            stel = Qsc.from_paper("2022 QH nfp3 vacuum", nphi=nphi)
+            self.assertEqual(stel.helicity, 1)
+            self.assertAlmostEqual(stel.iota, -1.25402177409397, places=places)
+            self.assertAlmostEqual(stel.d2_volume_d_psi2, 256.615192741512, places=places)
+            self.assertAlmostEqual(stel.r_singularity, 1.19017150226105, places=2)
+            check_r2(stel)
+            
+            # Landreman, arXiv:2209.11849 (2022), section 5.3:
+            stel = Qsc.from_paper("2022 QH nfp3 beta", nphi=nphi)
+            self.assertEqual(stel.helicity, 1)
+            self.assertAlmostEqual(stel.iota, -1.08767867125642, places=places)
+            self.assertAlmostEqual(stel.d2_volume_d_psi2, -373.876056716947, places=places)
+            self.assertAlmostEqual(stel.r_singularity, 0.330516938190007, places=places2)
+            check_r2(stel)
+            
+            # Landreman, arXiv:2209.11849 (2022), section 5.4:
+            stel = Qsc.from_paper("2022 QH nfp4 long axis", nphi=nphi)
+            self.assertEqual(stel.helicity, 1)
+            self.assertAlmostEqual(stel.iota, -1.77538223796474, places=places)
+            self.assertAlmostEqual(stel.d2_volume_d_psi2, 297.749457179557, places=places)
+            self.assertAlmostEqual(stel.r_singularity, 0.957566705852123, places=2)
+            check_r2(stel)
+            
+            # Landreman, arXiv:2209.11849 (2022), section 5.4:
+            stel = Qsc.from_paper("2022 QH nfp4 well", nphi=nphi)
+            self.assertEqual(stel.helicity, 1)
+            self.assertAlmostEqual(stel.iota, -1.13766926093388, places=places)
+            self.assertAlmostEqual(stel.d2_volume_d_psi2, -39.9505399355026, places=places)
+            self.assertAlmostEqual(stel.r_singularity, 0.433497572286833, places=places2)
+            check_r2(stel)
+            
+            # Landreman, arXiv:2209.11849 (2022), section 5.4:
+            stel = Qsc.from_paper("2022 QH nfp4 Mercier", nphi=nphi)
+            self.assertEqual(stel.helicity, 1)
+            self.assertAlmostEqual(stel.iota, -1.60108981435759, places=places)
+            self.assertAlmostEqual(stel.d2_volume_d_psi2, -1211.82381025175, places=places)
+            self.assertAlmostEqual(stel.r_singularity, 0.0999925405632508, places=places2)
+            check_r2(stel)
+            
+            # Landreman, arXiv:2209.11849 (2022), section 5.5:
+            stel = Qsc.from_paper("2022 QH nfp7", nphi=nphi)
+            self.assertEqual(stel.helicity, 1)
+            self.assertAlmostEqual(stel.iota, -3.65196588712095, places=2)
+            self.assertAlmostEqual(stel.d2_volume_d_psi2, 1281.33320214232, places=places)
+            self.assertGreater(stel.r_singularity, 100)
             check_r2(stel)
             
 
