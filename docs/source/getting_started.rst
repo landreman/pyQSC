@@ -7,7 +7,7 @@ Overview
 ``pyQSC`` is a python package for generating quasisymmetric stellarator configurations
 using an expansion about the magnetic axis.
 The underlying equations are explained in detail in
-[LandremanSenguptaPlunk]_ and [LandremanSengupta]_.
+[LandremanSenguptaPlunk2019]_ and [LandremanSengupta2019]_.
 PyQSC is closely related to the `fortran package here <https://github.com/landreman/quasisymmetry>`_,
 except that pyQSC is written in pure python. This makes pyQSC user-friendly,
 with no need for compilation, though it is slower.
@@ -41,8 +41,8 @@ Then install the package to your local python environment with::
 
 The ``-e`` in the last command is optional.
 
-.. [LandremanSenguptaPlunk] Landreman, Sengupta, and Plunk, *Journal of Plasma Physics* **85**, 905850103 (2019).
-.. [LandremanSengupta] Landreman and Sengupta, *Journal of Plasma Physics* **85**, 815850601 (2019).
+.. [LandremanSenguptaPlunk2019] Landreman, Sengupta, and Plunk, *Journal of Plasma Physics* **85**, 905850103 (2019).
+.. [LandremanSengupta2019] Landreman and Sengupta, *Journal of Plasma Physics* **85**, 815850601 (2019).
 
 Post-Installation
 ^^^^^^^^^^^^^^^^^
