@@ -46,7 +46,7 @@ def from_paper(cls, name, **kwargs):
     Confinement", Physical Review Letters 128, 035001 (2022).  The
     configurations that begin with ``"2022"`` refer to Landreman,
     "Mapping the space of quasisymmetric stellarators using optimized
-    near-axis expansion", arXiv:2209.11849 (2022).
+    near-axis expansion", J. Plasma Phys. 88, 905880616 (2022).
 
     You can specify any other arguments of the ``Qsc`` constructor
     in ``kwargs``. You can also use ``kwargs`` to override any of
@@ -207,7 +207,7 @@ def from_paper(cls, name, **kwargs):
         )
 
     elif name == "2022 QA":
-        """ The QA nfp=2 configuration from section 5.1 of Landreman, arXiv:2209.11849 (2022) """
+        """ The QA nfp=2 configuration from section 5.1 of Landreman, J. Plasma Phys. 88, 905880616 (2022) """
         add_default_args(
             kwargs,
             nfp=2,
@@ -223,7 +223,7 @@ def from_paper(cls, name, **kwargs):
         )
 
     elif name == "2022 QH nfp2":
-        """ The QH nfp=2 configuration from section 5.2 of Landreman, arXiv:2209.11849 (2022) """
+        """ The QH nfp=2 configuration from section 5.2 of Landreman, J. Plasma Phys. 88, 905880616 (2022) """
         add_default_args(
             kwargs,
             nfp=2,
@@ -242,7 +242,7 @@ def from_paper(cls, name, **kwargs):
         )
 
     elif name == "2022 QH nfp3 vacuum":
-        """ The QA nfp=3 vacuum configuration from section 5.3 of Landreman, arXiv:2209.11849 (2022) """
+        """ The QA nfp=3 vacuum configuration from section 5.3 of Landreman, J. Plasma Phys. 88, 905880616 (2022) """
         add_default_args(
             kwargs,
             nfp=3,
@@ -260,7 +260,7 @@ def from_paper(cls, name, **kwargs):
         )
 
     elif name == "2022 QH nfp3 beta":
-        """ The QA nfp=3 configuration with beta > 0 from section 5.3 of Landreman, arXiv:2209.11849 (2022) """
+        """ The QA nfp=3 configuration with beta > 0 from section 5.3 of Landreman, J. Plasma Phys. 88, 905880616 (2022) """
         add_default_args(
             kwargs,
             nfp=3,
@@ -279,7 +279,7 @@ def from_paper(cls, name, **kwargs):
         )
 
     elif name == "2022 QH nfp4 long axis":
-        """ The QA nfp=4 vacuum configuration with long magnetic axis from section 5.4 of Landreman, arXiv:2209.11849 (2022) """
+        """ The QA nfp=4 vacuum configuration with long magnetic axis from section 5.4 of Landreman, J. Plasma Phys. 88, 905880616 (2022) """
         add_default_args(
             kwargs,
             nfp=4,
@@ -305,7 +305,7 @@ def from_paper(cls, name, **kwargs):
         )
 
     elif name == "2022 QH nfp4 well":
-        """ The QA nfp=4 vacuum configuration with magnetic well from section 5.4 of Landreman, arXiv:2209.11849 (2022) """
+        """ The QA nfp=4 vacuum configuration with magnetic well from section 5.4 of Landreman, J. Plasma Phys. 88, 905880616 (2022) """
         add_default_args(
             kwargs,
             nfp=4,
@@ -327,7 +327,7 @@ def from_paper(cls, name, **kwargs):
         )
 
     elif name == "2022 QH nfp4 Mercier":
-        """ The QA nfp=4 finite-beta configuration with Mercier stability from section 5.4 of Landreman, arXiv:2209.11849 (2022) """
+        """ The QA nfp=4 finite-beta configuration with Mercier stability from section 5.4 of Landreman, J. Plasma Phys. 88, 905880616 (2022) """
         add_default_args(
             kwargs,
             nfp=4,
@@ -344,7 +344,7 @@ def from_paper(cls, name, **kwargs):
         )
 
     elif name == "2022 QH nfp7":
-        """ The QA nfp=7 vacuum configuration from section 5.5 of Landreman, arXiv:2209.11849 (2022) """
+        """ The QA nfp=7 vacuum configuration from section 5.5 of Landreman, J. Plasma Phys. 88, 905880616 (2022) """
         add_default_args(
             kwargs,
             nfp=7,

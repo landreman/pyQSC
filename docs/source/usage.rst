@@ -72,15 +72,15 @@ using the parameter ``nphi`` which is set by default as ``nphi=61``.
 Simple Demo
 ^^^^^^^^^^^
 
-In this Demo, we create a second order configuration and evaluate a few of its parameters.
+In this demo, we create a second order configuration and evaluate a few of its parameters.
 We also plot a surface shape at a constant toroidal magnetic flux (flux surface) and plot
 many of the relevant parameters for the near-axis construction. The file associated with
-this Demo is located in the ``examples`` folder.
+this demo is located in the ``examples`` folder.
 
 .. code-block::
 
    from qsc import Qsc
-   import numpy as np
+   
    stel = Qsc(rc=[1, 0.09], zs=[0, -0.09], nfp=2, etabar=0.95, I2=0.9, order='r2', B2c=-0.7, p2=-600000.)
    print(stel.iota) # Rotational transform on-axis for this configuration
    print(stel.d2_volume_d_psi2) # Magnetic well V''(psi)
@@ -126,4 +126,4 @@ in the examples folder in the file ``simsopt_demo.py``.
 .. [LandremanSenguptaPlunk2019] Landreman, Sengupta, and Plunk, *Journal of Plasma Physics* **85**, 905850103 (2019).
 .. [LandremanSengupta2019] Landreman and Sengupta, *Journal of Plasma Physics* **85**, 815850601 (2019).
 .. [LandremanPaul2022] Landreman and Paul, *Physical Review Letters* **128**, 035001 (2022).
-.. [Landreman2022] Landreman, *arXiv:2209.11849* (2022).
+.. [Landreman2022] Landreman, *Journal of Plasma Physics* **88**, 905880616 (2022).
