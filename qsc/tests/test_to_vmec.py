@@ -3,15 +3,21 @@
 from qsc.util import to_Fourier
 import unittest
 import os
-from scipy.io import netcdf
+from scipy.io import netcdf_file
 import numpy as np
 import logging
 from qsc.qsc import Qsc
 from mpi4py import MPI
-import vmec
 
 #logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+try:
+    import vmec
+    vmec_loaded = True
+except ImportError as e:
+    logger.debug(str(e))
+    vmec_loaded = False
 
 def compare_to_vmec(name, r=0.005, nphi=151):
     """
@@ -37,7 +43,7 @@ def compare_to_vmec(name, r=0.005, nphi=151):
     assert ictrl[1] == 11
     # Open VMEC output file
     woutFile="wout_"+str(name).replace(" ","")+".nc"
-    f = netcdf.netcdf_file(woutFile, 'r')
+    f = netcdf_file(woutFile, 'r')
     # Compare the results
     logger.info('pyQSC iota on axis = '+str(py.iota))
     logger.info('VMEC iota on axis = '+str(-f.variables['iotaf'][()][0]))
@@ -98,15 +104,17 @@ class ToVmecTests(unittest.TestCase):
         Verify that vmec can actually read the generated input files
         and that vmec's Bfield and iota on axis match the predicted values.
         """
-        for case in self.cases:
-            logger.info('Going through case '+case)
-            compare_to_vmec(case)
+        if vmec_loaded:
+            for case in self.cases:
+                logger.info('Going through case '+case)
+                compare_to_vmec(case)
 
     def test_Fourier(self):
         """
         Check that transforming with to_Fourier and then un-transforming gives the identity,
         for both even and odd ntheta and phi, and for lasym True or False.
         """
-        for case in self.cases:
-            logger.info('Going through case '+case)
-            Fourier_Inverse(case, atol=1e-9, rtol=1e-9)
+        if vmec_loaded:
+            for case in self.cases:
+                logger.info('Going through case '+case)
+                Fourier_Inverse(case, atol=1e-9, rtol=1e-9)
