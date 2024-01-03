@@ -65,24 +65,9 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14, RBC=Non
         # Fourier transform the result.
         # This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.
         RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, mpol, ntor, self.lasym)
-    else:
-        mpol = RBC.shape[1]-1
-        ntor = RBC.shape[0]-1
-        if RBS is None:
-            RBS = np.zeros((ntor+1,mpol+1))
-        if ZBC is None:
-            ZBC = np.zeros((ntor+1,mpol+1))
-        if ZBS is None:
-            ZBS = np.zeros((ntor+1,mpol+1))
-        # Check that the arrays are the correct size
-        if RBC.shape!=(ntor+1,mpol+1):
-            raise ValueError("RBC must have shape (ntor+1,mpol+1)")
-        if RBS.shape!=(ntor+1,mpol+1):
-            raise ValueError("RBS must have shape (ntor+1,mpol+1)")
-        if ZBC.shape!=(ntor+1,mpol+1):
-            raise ValueError("ZBC must have shape (ntor+1,mpol+1)")
-        if ZBS.shape!=(ntor+1,mpol+1):
-            raise ValueError("ZBS must have shape (ntor+1,mpol+1)")
+    # else:
+    #     assert (ntor+1)*2 == RBC.shape[1]
+    #     assert mpol == RBC.shape[0]
 
     # Write to VMEC file
     file_object = open(filename,"w+")
