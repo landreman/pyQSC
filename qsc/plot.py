@@ -249,7 +249,7 @@ def create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot,
         for j in range(len(alphas)):
             mlab.plot3d(fieldline_X_rotated[j], fieldline_Y_rotated[j]-shift_array[i], fieldline_Z_rotated[j], color=(0,0,0), line_width=0.001, tube_radius=0.005)
 
-def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, ntor=25, R_2D=None, Z_2D=None):
+def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, ntor=25, R_2D=None, Z_2D=None, output_fourier=False):
     '''
     Function that, for a given near-axis radial coordinate r, outputs
     the [X,Y,Z,R] components of the boundary. The resolution along the toroidal
@@ -289,7 +289,10 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, n
     y_2D_plot = R_2Dnew * np.sin(phi1D)
     z_2D_plot = Z_2Dnew
 
-    return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew
+    if output_fourier:
+        return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew, RBC, RBS, ZBC, ZBS
+    else:
+        return x_2D_plot, y_2D_plot, z_2D_plot, R_2Dnew
 
 def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
          fieldlines=False, savefig=None, colormap=None, azim_default=None,
