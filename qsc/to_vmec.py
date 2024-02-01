@@ -7,7 +7,7 @@ import numpy as np
 from .Frenet_to_cylindrical import Frenet_to_cylindrical
 from .util import mu0, to_Fourier
 
-def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14, RBC=None, RBS=None, ZBC=None, ZBS=None):
+def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14, mpolMax=14, RBC=None, RBS=None, ZBC=None, ZBS=None, lasym=None):
     """
     Outputs the near-axis configuration calculated with pyQSC to
     a text file that is able to be read by VMEC.
@@ -20,6 +20,8 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14, RBC=Non
         ntheta: resolution in the poloidal angle theta for the Frenet_to_cylindrical and VMEC calculations
         ntorMax: maximum number of NTOR in the resulting VMEC input file
     """
+    if lasym is None:
+        lasym = self.lasym
     if "mpol" not in params.keys():
         mpol1d = 100 # maximum number of mode numbers VMEC can handle
         mpol = int(np.floor(min(ntheta / 2, mpol1d)))
@@ -64,7 +66,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14, RBC=Non
         
         # Fourier transform the result.
         # This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.
-        RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, mpol, ntor, self.lasym)
+        RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, mpol, ntor, lasym)
     # else:
     #     assert (ntor+1)*2 == RBC.shape[1]
     #     assert mpol == RBC.shape[0]
@@ -85,9 +87,9 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14, RBC=Non
     file_object.write('  FTOL_ARRAY = '+str(params["ftol_array"])[1:-1]+'\n')
     file_object.write('  NITER_ARRAY = '+str(params["niter_array"])[1:-1]+'\n')
     file_object.write('!----- Grid Parameters -----\n')
-    file_object.write('  LASYM = '+str(self.lasym)+'\n')
+    file_object.write('  LASYM = '+str(lasym)+'\n')
     file_object.write('  NFP = '+str(self.nfp)+'\n')
-    file_object.write('  MPOL = '+str(mpol)+'\n')
+    file_object.write('  MPOL = '+str(min(mpol,mpolMax))+'\n')
     file_object.write('  NTOR = '+str(min(ntor,ntorMax))+'\n')
     file_object.write('  PHIEDGE = '+str(phiedge)+'\n')
     file_object.write('!----- Pressure Parameters -----\n')
@@ -103,7 +105,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14, RBC=Non
     # To convert sin(...) modes to vmec, we introduce a minus sign. This is because in vmec,
     # R and Z ~ sin(m theta - n phi), which for m=0 is sin(-n phi) = -sin(n phi).
     file_object.write('  RAXIS_CC = '+str(self.rc)[1:-1]+'\n')
-    if self.lasym:
+    if lasym:
         file_object.write('  RAXIS_CS = '+str(-self.rs)[1:-1]+'\n')
         file_object.write('  ZAXIS_CC = '+str(self.zc)[1:-1]+'\n')
     file_object.write('  ZAXIS_CS = '+str(-self.zs)[1:-1]+'\n')
@@ -112,14 +114,14 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14, RBC=Non
         for n in range(-ntor,ntor+1):
             if RBC[n+ntor,m]!=0 or ZBS[n+ntor,m]!=0:
                 file_object.write(    '  RBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBC[n+ntor,m]:+.16e}"+',    ZBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBS[n+ntor,m]:+.16e}"+'\n')
-                if self.lasym:
+                if lasym:
                     file_object.write('  RBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBS[n+ntor,m]:+.16e}"+',    ZBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBC[n+ntor,m]:+.16e}"+'\n')
     file_object.write('/\n')
     file_object.close()
 
     self.RBC = RBC.transpose()
     self.ZBS = ZBS.transpose()
-    if self.lasym:
+    if lasym:
         self.RBS = RBS.transpose()
         self.ZBC = ZBC.transpose()
     else:
