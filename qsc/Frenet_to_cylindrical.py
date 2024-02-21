@@ -103,7 +103,7 @@ def Frenet_to_cylindrical_1_point(phi0, qsc):
 
     return total_R, total_z, total_phi
 
-def Frenet_to_cylindrical(self, r, ntheta=20):
+def Frenet_to_cylindrical(self, r, ntheta=24):
     r"""
     For a given minor radius coordinate :math:`r`, compute the
     shape of the flux surface in standard cylindrical coordinates

@@ -7,7 +7,7 @@ import numpy as np
 from .Frenet_to_cylindrical import Frenet_to_cylindrical
 from .util import mu0, to_Fourier
 
-def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14, mpolMax=14, RBC=None, RBS=None, ZBC=None, ZBS=None, lasym=None):
+def to_vmec(self, filename, r=0.1, params=dict(), ntheta=24, ntorMax=12, mpolMax=12, RBC=None, RBS=None, ZBC=None, ZBS=None, lasym=None):
     """
     Outputs the near-axis configuration calculated with pyQSC to
     a text file that is able to be read by VMEC.
