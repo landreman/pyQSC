@@ -31,6 +31,7 @@ class Qsc():
     from .plot import plot, plot_boundary, get_boundary, B_fieldline, B_contour, plot_axis, flux_tube
     from .Frenet_to_cylindrical import Frenet_to_cylindrical, to_RZ
     from .to_vmec import to_vmec
+    from .to_desc import to_desc
     from .util import B_mag
     from .configurations import from_paper, configurations
     
