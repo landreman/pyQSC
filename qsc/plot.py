@@ -345,6 +345,19 @@ def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections
     R_2D_spline = interp1d(phi, R_2D_plot, axis=1)
     z_2D_spline = interp1d(phi, z_2D_plot, axis=1)
     
+    # Define a list of colors
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+
+    # Counter to keep track of the color index
+    color_index = 0
+
+    # Function to get the next color from the list
+    def get_next_color():
+        nonlocal color_index
+        color = colors[color_index]
+        color_index = (color_index + 1) % len(colors)
+        return color
+    
     ## Poloidal plot
     phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
     fig = plt.figure(figsize=(6, 6), dpi=80)
@@ -361,7 +374,7 @@ def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections
             label = r'$\phi={3\pi}/$' + str(2 * self.nfp)
         else:
             label = '_nolegend_'
-        color = next(ax._get_lines.prop_cycler)['color']
+        color = get_next_color()
         # Plot location of the axis
         plt.plot(self.R0_func(phi), self.Z0_func(phi), marker="x", linewidth=2, label=label, color=color)
         # Plot poloidal cross-section
