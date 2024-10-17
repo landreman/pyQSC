@@ -96,7 +96,7 @@ def plot(self, newfigure=True, show=True):
         subplot('Z2c')
         subplot('Z2s')
         data = self.r_singularity_vs_varphi
-        data[data > 1e20] = np.NAN
+        data[data > 1e20] = np.nan
         subplot('r_singularity', data=data, y0=True)
         if self.order != 'r2':
             subplot('X3c1')
