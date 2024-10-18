@@ -3,7 +3,7 @@ This module contains a function to plot a near-axis surface.
 """
 
 import numpy as np
-from scipy.interpolate import interp2d, interp1d
+from scipy.interpolate import interp1d, RectBivariateSpline
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib.colors as clr
@@ -184,18 +184,19 @@ def create_field_lines(qsc, alphas, X_2D, Y_2D, Z_2D, phimax=2*np.pi, nphi=500):
     [ntheta_RZ,nphi_RZ] = X_2D.shape
     phi1D   = np.linspace(0,2*np.pi,nphi_RZ)
     theta1D = np.linspace(0,2*np.pi,ntheta_RZ)
-    X_2D_spline = interp2d(phi1D, theta1D, X_2D, kind='cubic')
-    Y_2D_spline = interp2d(phi1D, theta1D, Y_2D, kind='cubic')
-    Z_2D_spline = interp2d(phi1D, theta1D, Z_2D, kind='cubic')
+    X_2D_spline = RectBivariateSpline(phi1D, theta1D, X_2D.T)
+    Y_2D_spline = RectBivariateSpline(phi1D, theta1D, Y_2D.T)
+    Z_2D_spline = RectBivariateSpline(phi1D, theta1D, Z_2D.T)
     for i in range(len(alphas)):
         for j in range(len(phi_array)):
             phi_mod = np.mod(phi_array[j],2*np.pi)
             varphi0=qsc.nu_spline(phi_array[j])+2*phi_array[j]-phi_mod
             theta_fieldline=qsc.iota*varphi0+alphas[i]
             theta_fieldline_mod=np.mod(theta_fieldline,2*np.pi)
-            fieldline_X[i,j] = X_2D_spline(phi_mod,theta_fieldline_mod)[0]
-            fieldline_Y[i,j] = Y_2D_spline(phi_mod,theta_fieldline_mod)[0]
-            fieldline_Z[i,j] = Z_2D_spline(phi_mod,theta_fieldline_mod)[0]
+            fieldline_X[i, j] = X_2D_spline(phi_mod, theta_fieldline_mod)[0, 0]
+            fieldline_Y[i, j] = Y_2D_spline(phi_mod, theta_fieldline_mod)[0, 0]
+            fieldline_Z[i, j] = Z_2D_spline(phi_mod, theta_fieldline_mod)[0, 0]
+
     return fieldline_X, fieldline_Y, fieldline_Z
 
 def create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot,
@@ -509,7 +510,7 @@ def B_fieldline(self, r=0.1, alpha=0, phimax=None, nphi=400, show=True):
     plt.title("r = " + str(r) + ", alpha = " + str(alpha))
     theta = alpha + self.iota * varphi_array
     plt.plot(varphi_array/np.pi, self.B_mag(r, theta, varphi_array, Boozer_toroidal=True))
-    ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    ax.xaxis.set_major_formatter(tck.FormatStrFormatter(r'%g $\pi$'))
     ax.xaxis.set_major_locator(tck.MultipleLocator(base=2))
     plt.tight_layout()
     if show:
@@ -538,8 +539,8 @@ def B_contour(self, r=0.1, ntheta=100, nphi=120, ncontours=10, show=True):
     ax.set_title('|B| for r=' + str(r))
     ax.set_xlabel(r'$\varphi$')
     ax.set_ylabel(r'$\theta$')
-    ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
-    ax.yaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    ax.xaxis.set_major_formatter(tck.FormatStrFormatter(r'%g $\pi$'))
+    ax.yaxis.set_major_formatter(tck.FormatStrFormatter(r'%g $\pi$'))
     ax.xaxis.set_major_locator(tck.MultipleLocator(base=0.5))
     ax.yaxis.set_major_locator(tck.MultipleLocator(base=0.5))
     plt.tight_layout()

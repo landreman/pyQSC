@@ -296,8 +296,8 @@ def calculate_shear(self,B31c = 0):
         fac_denom_ext = np.append(fac_denom, fac_denom[0])
         varphi_ext = np.append(self.varphi, 2 * np.pi / self.nfp)
         self.iota2 = self.B0 / 2 \
-            * integ.trapz(expSig_ext * LamTilde_ext, varphi_ext) \
-            / integ.trapz(expSig_ext * fac_denom_ext, varphi_ext)
+            * integ.trapezoid(expSig_ext * LamTilde_ext, varphi_ext) \
+            / integ.trapezoid(expSig_ext * fac_denom_ext, varphi_ext)
     
     # Using cumtrapz without exploiting periodicity
     # expSig = np.exp(2*iota*integ.cumtrapz(self.sigma,self.varphi,initial=0))
