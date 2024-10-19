@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outputs and Functions &mdash; pyQsc 0.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=ae2dc491"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Usage" href="usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyQsc
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#post-installation">Post-Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#known-configurations">Known configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#new-configurations">New configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#simple-demo">Simple Demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#input-parameters">Input parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#using-with-simsopt">Using with SIMSOPT</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Outputs and Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#outputs">Outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simsopt-related">SIMSOPT related</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#position-vector">Position Vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#grad-b">Grad B</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#qsc-qsc-class">qsc.Qsc class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#qsc.Qsc"><code class="docutils literal notranslate"><span class="pre">Qsc</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.B_contour"><code class="docutils literal notranslate"><span class="pre">Qsc.B_contour()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.B_fieldline"><code class="docutils literal notranslate"><span class="pre">Qsc.B_fieldline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.B_mag"><code class="docutils literal notranslate"><span class="pre">Qsc.B_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.Bfield_cartesian"><code class="docutils literal notranslate"><span class="pre">Qsc.Bfield_cartesian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.Bfield_cylindrical"><code class="docutils literal notranslate"><span class="pre">Qsc.Bfield_cylindrical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.Frenet_to_cylindrical"><code class="docutils literal notranslate"><span class="pre">Qsc.Frenet_to_cylindrical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_grad_B_tensor"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_grad_B_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_grad_grad_B_tensor"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_grad_grad_B_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_r2"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_r2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_r3"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_r3()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_r_singularity"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_r_singularity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_shear"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_shear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.change_nfourier"><code class="docutils literal notranslate"><span class="pre">Qsc.change_nfourier()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.configurations"><code class="docutils literal notranslate"><span class="pre">Qsc.configurations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.convert_to_spline"><code class="docutils literal notranslate"><span class="pre">Qsc.convert_to_spline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.flux_tube"><code class="docutils literal notranslate"><span class="pre">Qsc.flux_tube()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.from_cxx"><code class="docutils literal notranslate"><span class="pre">Qsc.from_cxx()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.from_paper"><code class="docutils literal notranslate"><span class="pre">Qsc.from_paper()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.get_boundary"><code class="docutils literal notranslate"><span class="pre">Qsc.get_boundary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.get_dofs"><code class="docutils literal notranslate"><span class="pre">Qsc.get_dofs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.grad_B_tensor_cartesian"><code class="docutils literal notranslate"><span class="pre">Qsc.grad_B_tensor_cartesian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.grad_grad_B_tensor_cartesian"><code class="docutils literal notranslate"><span class="pre">Qsc.grad_grad_B_tensor_cartesian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.grad_grad_B_tensor_cylindrical"><code class="docutils literal notranslate"><span class="pre">Qsc.grad_grad_B_tensor_cylindrical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.init_axis"><code class="docutils literal notranslate"><span class="pre">Qsc.init_axis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.mercier"><code class="docutils literal notranslate"><span class="pre">Qsc.mercier()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.min_R0_penalty"><code class="docutils literal notranslate"><span class="pre">Qsc.min_R0_penalty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.plot"><code class="docutils literal notranslate"><span class="pre">Qsc.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.plot_axis"><code class="docutils literal notranslate"><span class="pre">Qsc.plot_axis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.plot_boundary"><code class="docutils literal notranslate"><span class="pre">Qsc.plot_boundary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.r1_diagnostics"><code class="docutils literal notranslate"><span class="pre">Qsc.r1_diagnostics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.set_dofs"><code class="docutils literal notranslate"><span class="pre">Qsc.set_dofs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.solve_sigma_equation"><code class="docutils literal notranslate"><span class="pre">Qsc.solve_sigma_equation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.to_RZ"><code class="docutils literal notranslate"><span class="pre">Qsc.to_RZ()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.to_vmec"><code class="docutils literal notranslate"><span class="pre">Qsc.to_vmec()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source.html">Source code on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyQsc</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Outputs and Functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/outputs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="outputs-and-functions">
+<h1>Outputs and Functions<a class="headerlink" href="#outputs-and-functions" title="Permalink to this heading"></a></h1>
+<p>List of main outputs provided by <code class="docutils literal notranslate"><span class="pre">pyQsc</span></code> and functions that
+can be used. Some of the functions have links to their
+definitions in the code in order to get more details.</p>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.from_paper" title="qsc.Qsc.from_paper"><code class="xref py py-mod docutils literal notranslate"><span class="pre">from_paper</span></code></a>: create a stellarator from a known configuration.</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.get_boundary" title="qsc.Qsc.get_boundary"><code class="xref py py-mod docutils literal notranslate"><span class="pre">get_boundary</span></code></a>: obtain the <span class="math notranslate nohighlight">\((x,y,z)\)</span> arrays of a boundary shape at a specific radius.</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.plot" title="qsc.Qsc.plot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plot</span></code></a>: Generate a matplotlib figure with an array of plots, showing the toroidally varying properties of the configuration.</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.plot_axis" title="qsc.Qsc.plot_axis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_axis</span></code></a>: Plot axis shape and the Frenet-Serret frame along the axis (optional).</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.plot_boundary" title="qsc.Qsc.plot_boundary"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_boundary</span></code></a>: Plot the boundary of the near-axis configuration.</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.B_contour" title="qsc.Qsc.B_contour"><code class="xref py py-mod docutils literal notranslate"><span class="pre">B_contour</span></code></a>: Plot contours of B in the <span class="math notranslate nohighlight">\((\vartheta,\varphi)\)</span> plane with <span class="math notranslate nohighlight">\((\vartheta,\varphi)\)</span> Boozer angles</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.B_fieldline" title="qsc.Qsc.B_fieldline"><code class="xref py py-mod docutils literal notranslate"><span class="pre">B_fieldline</span></code></a>: Plot the modulus of the magnetic field B along a field line.</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.B_mag" title="qsc.Qsc.B_mag"><code class="xref py py-mod docutils literal notranslate"><span class="pre">B_mag</span></code></a>: Calculate the modulus of the magnetic field for a given set of coordinates <span class="math notranslate nohighlight">\((r,\theta,\phi)\)</span></p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.Bfield_cartesian" title="qsc.Qsc.Bfield_cartesian"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Bfield_cartesian</span></code></a>: magnetic field vector in cartesian coordinates</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.Bfield_cylindrical" title="qsc.Qsc.Bfield_cylindrical"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Bfield_cylindrical</span></code></a>:  magnetic field vector in cylindrical coordinates</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.grad_B_tensor_cartesian" title="qsc.Qsc.grad_B_tensor_cartesian"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grad_B_tensor_cartesian</span></code></a>: grad B tensor in cartesian coordinates</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">grad_B_tensor_cylindrical</span></code>: grad B tensor in cylindrical coordinates</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.grad_grad_B_tensor_cylindrical" title="qsc.Qsc.grad_grad_B_tensor_cylindrical"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grad_grad_B_tensor_cylindrical</span></code></a>: grad grad B tensor in cartesian coordinates</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.grad_grad_B_tensor_cartesian" title="qsc.Qsc.grad_grad_B_tensor_cartesian"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grad_grad_B_tensor_cartesian</span></code></a>: grad grad B tensor in cartesian coordinates</p></li>
+</ul>
+</section>
+<section id="outputs">
+<h2>Outputs<a class="headerlink" href="#outputs" title="Permalink to this heading"></a></h2>
+<p>Scalars</p>
+<ul class="simple">
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">iota</span></code>: rotational transform on-axis (iota)</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">iotaN</span></code>: iota-N where N is the helicity of the axis</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">axis_length</span></code>: total length of the magnetic axis</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Bbar</span></code>: magnetic field normalization <span class="math notranslate nohighlight">\(=s_\psi \times B_0\)</span></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">G0</span></code>: lowest order Boozer function <span class="math notranslate nohighlight">\(G_0\)</span></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">G2</span></code>: higher order Boozer function <span class="math notranslate nohighlight">\(G_0\)</span></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">beta_1s</span></code>: Boozer function <span class="math notranslate nohighlight">\(\beta_{1s}\)</span></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">lasym</span></code>: true if stellarator-asymmetric, false otherwise</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">max_elongation</span></code>: maximum elongation of the first order solution</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">mean_elongation</span></code>: mean elongation of the first order solution</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">min_R0</span></code>: minimum radial location of the axis</p></li>
+</ul>
+<p>Arrays</p>
+<ul class="simple">
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">sigma</span></code>: sigma function related to the first-order solution</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">torsion</span></code>: torsion of the axis</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">curvature</span></code>: curvature of the axis</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">varphi</span></code>: toroidal Boozer angle</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">phi</span></code>: toroidal cylindrical angle</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">d_l_d_phi</span></code>: derivative of the arclength with respect to phi</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">d_l_d_varphi</span></code>: derivative of the arclength with respect to varphi</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">elongation</span></code>: elongation of the first order elliptical shape</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">B20</span></code>: solution of the second order magnetic field B20</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">DGeod_times_r2</span></code>: DGeod term of the Mercier criterion times r2</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">DMerc_times_r2</span></code>: DMerc term of the Mercier criterion times r2</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">DWell_times_r2</span></code>: DWell term of the Mercier criterion times r2</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">d2_volume_d_psi2</span></code>: Magnetic well</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">r_singularity</span></code>: proxy for the maximum acceptable radius</p></li>
+</ul>
+</section>
+<section id="simsopt-related">
+<h2>SIMSOPT related<a class="headerlink" href="#simsopt-related" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.get_dofs" title="qsc.Qsc.get_dofs"><code class="xref py py-mod docutils literal notranslate"><span class="pre">get_dofs</span></code></a>: list of degrees of freedom of a particular stellarator in a format ready to be used by SIMSOPT.</p></li>
+<li><p><a class="reference internal" href="api.html#qsc.Qsc.set_dofs" title="qsc.Qsc.set_dofs"><code class="xref py py-mod docutils literal notranslate"><span class="pre">set_dofs</span></code></a>: modify the degress of freedom of a particular stellarator resulting in a new configuration.</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">names</span></code>: names of degrees of freedom</p></li>
+</ul>
+</section>
+<section id="position-vector">
+<h2>Position Vector<a class="headerlink" href="#position-vector" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Z0</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">R0</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">X1c</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">X1s</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Y1c</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Y1s</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">X20</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">X2c</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">X2s</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Y20</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Y2c</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Y2s</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Z20</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Z2c</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Z2s</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">X3c1</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">X3c3</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">X3s1</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">X3s3</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Y3c1</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Y3c3</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Y3s1</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Y3s3</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Z3c1</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Z3c3</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Z3s1</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Z3s3</span></code></p></li>
+</ul>
+</section>
+<section id="grad-b">
+<h2>Grad B<a class="headerlink" href="#grad-b" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">grad_B_tensor_cylindrical</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">grad_B_colon_grad_B</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">L_grad_B</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">L_grad_grad_B</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">inv_L_grad_B</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">min_L_grad_Bmin_L_grad_B&gt;</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">grad_grad_B_inverse_scale_length_vs_varphi</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">L_grad_grad_B</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">grad_grad_B_inverse_scale_length</span></code></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">grad_grad_B</span></code></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matt Landreman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

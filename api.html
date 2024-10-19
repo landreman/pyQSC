@@ -1,0 +1,697 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; pyQsc 0.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=ae2dc491"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Source code on GitHub" href="source.html" />
+    <link rel="prev" title="Outputs and Functions" href="outputs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyQsc
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#post-installation">Post-Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#known-configurations">Known configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#new-configurations">New configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#simple-demo">Simple Demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#input-parameters">Input parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#using-with-simsopt">Using with SIMSOPT</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs and Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html#outputs">Outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html#simsopt-related">SIMSOPT related</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html#position-vector">Position Vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html#grad-b">Grad B</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qsc-qsc-class">qsc.Qsc class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qsc.Qsc"><code class="docutils literal notranslate"><span class="pre">Qsc</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.B_contour"><code class="docutils literal notranslate"><span class="pre">Qsc.B_contour()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.B_fieldline"><code class="docutils literal notranslate"><span class="pre">Qsc.B_fieldline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.B_mag"><code class="docutils literal notranslate"><span class="pre">Qsc.B_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.Bfield_cartesian"><code class="docutils literal notranslate"><span class="pre">Qsc.Bfield_cartesian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.Bfield_cylindrical"><code class="docutils literal notranslate"><span class="pre">Qsc.Bfield_cylindrical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.Frenet_to_cylindrical"><code class="docutils literal notranslate"><span class="pre">Qsc.Frenet_to_cylindrical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.calculate"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.calculate_grad_B_tensor"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_grad_B_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.calculate_grad_grad_B_tensor"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_grad_grad_B_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.calculate_r2"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_r2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.calculate_r3"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_r3()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.calculate_r_singularity"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_r_singularity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.calculate_shear"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_shear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.change_nfourier"><code class="docutils literal notranslate"><span class="pre">Qsc.change_nfourier()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.configurations"><code class="docutils literal notranslate"><span class="pre">Qsc.configurations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.convert_to_spline"><code class="docutils literal notranslate"><span class="pre">Qsc.convert_to_spline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.flux_tube"><code class="docutils literal notranslate"><span class="pre">Qsc.flux_tube()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.from_cxx"><code class="docutils literal notranslate"><span class="pre">Qsc.from_cxx()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.from_paper"><code class="docutils literal notranslate"><span class="pre">Qsc.from_paper()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.get_boundary"><code class="docutils literal notranslate"><span class="pre">Qsc.get_boundary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.get_dofs"><code class="docutils literal notranslate"><span class="pre">Qsc.get_dofs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.grad_B_tensor_cartesian"><code class="docutils literal notranslate"><span class="pre">Qsc.grad_B_tensor_cartesian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.grad_grad_B_tensor_cartesian"><code class="docutils literal notranslate"><span class="pre">Qsc.grad_grad_B_tensor_cartesian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.grad_grad_B_tensor_cylindrical"><code class="docutils literal notranslate"><span class="pre">Qsc.grad_grad_B_tensor_cylindrical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.init_axis"><code class="docutils literal notranslate"><span class="pre">Qsc.init_axis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.mercier"><code class="docutils literal notranslate"><span class="pre">Qsc.mercier()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.min_R0_penalty"><code class="docutils literal notranslate"><span class="pre">Qsc.min_R0_penalty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.plot"><code class="docutils literal notranslate"><span class="pre">Qsc.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.plot_axis"><code class="docutils literal notranslate"><span class="pre">Qsc.plot_axis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.plot_boundary"><code class="docutils literal notranslate"><span class="pre">Qsc.plot_boundary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.r1_diagnostics"><code class="docutils literal notranslate"><span class="pre">Qsc.r1_diagnostics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.set_dofs"><code class="docutils literal notranslate"><span class="pre">Qsc.set_dofs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.solve_sigma_equation"><code class="docutils literal notranslate"><span class="pre">Qsc.solve_sigma_equation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.to_RZ"><code class="docutils literal notranslate"><span class="pre">Qsc.to_RZ()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qsc.Qsc.to_vmec"><code class="docutils literal notranslate"><span class="pre">Qsc.to_vmec()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source.html">Source code on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyQsc</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this heading"></a></h1>
+<p>All of the functionality of pyQSC is contained
+in a single class, <code class="docutils literal notranslate"><span class="pre">qsc.Qsc</span></code>.
+For many applications, all that is needed is the constructor
+of this class, which drives the individual steps of the calculation.</p>
+<section id="qsc-qsc-class">
+<h2>qsc.Qsc class<a class="headerlink" href="#qsc-qsc-class" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsc.Qsc">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsc.</span></span><span class="sig-name descname"><span class="pre">Qsc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">etabar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sG</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spsi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">61</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B2s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B2c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r1'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This is the main class for representing the quasisymmetric
+stellarator construction.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.B_contour">
+<span class="sig-name descname"><span class="pre">B_contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntheta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncontours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.B_contour" title="Permalink to this definition"></a></dt>
+<dd><p>Plot contours of constant B, with B the modulus of the
+magnetic field, as a function of Boozer coordinates theta and varphi</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> (<em>float</em>) – near-axis radius r where to create the surface</p></li>
+<li><p><strong>ntheta</strong> (<em>int</em>) – Number of grid points to plot in the Boozer poloidal angle.</p></li>
+<li><p><strong>nphi</strong> (<em>int</em>) – Number of grid points to plot in the Boozer toroidal angle.</p></li>
+<li><p><strong>ncontours</strong> (<em>int</em>) – number of contours to show in the plot</p></li>
+<li><p><strong>show</strong> (<em>bool</em>) – Whether or not to call the matplotlib <code class="docutils literal notranslate"><span class="pre">show()</span></code> command.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.B_fieldline">
+<span class="sig-name descname"><span class="pre">B_fieldline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phimax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.B_fieldline" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the modulus of the magnetic field B along a field line with
+the Boozer toroidal angle varphi acting as a field-line following
+coordinate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> (<em>float</em>) – near-axis radius r where to create the surface</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Field-line label</p></li>
+<li><p><strong>phimax</strong> (<em>float</em>) – Maximum value of the field-line following parameter varphi</p></li>
+<li><p><strong>nphi</strong> (<em>int</em>) – resolution of the phi grid</p></li>
+<li><p><strong>show</strong> (<em>bool</em>) – Whether or not to call the matplotlib <code class="docutils literal notranslate"><span class="pre">show()</span></code> command.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.B_mag">
+<span class="sig-name descname"><span class="pre">B_mag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Boozer_toroidal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.B_mag" title="Permalink to this definition"></a></dt>
+<dd><p>Function to calculate the modulus of the magnetic field B for a given
+near-axis radius r, a Boozer poloidal angle theta (not vartheta) and
+a cylindrical toroidal angle phi if Boozer_toroidal = True or the
+Boozer angle varphi if Boozer_toroidal = True</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> – the near-axis radius</p></li>
+<li><p><strong>theta</strong> – the Boozer poloidal angle</p></li>
+<li><p><strong>phi</strong> – the cylindrical or Boozer toroidal angle</p></li>
+<li><p><strong>Boozer_toroidal</strong> – False if phi is the cylindrical toroidal angle, True for the Boozer one</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.Bfield_cartesian">
+<span class="sig-name descname"><span class="pre">Bfield_cartesian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.Bfield_cartesian" title="Permalink to this definition"></a></dt>
+<dd><p>Function to calculate the magnetic field vector B=(B_x,B_y,B_z) at
+every point along the axis (hence with nphi points) where x, y and z
+are the standard cartesian coordinates for a given
+near-axis radius r and a Boozer poloidal angle vartheta (not theta).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> – the near-axis radius</p></li>
+<li><p><strong>theta</strong> – the Boozer poloidal angle vartheta (= theta-N*phi)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.Bfield_cylindrical">
+<span class="sig-name descname"><span class="pre">Bfield_cylindrical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.Bfield_cylindrical" title="Permalink to this definition"></a></dt>
+<dd><p>Function to calculate the magnetic field vector B=(B_R,B_phi,B_Z) at
+every point along the axis (hence with nphi points) where R, phi and Z
+are the standard cylindrical coordinates for a given
+near-axis radius r and a Boozer poloidal angle vartheta (not theta).
+The formulae implemented here are eq (3.5) and (3.6) of
+Landreman (2021): Figures of merit for stellarators near the magnetic axis, JPP</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> – the near-axis radius</p></li>
+<li><p><strong>theta</strong> – the Boozer poloidal angle vartheta (= theta-N*phi)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.Frenet_to_cylindrical">
+<span class="sig-name descname"><span class="pre">Frenet_to_cylindrical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntheta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.Frenet_to_cylindrical" title="Permalink to this definition"></a></dt>
+<dd><p>For a given minor radius coordinate <span class="math notranslate nohighlight">\(r\)</span>, compute the
+shape of the flux surface in standard cylindrical coordinates
+<span class="math notranslate nohighlight">\((R, \phi, Z)\)</span>.  This function returns <span class="math notranslate nohighlight">\(R\)</span> and
+<span class="math notranslate nohighlight">\(Z\)</span> as 2D arrays corresponding to dimensions <code class="docutils literal notranslate"><span class="pre">(theta,</span>
+<span class="pre">phi)</span></code>, where <code class="docutils literal notranslate"><span class="pre">theta</span></code> is the Boozer poloidal angle and <code class="docutils literal notranslate"><span class="pre">phi</span></code>
+is the standard toroidal angle.  Also returned is <code class="docutils literal notranslate"><span class="pre">phi0(theta,</span>
+<span class="pre">phi)</span></code>, defined as follows: for given <code class="docutils literal notranslate"><span class="pre">(theta,</span> <span class="pre">phi)</span></code>, move to
+the magnetic axis while holding the Boozer poloidal and toroidal
+angles fixed; the standard toroidal angle at that resulting point
+on the axis is <code class="docutils literal notranslate"><span class="pre">phi0</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> – near-axis radius r of the desired boundary surface</p></li>
+<li><p><strong>ntheta</strong> – resolution in the poloidal angle theta</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: 3 element tuple containing <code class="docutils literal notranslate"><span class="pre">(R,</span> <span class="pre">Z,</span> <span class="pre">phi0)</span></code>. Each entry has shape <code class="docutils literal notranslate"><span class="pre">(ntheta,</span> <span class="pre">nphi)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate" title="Permalink to this definition"></a></dt>
+<dd><p>Driver for the main calculations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.calculate_grad_B_tensor">
+<span class="sig-name descname"><span class="pre">calculate_grad_B_tensor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate_grad_B_tensor" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the components of the grad B tensor, and the scale
+length L grad B associated with the Frobenius norm of this
+tensor.
+The formula for the grad B tensor is eq (3.12) of
+Landreman (2021): Figures of merit for stellarators near the magnetic axis, JPP</p>
+<p>self should be an instance of Qsc with X1c, Y1s etc populated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.calculate_grad_grad_B_tensor">
+<span class="sig-name descname"><span class="pre">calculate_grad_grad_B_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">two_ways</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate_grad_grad_B_tensor" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the components of the grad grad B tensor, and the scale
+length L grad grad B associated with the Frobenius norm of this
+tensor.
+self should be an instance of Qsc with X1c, Y1s etc populated.
+The grad grad B tensor in discussed around eq (3.13)
+Landreman (2021): Figures of merit for stellarators near the magnetic axis, JPP
+although an explicit formula is not given there.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">two_ways</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, an independent calculation of
+the tensor is also computed, to confirm the answer is the same.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.calculate_r2">
+<span class="sig-name descname"><span class="pre">calculate_r2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate_r2" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the O(r^2) quantities.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.calculate_r3">
+<span class="sig-name descname"><span class="pre">calculate_r3</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate_r3" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the O(r**3) contributions to X and Y needed for full
+consistency of B through O(r**2), as detailed in section 3 of
+Landreman &amp; Sengupta, J Plasma Physics (2019).  This subroutine is
+based on the order_r_option = “r3_flux_constraint” equations from
+the fortran quasisymmetry code.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.calculate_r_singularity">
+<span class="sig-name descname"><span class="pre">calculate_r_singularity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">high_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate_r_singularity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.calculate_shear">
+<span class="sig-name descname"><span class="pre">calculate_shear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">B31c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.calculate_shear" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the magnetic shear iota_2 (so iota=iota0+r^2*iota2) which comes
+from the solvability condition of the generalised sigma equation at order
+O(r**3), as detailed in Rodriguez et al., to be published (2021).
+This calculation is taken for a standard MHS equilibrium configuration.
+B31c can be given as an input.
+One may generalise this calculation straightforwardly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.change_nfourier">
+<span class="sig-name descname"><span class="pre">change_nfourier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nfourier_new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.change_nfourier" title="Permalink to this definition"></a></dt>
+<dd><p>Resize the arrays of Fourier amplitudes. You can either increase
+or decrease nfourier.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsc.Qsc.configurations">
+<span class="sig-name descname"><span class="pre">configurations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['r1</span> <span class="pre">section</span> <span class="pre">5.1',</span> <span class="pre">'r1</span> <span class="pre">section</span> <span class="pre">5.2',</span> <span class="pre">'r1</span> <span class="pre">section</span> <span class="pre">5.3',</span> <span class="pre">'r2</span> <span class="pre">section</span> <span class="pre">5.1',</span> <span class="pre">'r2</span> <span class="pre">section</span> <span class="pre">5.2',</span> <span class="pre">'r2</span> <span class="pre">section</span> <span class="pre">5.3',</span> <span class="pre">'r2</span> <span class="pre">section</span> <span class="pre">5.4',</span> <span class="pre">'r2</span> <span class="pre">section</span> <span class="pre">5.5',</span> <span class="pre">'precise</span> <span class="pre">QA',</span> <span class="pre">'precise</span> <span class="pre">QA+well',</span> <span class="pre">'precise</span> <span class="pre">QH',</span> <span class="pre">'precise</span> <span class="pre">QH+well',</span> <span class="pre">'2022</span> <span class="pre">QA',</span> <span class="pre">'2022</span> <span class="pre">QH</span> <span class="pre">nfp2',</span> <span class="pre">'2022</span> <span class="pre">QH</span> <span class="pre">nfp3</span> <span class="pre">vacuum',</span> <span class="pre">'2022</span> <span class="pre">QH</span> <span class="pre">nfp3</span> <span class="pre">beta',</span> <span class="pre">'2022</span> <span class="pre">QH</span> <span class="pre">nfp4</span> <span class="pre">long</span> <span class="pre">axis',</span> <span class="pre">'2022</span> <span class="pre">QH</span> <span class="pre">nfp4</span> <span class="pre">well',</span> <span class="pre">'2022</span> <span class="pre">QH</span> <span class="pre">nfp4</span> <span class="pre">Mercier',</span> <span class="pre">'2022</span> <span class="pre">QH</span> <span class="pre">nfp7']</span></em><a class="headerlink" href="#qsc.Qsc.configurations" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.convert_to_spline">
+<span class="sig-name descname"><span class="pre">convert_to_spline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.convert_to_spline" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.flux_tube">
+<span class="sig-name descname"><span class="pre">flux_tube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.03</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_phi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12.566370614359172</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntheta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">150</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntheta_fourier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nphi_tube</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.flux_tube" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the flux tube at a specific alpha and psi
+with a volume of delta alpha, delta psi and delta phi.
+The variable alpha is the field-line label
+alpha=theta-q varphi with theta and varphi the poloidal
+and toroidal Boozer angles. Phi is the cylindrical
+toroidal angle and psi=Bbar r^2/2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> (<em>float</em>) – radial location of the field-line</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – field-line label for the field-line</p></li>
+<li><p><strong>delta_r</strong> (<em>float</em>) – radial length of the field-line</p></li>
+<li><p><strong>delta_alpha</strong> (<em>float</em>) – poloidal length of the field-line</p></li>
+<li><p><strong>delta_phi</strong> (<em>float</em>) – toroidal length of the field-line</p></li>
+<li><p><strong>ntheta</strong> (<em>int</em>) – Number of grid points to plot in the poloidal angle.</p></li>
+<li><p><strong>nphi</strong> (<em>int</em>) – Number of grid points to plot in the toroidal angle.</p></li>
+<li><p><strong>ntheta_fourier</strong> (<em>int</em>) – Resolution in the Fourier transform to cylindrical coordinates</p></li>
+<li><p><strong>nphi_tube</strong> (<em>int</em>) – Resolution of the field-lines in the flux tube plot</p></li>
+<li><p><strong>savefig</strong> (<em>str</em>) – Filename prefix for the png files to save.
+Note that a suffix including <code class="docutils literal notranslate"><span class="pre">.png</span></code> will be appended.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no figure files will be saved.</p></li>
+<li><p><strong>show</strong> (<em>bool</em>) – Whether or not to call the matplotlib/mayavi <code class="docutils literal notranslate"><span class="pre">show()</span></code> command.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.from_cxx">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_cxx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.from_cxx" title="Permalink to this definition"></a></dt>
+<dd><p>Load a configuration from a <code class="docutils literal notranslate"><span class="pre">qsc_out.&lt;extension&gt;.nc</span></code> output file
+that was generated by the C++ version of QSC. Almost all the
+data will be taken from the output file, over-writing any
+calculations done in python when the new Qsc object is
+created.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.from_paper">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_paper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.from_paper" title="Permalink to this definition"></a></dt>
+<dd><p>Get one of the configurations that has been used in papers.
+Available values for <code class="docutils literal notranslate"><span class="pre">name</span></code> are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;r1 section 5.1&quot;</span>
+<span class="s2">&quot;r1 section 5.2&quot;</span>
+<span class="s2">&quot;r1 section 5.3&quot;</span>
+<span class="s2">&quot;r2 section 5.1&quot;</span>
+<span class="s2">&quot;r2 section 5.2&quot;</span>
+<span class="s2">&quot;r2 section 5.3&quot;</span>
+<span class="s2">&quot;r2 section 5.4&quot;</span>
+<span class="s2">&quot;r2 section 5.5&quot;</span>
+<span class="s2">&quot;precise QA&quot;</span>
+<span class="s2">&quot;precise QA+well&quot;</span>
+<span class="s2">&quot;precise QH&quot;</span>
+<span class="s2">&quot;precise QH+well&quot;</span>
+<span class="s2">&quot;2022 QA&quot;</span>
+<span class="s2">&quot;2022 QH nfp2&quot;</span>
+<span class="s2">&quot;2022 QH nfp3 vacuum&quot;</span>
+<span class="s2">&quot;2022 QH nfp3 beta&quot;</span>
+<span class="s2">&quot;2022 QH nfp4 long axis&quot;</span>
+<span class="s2">&quot;2022 QH nfp4 well&quot;</span>
+<span class="s2">&quot;2022 QH nfp4 Mercier&quot;</span>
+<span class="s2">&quot;2022 QH nfp7&quot;</span>
+</pre></div>
+</div>
+<p>The list of available configurations is also available as
+<a class="reference internal" href="#qsc.Qsc.configurations" title="qsc.Qsc.configurations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Qsc.configurations</span></code></a>.  The configurations that begin with
+<code class="docutils literal notranslate"><span class="pre">&quot;r1&quot;</span></code> refer to sections in Landreman, Sengupta, and Plunk,
+“Direct construction of optimized stellarator shapes. Part
+2. Numerical quasisymmetric solutions”, Journal of Plasma Physics
+85, 905850103 (2019).  The configurations that begin with <code class="docutils literal notranslate"><span class="pre">&quot;r2&quot;</span></code>
+refer to sections in Landreman and Sengupta, “Constructing
+stellarators with quasisymmetry to high order”, Journal of Plasma
+Physics 85, 815850601 (2019).  The configurations that begin with
+<code class="docutils literal notranslate"><span class="pre">&quot;precise&quot;</span></code> are fits to the configurations in Landreman and
+Paul, “Magnetic Fields with Precise Quasisymmetry for Plasma
+Confinement”, Physical Review Letters 128, 035001 (2022).  The
+configurations that begin with <code class="docutils literal notranslate"><span class="pre">&quot;2022&quot;</span></code> refer to Landreman,
+“Mapping the space of quasisymmetric stellarators using optimized
+near-axis expansion”, J. Plasma Phys. 88, 905880616 (2022).</p>
+<p>You can specify any other arguments of the <code class="docutils literal notranslate"><span class="pre">Qsc</span></code> constructor
+in <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>. You can also use <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> to override any of
+the properties of the configurations from the papers. For
+instance, you can modify the value of <code class="docutils literal notranslate"><span class="pre">etabar</span></code> in the first
+example using</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="n">qsc</span><span class="o">.</span><span class="n">Qsc</span><span class="o">.</span><span class="n">from_paper</span><span class="p">(</span><span class="s1">&#39;r1 section 5.1&#39;</span><span class="p">,</span> <span class="n">etabar</span><span class="o">=</span><span class="mf">1.1</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.get_boundary">
+<span class="sig-name descname"><span class="pre">get_boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntheta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">130</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntheta_fourier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">13</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.get_boundary" title="Permalink to this definition"></a></dt>
+<dd><p>Function that, for a given near-axis radial coordinate r, outputs
+the [X,Y,Z,R] components of the boundary. The resolution along the toroidal
+angle phi is equal to the resolution nphi for the axis, while ntheta
+is specified by the used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> (<em>float</em>) – near-axis radius r where to create the surface</p></li>
+<li><p><strong>ntheta</strong> (<em>int</em>) – Number of grid points to plot in the poloidal angle.</p></li>
+<li><p><strong>nphi</strong> (<em>int</em>) – Number of grid points to plot in the toroidal angle.</p></li>
+<li><p><strong>ntheta_fourier</strong> (<em>int</em>) – Resolution in the Fourier transform to cylindrical coordinates</p></li>
+<li><p><strong>mpol</strong> – resolution in poloidal Fourier space</p></li>
+<li><p><strong>ntor</strong> – resolution in toroidal Fourier space</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.get_dofs">
+<span class="sig-name descname"><span class="pre">get_dofs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.get_dofs" title="Permalink to this definition"></a></dt>
+<dd><p>Return a 1D numpy vector of all possible optimizable
+degrees-of-freedom, for simsopt.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.grad_B_tensor_cartesian">
+<span class="sig-name descname"><span class="pre">grad_B_tensor_cartesian</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.grad_B_tensor_cartesian" title="Permalink to this definition"></a></dt>
+<dd><p>Function to calculate the gradient of the magnetic field vector B=(B_x,B_y,B_z)
+at every point along the axis (hence with nphi points) where x, y and z
+are the standard cartesian coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.grad_grad_B_tensor_cartesian">
+<span class="sig-name descname"><span class="pre">grad_grad_B_tensor_cartesian</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.grad_grad_B_tensor_cartesian" title="Permalink to this definition"></a></dt>
+<dd><p>Function to calculate the gradient of of the gradient the magnetic field
+vector B=(B_x,B_y,B_z) at every point along the axis (hence with nphi points)
+where x, y and z are the standard cartesian coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.grad_grad_B_tensor_cylindrical">
+<span class="sig-name descname"><span class="pre">grad_grad_B_tensor_cylindrical</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.grad_grad_B_tensor_cylindrical" title="Permalink to this definition"></a></dt>
+<dd><p>Function to calculate the gradient of of the gradient the magnetic field
+vector B=(B_R,B_phi,B_Z) at every point along the axis (hence with nphi points)
+where R, phi and Z are the standard cylindrical coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.init_axis">
+<span class="sig-name descname"><span class="pre">init_axis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.init_axis" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the curvature, torsion, differentiation matrix, etc.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.mercier">
+<span class="sig-name descname"><span class="pre">mercier</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.mercier" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the terms in Mercier’s criterion.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.min_R0_penalty">
+<span class="sig-name descname"><span class="pre">min_R0_penalty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.min_R0_penalty" title="Permalink to this definition"></a></dt>
+<dd><p>This function can be used in optimization to penalize situations
+in which min(R0) &lt; min_R0_constraint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newfigure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a matplotlib figure with an array of plots, showing the
+toroidally varying properties of the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>newfigure</strong> – Whether to create a new matplotlib figure.</p></li>
+<li><p><strong>show</strong> – Whether to call matplotlib’s <code class="docutils literal notranslate"><span class="pre">show()</span></code> function after making the plots.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.plot_axis">
+<span class="sig-name descname"><span class="pre">plot_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frenet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nphi_frenet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frenet_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.plot_axis" title="Permalink to this definition"></a></dt>
+<dd><p>Plot axis shape and the Frenet-Serret frame along
+the axis (optional). If frenet is true, creates
+a mayavi instance showing the axis and nphi_frenet
+times 3 vectors, corresponding to the tangent, normal and
+binormal vectors. If frenet is false, creates a
+matplotlib instance with only a single axis shape
+curve shown.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nphi</strong> (<em>int</em>) – Number of grid points in the axis shape</p></li>
+<li><p><strong>frenet</strong> (<em>bool</em>) – True plots the Frenet-Serret frame, False it doesn’t</p></li>
+<li><p><strong>nphi_frenet</strong> (<em>int</em>) – Number of Frenet-Serret vectors to show</p></li>
+<li><p><strong>frenet_factor</strong> (<em>float</em>) – Size of Frenet-Serret vectors</p></li>
+<li><p><strong>savefig</strong> (<em>string</em>) – filename to save resulting figure in png format.
+Note that <code class="docutils literal notranslate"><span class="pre">.png</span></code> will be appended.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no figure file will be saved.</p></li>
+<li><p><strong>show</strong> (<em>bool</em>) – Whether or not to call the matplotlib/mayavi <code class="docutils literal notranslate"><span class="pre">show()</span></code> command.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.plot_boundary">
+<span class="sig-name descname"><span class="pre">plot_boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntheta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">150</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntheta_fourier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fieldlines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azim_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.plot_boundary" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the boundary of the near-axis configuration. There are two main ways of
+running this function.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">fieldlines=False</span></code> (default), 2 matplotlib figures are generated:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>A 2D plot with several poloidal planes at the specified radius r with the
+corresponding location of the magnetic axis.</p></li>
+<li><p>A 3D plot with the flux surface and the magnetic field strength
+on the surface.</p></li>
+</ul>
+</div></blockquote>
+<p>If <code class="docutils literal notranslate"><span class="pre">fieldlines=True</span></code>, both matplotlib and mayavi are required, and
+the following 2 figures are generated:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>A 2D matplotlib plot with several poloidal planes at the specified radius r with the
+corresponding location of the magnetic axis.</p></li>
+<li><p>A 3D mayavi figure with the flux surface the magnetic field strength
+on the surface and several magnetic field lines.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> (<em>float</em>) – near-axis radius r where to create the surface</p></li>
+<li><p><strong>ntheta</strong> (<em>int</em>) – Number of grid points to plot in the poloidal angle.</p></li>
+<li><p><strong>nphi</strong> (<em>int</em>) – Number of grid points to plot in the toroidal angle.</p></li>
+<li><p><strong>ntheta_fourier</strong> (<em>int</em>) – Resolution in the Fourier transform to cylindrical coordinates</p></li>
+<li><p><strong>nsections</strong> (<em>int</em>) – Number of poloidal planes to show.</p></li>
+<li><p><strong>fieldlines</strong> (<em>bool</em>) – Specify if fieldlines are shown. Using mayavi instead of matplotlib due to known bug <a class="reference external" href="https://matplotlib.org/2.2.2/mpl_toolkits/mplot3d/faq.html">https://matplotlib.org/2.2.2/mpl_toolkits/mplot3d/faq.html</a></p></li>
+<li><p><strong>savefig</strong> (<em>str</em>) – Filename prefix for the png files to save.
+Note that a suffix including <code class="docutils literal notranslate"><span class="pre">.png</span></code> will be appended.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no figure files will be saved.</p></li>
+<li><p><strong>colormap</strong> (<em>cmap</em>) – Custom colormap for the 3D plots</p></li>
+<li><p><strong>azim_default</strong> – Default azimuthal angle for the three subplots in the 3D surface plot</p></li>
+<li><p><strong>show</strong> – Whether or not to call the matplotlib/mayavi <code class="docutils literal notranslate"><span class="pre">show()</span></code> command.</p></li>
+<li><p><strong>kwargs</strong> – Any additional key-value pairs to pass to matplotlib’s plot_surface.</p></li>
+</ul>
+</dd>
+</dl>
+<p>This function generates plots similar to the ones below:</p>
+<a class="reference internal image-reference" href="_images/3dplot1.png"><img alt="_images/3dplot1.png" src="_images/3dplot1.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/3dplot2.png"><img alt="_images/3dplot2.png" src="_images/3dplot2.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/poloidalplot.png"><img alt="_images/poloidalplot.png" src="_images/poloidalplot.png" style="width: 200px;" /></a>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.r1_diagnostics">
+<span class="sig-name descname"><span class="pre">r1_diagnostics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.r1_diagnostics" title="Permalink to this definition"></a></dt>
+<dd><p>Compute various properties of the O(r^1) solution, once sigma and
+iota are solved for.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.set_dofs">
+<span class="sig-name descname"><span class="pre">set_dofs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.set_dofs" title="Permalink to this definition"></a></dt>
+<dd><p>For interaction with simsopt, set the optimizable degrees of
+freedom from a 1D numpy vector.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.solve_sigma_equation">
+<span class="sig-name descname"><span class="pre">solve_sigma_equation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.solve_sigma_equation" title="Permalink to this definition"></a></dt>
+<dd><p>Solve the sigma equation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.to_RZ">
+<span class="sig-name descname"><span class="pre">to_RZ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.to_RZ" title="Permalink to this definition"></a></dt>
+<dd><p>Function to convert a set of points in (r,theta,phi0) coordinates
+where r=sqrt(2*psi/B0) is the near-axis radius, theta is the
+Boozer poloidal angle and phi0 is the cylindrical angle phi
+on the axis to cylindrical coordinates (R,Z)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> – an array of floats with dimension Nx3 with N the</p></li>
+<li><p><strong>having</strong> (<em>number</em><em> of </em><em>points to evaluate with each points</em>) – </p></li>
+<li><p><strong>the</strong> (<em>r</em><em>,</em><em>theta</em><em>,</em><em>phi0</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsc.Qsc.to_vmec">
+<span class="sig-name descname"><span class="pre">to_vmec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntheta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntorMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsc.Qsc.to_vmec" title="Permalink to this definition"></a></dt>
+<dd><p>Outputs the near-axis configuration calculated with pyQSC to
+a text file that is able to be read by VMEC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – name of the text file to be created</p></li>
+<li><p><strong>r</strong> – near-axis radius r of the desired boundary surface</p></li>
+<li><p><strong>params</strong> – a Python dict() instance containing one/several of the following parameters: mpol,
+delt, nstep, tcon0, ns_array, ftol_array, niter_array</p></li>
+<li><p><strong>ntheta</strong> – resolution in the poloidal angle theta for the Frenet_to_cylindrical and VMEC calculations</p></li>
+<li><p><strong>ntorMax</strong> – maximum number of NTOR in the resulting VMEC input file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="outputs.html" class="btn btn-neutral float-left" title="Outputs and Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="source.html" class="btn btn-neutral float-right" title="Source code on GitHub" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matt Landreman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

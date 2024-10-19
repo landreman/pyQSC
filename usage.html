@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usage &mdash; pyQsc 0.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=ae2dc491"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Outputs and Functions" href="outputs.html" />
+    <link rel="prev" title="Getting started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyQsc
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#post-installation">Post-Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#known-configurations">Known configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#new-configurations">New configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-demo">Simple Demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input-parameters">Input parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-with-simsopt">Using with SIMSOPT</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs and Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html#outputs">Outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html#simsopt-related">SIMSOPT related</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html#position-vector">Position Vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html#grad-b">Grad B</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#qsc-qsc-class">qsc.Qsc class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#qsc.Qsc"><code class="docutils literal notranslate"><span class="pre">Qsc</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.B_contour"><code class="docutils literal notranslate"><span class="pre">Qsc.B_contour()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.B_fieldline"><code class="docutils literal notranslate"><span class="pre">Qsc.B_fieldline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.B_mag"><code class="docutils literal notranslate"><span class="pre">Qsc.B_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.Bfield_cartesian"><code class="docutils literal notranslate"><span class="pre">Qsc.Bfield_cartesian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.Bfield_cylindrical"><code class="docutils literal notranslate"><span class="pre">Qsc.Bfield_cylindrical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.Frenet_to_cylindrical"><code class="docutils literal notranslate"><span class="pre">Qsc.Frenet_to_cylindrical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_grad_B_tensor"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_grad_B_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_grad_grad_B_tensor"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_grad_grad_B_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_r2"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_r2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_r3"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_r3()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_r_singularity"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_r_singularity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.calculate_shear"><code class="docutils literal notranslate"><span class="pre">Qsc.calculate_shear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.change_nfourier"><code class="docutils literal notranslate"><span class="pre">Qsc.change_nfourier()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.configurations"><code class="docutils literal notranslate"><span class="pre">Qsc.configurations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.convert_to_spline"><code class="docutils literal notranslate"><span class="pre">Qsc.convert_to_spline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.flux_tube"><code class="docutils literal notranslate"><span class="pre">Qsc.flux_tube()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.from_cxx"><code class="docutils literal notranslate"><span class="pre">Qsc.from_cxx()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.from_paper"><code class="docutils literal notranslate"><span class="pre">Qsc.from_paper()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.get_boundary"><code class="docutils literal notranslate"><span class="pre">Qsc.get_boundary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.get_dofs"><code class="docutils literal notranslate"><span class="pre">Qsc.get_dofs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.grad_B_tensor_cartesian"><code class="docutils literal notranslate"><span class="pre">Qsc.grad_B_tensor_cartesian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.grad_grad_B_tensor_cartesian"><code class="docutils literal notranslate"><span class="pre">Qsc.grad_grad_B_tensor_cartesian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.grad_grad_B_tensor_cylindrical"><code class="docutils literal notranslate"><span class="pre">Qsc.grad_grad_B_tensor_cylindrical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.init_axis"><code class="docutils literal notranslate"><span class="pre">Qsc.init_axis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.mercier"><code class="docutils literal notranslate"><span class="pre">Qsc.mercier()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.min_R0_penalty"><code class="docutils literal notranslate"><span class="pre">Qsc.min_R0_penalty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.plot"><code class="docutils literal notranslate"><span class="pre">Qsc.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.plot_axis"><code class="docutils literal notranslate"><span class="pre">Qsc.plot_axis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.plot_boundary"><code class="docutils literal notranslate"><span class="pre">Qsc.plot_boundary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.r1_diagnostics"><code class="docutils literal notranslate"><span class="pre">Qsc.r1_diagnostics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.set_dofs"><code class="docutils literal notranslate"><span class="pre">Qsc.set_dofs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.solve_sigma_equation"><code class="docutils literal notranslate"><span class="pre">Qsc.solve_sigma_equation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.to_RZ"><code class="docutils literal notranslate"><span class="pre">Qsc.to_RZ()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#qsc.Qsc.to_vmec"><code class="docutils literal notranslate"><span class="pre">Qsc.to_vmec()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source.html">Source code on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyQsc</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h1>
+<section id="known-configurations">
+<h2>Known configurations<a class="headerlink" href="#known-configurations" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pyQSC</span></code> has several built-in stellarator configurations that can be
+called using the function <code class="xref py py-func docutils literal notranslate"><span class="pre">Qsc.from_paper()</span></code>. For example, if we
+wanted to use the second order configuration from section 5.2 of
+<a class="reference internal" href="#landremansengupta2019" id="id1"><span>[LandremanSengupta2019]</span></a>, we can simply call</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qsc</span> <span class="kn">import</span> <span class="n">Qsc</span>
+<span class="n">stel</span> <span class="o">=</span> <span class="n">Qsc</span><span class="o">.</span><span class="n">from_paper</span><span class="p">(</span><span class="s1">&#39;r2 section 5.2&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>pyQSC has all the first order configurations from
+<a class="reference internal" href="#landremansenguptaplunk2019" id="id2"><span>[LandremanSenguptaPlunk2019]</span></a>, all the second order configurations
+from <a class="reference internal" href="#landremansengupta2019" id="id3"><span>[LandremanSengupta2019]</span></a>, the precise quasisymmetric
+configurations of <a class="reference internal" href="#landremanpaul2022" id="id4"><span>[LandremanPaul2022]</span></a>, and the second order
+configurations in <a class="reference internal" href="#landreman2022" id="id5"><span>[Landreman2022]</span></a>.  See <code class="xref py py-obj docutils literal notranslate"><span class="pre">Qsc.configurations</span></code> for
+the list of these available pre-defined configurations, and see the
+documentation of <code class="xref py py-func docutils literal notranslate"><span class="pre">Qsc.from_paper()</span></code> for more details.
+Alternatively, a configuration generated by the <a class="reference external" href="https://github.com/landreman/qsc">C++ version of QSC</a> can be obtained using the
+function</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qsc</span> <span class="kn">import</span> <span class="n">Qsc</span>
+<span class="n">stel</span> <span class="o">=</span> <span class="n">Qsc</span><span class="o">.</span><span class="n">from_cxx</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">filename</span></code> is the output file of the C++ version of QSC.</p>
+</section>
+<section id="new-configurations">
+<h2>New configurations<a class="headerlink" href="#new-configurations" title="Permalink to this heading"></a></h2>
+<p>A minimal quasisymmetric configuration can be created using the following four parameters:
+the cosine components of the axis radial component <code class="docutils literal notranslate"><span class="pre">rc</span></code>, the sine components of the axis
+vertical component <code class="docutils literal notranslate"><span class="pre">zs</span></code>, the number of field periods <code class="docutils literal notranslate"><span class="pre">nfp</span></code> and the scalar parameter <code class="docutils literal notranslate"><span class="pre">etabar</span></code>
+for the first order magnetic field.
+The following example creates the <code class="docutils literal notranslate"><span class="pre">r1</span> <span class="pre">section</span> <span class="pre">5.1</span></code> configuration using only these four
+parameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qsc</span> <span class="kn">import</span> <span class="n">Qsc</span>
+<span class="n">stel</span> <span class="o">=</span> <span class="n">Qsc</span><span class="p">(</span><span class="n">rc</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.045</span><span class="p">],</span> <span class="n">zs</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.045</span><span class="p">],</span> <span class="n">nfp</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">etabar</span><span class="o">=-</span><span class="mf">0.9</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The following example creates the second order configuration of <code class="docutils literal notranslate"><span class="pre">r2</span> <span class="pre">section</span> <span class="pre">5.4</span></code>.
+As a second order configuration, besides the first order input parameters, it needs to be
+specified as <code class="docutils literal notranslate"><span class="pre">order=&quot;r2&quot;</span></code>, and it takes one more input parameter: the scalar parameter
+<code class="docutils literal notranslate"><span class="pre">B2c</span></code> for the second order magnetic field.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qsc</span> <span class="kn">import</span> <span class="n">Qsc</span>
+<span class="n">stel</span> <span class="o">=</span> <span class="n">Qsc</span><span class="p">(</span><span class="n">rc</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.155</span><span class="p">,</span> <span class="mf">0.0102</span><span class="p">],</span> <span class="n">zs</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.154</span><span class="p">,</span> <span class="mf">0.0111</span><span class="p">],</span> <span class="n">nfp</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">etabar</span><span class="o">=</span><span class="mf">0.64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;r2&#39;</span><span class="p">,</span> <span class="n">B2c</span><span class="o">=-</span><span class="mf">0.00322</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the examples above, only stellarator-symmetric configurations in vacuum are created. The extra parameters
+in pyQSC that need to be specified for non-stellarator-symmetric configurations are specified in
+<a class="reference internal" href="#input-parameters">Input parameters</a>. For a configuration with finite toroidal current on-axis, you can specify the
+parameter <code class="docutils literal notranslate"><span class="pre">I2</span></code> (the second derivative of the current with respect to the radial variable <code class="docutils literal notranslate"><span class="pre">r</span></code>).
+Also, at second order, it is possible to specify a value for <code class="docutils literal notranslate"><span class="pre">p2</span></code>
+(the second derivative of the pressure with respect to the radial variable <code class="docutils literal notranslate"><span class="pre">r</span></code>, usually negative)
+therefore creating a finite-<span class="math notranslate nohighlight">\(\beta\)</span> configuration. The resolution used in pyQSC is controlled
+using the parameter <code class="docutils literal notranslate"><span class="pre">nphi</span></code> which is set by default as <code class="docutils literal notranslate"><span class="pre">nphi=61</span></code>.</p>
+</section>
+<section id="simple-demo">
+<h2>Simple Demo<a class="headerlink" href="#simple-demo" title="Permalink to this heading"></a></h2>
+<p>In this demo, we create a second order configuration and evaluate a few of its parameters.
+We also plot a surface shape at a constant toroidal magnetic flux (flux surface) and plot
+many of the relevant parameters for the near-axis construction. The file associated with
+this demo is located in the <code class="docutils literal notranslate"><span class="pre">examples</span></code> folder.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qsc</span> <span class="kn">import</span> <span class="n">Qsc</span>
+
+<span class="n">stel</span> <span class="o">=</span> <span class="n">Qsc</span><span class="p">(</span><span class="n">rc</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.09</span><span class="p">],</span> <span class="n">zs</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.09</span><span class="p">],</span> <span class="n">nfp</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">etabar</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">I2</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;r2&#39;</span><span class="p">,</span> <span class="n">B2c</span><span class="o">=-</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">p2</span><span class="o">=-</span><span class="mf">600000.</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stel</span><span class="o">.</span><span class="n">iota</span><span class="p">)</span> <span class="c1"># Rotational transform on-axis for this configuration</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stel</span><span class="o">.</span><span class="n">d2_volume_d_psi2</span><span class="p">)</span> <span class="c1"># Magnetic well V&#39;&#39;(psi)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stel</span><span class="o">.</span><span class="n">DMerc_times_r2</span><span class="p">)</span> <span class="c1"># Mercier criterion parameter DMerc multiplied by r^2</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stel</span><span class="o">.</span><span class="n">min_L_grad_B</span><span class="p">)</span> <span class="c1"># Scale length associated with the grad grad B tensor</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stel</span><span class="o">.</span><span class="n">grad_grad_B_inverse_scale_length</span><span class="p">)</span> <span class="c1"># Scale length associated with the grad grad B tensor</span>
+<span class="n">stel</span><span class="o">.</span><span class="n">plot_boundary</span><span class="p">()</span> <span class="c1"># Plot the flux surface shape at the default radius r = 0.1</span>
+<span class="n">stel</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span> <span class="c1"># Plot relevant near axis parameters</span>
+</pre></div>
+</div>
+</section>
+<section id="input-parameters">
+<h2>Input parameters<a class="headerlink" href="#input-parameters" title="Permalink to this heading"></a></h2>
+<p>Besides the input parameters of <code class="docutils literal notranslate"><span class="pre">pyQSC</span></code> listed above, there are other input parameters
+related to stellarator-symmetry and to the choice of vacuum or non-vacuum configurations.
+By order of appearance in the <code class="docutils literal notranslate"><span class="pre">Qsc</span></code> function, the possible input parameters to pyQSC are:</p>
+<ul class="simple">
+<li><p>rc: the cosine components of the axis radial component</p></li>
+<li><p>zs: the sine components of the axis vertical component</p></li>
+<li><p>rs: the sine components of the axis radial component</p></li>
+<li><p>zc: the cosine components of the axis vertical component</p></li>
+<li><p>nfp: the number of field periods</p></li>
+<li><p>etabar: a scalar that specifies the strength of the first order magnetic field modulus</p></li>
+<li><p>sigma0: the value of the function sigma at phi=0, which is 0 for stellarator-symmetry</p></li>
+<li><p>B0: the strength of the magnetic field on-axis</p></li>
+<li><p>I2: the second derivative of the current with respect to the radial variable <code class="docutils literal notranslate"><span class="pre">r</span></code></p></li>
+<li><p>sG: sign of the Boozer function G</p></li>
+<li><p>spsi: sign of the toroidal flux function Psi</p></li>
+<li><p>nphi: toroidal resolution specifying the number of points in a grid along the axis</p></li>
+<li><p>B2s: a scalar that specifies the strength of the sine component of the second order magnetic field modulus, 0 for stellarator-symmetry</p></li>
+<li><p>B2c: a scalar that specifies the strength of the cosine component of the second order magnetic field modulus</p></li>
+<li><p>p2: the second derivative of the pressure with respect to the radial variable <code class="docutils literal notranslate"><span class="pre">r</span></code>, usually negative</p></li>
+<li><p>order: a string that specifies the order of the expansion, “r1”, “r2” or “r3”. For “r3” only the X3c1, Y3c1 and Y3s1 components are calculated (see section 3 of <a class="reference internal" href="#landremansengupta2019" id="id6"><span>[LandremanSengupta2019]</span></a>)</p></li>
+</ul>
+</section>
+<section id="using-with-simsopt">
+<h2>Using with SIMSOPT<a class="headerlink" href="#using-with-simsopt" title="Permalink to this heading"></a></h2>
+<p>An example of the usage of <code class="docutils literal notranslate"><span class="pre">pyQsc</span></code> with the optimization code <code class="docutils literal notranslate"><span class="pre">SIMSOPT</span></code> is shown
+in the examples folder in the file <code class="docutils literal notranslate"><span class="pre">simsopt_demo.py</span></code>.</p>
+<div role="list" class="citation-list">
+<div class="citation" id="landremansenguptaplunk2019" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">LandremanSenguptaPlunk2019</a><span class="fn-bracket">]</span></span>
+<p>Landreman, Sengupta, and Plunk, <em>Journal of Plasma Physics</em> <strong>85</strong>, 905850103 (2019).</p>
+</div>
+<div class="citation" id="landremansengupta2019" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>LandremanSengupta2019<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id3">2</a>,<a role="doc-backlink" href="#id6">3</a>)</span>
+<p>Landreman and Sengupta, <em>Journal of Plasma Physics</em> <strong>85</strong>, 815850601 (2019).</p>
+</div>
+<div class="citation" id="landremanpaul2022" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">LandremanPaul2022</a><span class="fn-bracket">]</span></span>
+<p>Landreman and Paul, <em>Physical Review Letters</em> <strong>128</strong>, 035001 (2022).</p>
+</div>
+<div class="citation" id="landreman2022" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">Landreman2022</a><span class="fn-bracket">]</span></span>
+<p>Landreman, <em>Journal of Plasma Physics</em> <strong>88</strong>, 905880616 (2022).</p>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="outputs.html" class="btn btn-neutral float-right" title="Outputs and Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matt Landreman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

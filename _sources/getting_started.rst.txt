@@ -1,0 +1,53 @@
+Getting started
+===============
+
+Overview
+^^^^^^^^
+
+``pyQSC`` is a python package for generating quasisymmetric stellarator configurations
+using an expansion about the magnetic axis.
+The underlying equations are explained in detail in
+[LandremanSenguptaPlunk2019]_ and [LandremanSengupta2019]_.
+PyQSC is closely related to the `fortran package here <https://github.com/landreman/quasisymmetry>`_,
+except that pyQSC is written in pure python. This makes pyQSC user-friendly,
+with no need for compilation, though it is slower.
+
+
+Requirements
+^^^^^^^^^^^^
+
+``pyQSC`` has minimal dependencies - it requires only python3, numpy,
+scipy, and matplotlib. If you don't already have numpy, scipy, and
+matplotlib, they will be installed automatically by the ``pip
+install`` step described in the next section. Certain plotting
+routines also require the mayavi package.
+
+
+Installation
+^^^^^^^^^^^^
+
+The recommended way to install pyQSC is to install it from `PyPI <https://pypi.org/project/qsc/>`_ using ``pip``::
+
+    pip install qsc
+
+If you prefer to see or edit the source code, you can first clone the repository using::
+
+    git clone https://github.com/landreman/pyQSC.git
+
+Then install the package to your local python environment with::
+
+  cd pyQSC
+  pip install -e .
+
+The ``-e`` in the last command is optional.
+
+.. [LandremanSenguptaPlunk2019] Landreman, Sengupta, and Plunk, *Journal of Plasma Physics* **85**, 905850103 (2019).
+.. [LandremanSengupta2019] Landreman and Sengupta, *Journal of Plasma Physics* **85**, 815850601 (2019).
+
+Post-Installation
+^^^^^^^^^^^^^^^^^
+
+If the installation is successful, ``pyQSC`` will be added to your python environment.
+To use it in python, simply import the module as
+
+  >>> from qsc import Qsc
