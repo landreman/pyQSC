@@ -119,6 +119,16 @@ def init_axis(self):
         self.varphi[j] = self.varphi[j-1] + (d_l_d_phi[j-1] + d_l_d_phi[j])
     self.varphi = self.varphi * (0.5 * d_phi * 2 * np.pi / axis_length)
 
+    matrix = self.d_d_phi.copy()
+    matrix[0, 0] = 1
+    rhs = self.d_varphi_d_phi - 1
+    nu = np.linalg.solve(matrix, rhs)
+    varphi_new = phi + nu
+    #print("old:", self.varphi)
+    #print("new:", varphi_new)
+    #print("diff:", self.varphi - varphi_new)
+    self.varphi = varphi_new
+
     # Add all results to self:
     self.phi = phi
     self.d_phi = d_phi
