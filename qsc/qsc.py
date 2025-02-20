@@ -6,7 +6,7 @@ stellarator construction.
 import logging
 import numpy as np
 from scipy.io import netcdf
-#from numba import jit
+import matplotlib.pyplot as plt
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -221,3 +221,144 @@ class Qsc():
         """
         return np.max((0, self.min_R0_threshold - self.min_R0)) ** 2
         
+    @classmethod
+    def from_boozxform(cls, booz_xform_file, order='r2', max_s_for_fit = 0.4, N_phi = 200, max_n_to_plot = 2, show=False,
+                         vmec_file=None, rc=[], rs=[], zc=[], zs=[], sigma0=0, I2=0, p2=0):
+        """
+        Load a configuration from a VMEC and a BOOZ_XFORM output files
+        """
+        # Read properties of BOOZ_XFORM output file
+        f = netcdf.netcdf_file(booz_xform_file,'r',mmap=False)
+        bmnc = f.variables['bmnc_b'][()]
+        ixm = f.variables['ixm_b'][()]
+        ixn = f.variables['ixn_b'][()]
+        jlist = f.variables['jlist'][()]
+        ns = f.variables['ns_b'][()]
+        nfp = f.variables['nfp_b'][()]
+        Psi = f.variables['phi_b'][()]
+        Psi_a = np.abs(Psi[-1])
+        iotaVMECt=f.variables['iota_b'][()][1]
+        f.close()
+
+        if vmec_file!=None:
+            # Read axis-shape from VMEC output file
+            f = netcdf.netcdf_file(vmec_file,'r',mmap=False)
+            am = f.variables['am'][()]
+            rc = f.variables['raxis_cc'][()]
+            zs = -f.variables['zaxis_cs'][()]
+            try:
+                rs = -f.variables['raxis_cs'][()]
+                zc = f.variables['zaxis_cc'][()]
+                logger.info('Non stellarator symmetric configuration')
+            except:
+                rs=[]
+                zc=[]
+                logger.info('Stellarator symmetric configuration')
+            f.close()
+        elif rc!=[]:
+            # Read axis-shape from input parameters
+            rc=rc
+            rs=rs
+            zc=zc
+            zs=zs
+        else:
+            raise Exception("Axis shape not specified")
+
+        # Calculate nNormal
+        stel = Qsc(rc=rc, rs=rs, zc=zc, zs=zs, nfp=nfp)
+        nNormal = stel.iotaN - stel.iota
+
+        # Prepare coordinates for fit
+        s_full = np.linspace(0,1,ns)
+        ds = s_full[1] - s_full[0]
+        #s_half = s_full[1:] - 0.5*ds
+        s_half = s_full[jlist-1] - 0.5*ds
+        mask = s_half < max_s_for_fit
+        s_fine = np.linspace(0,1,400)
+        sqrts_fine = s_fine
+        phi = np.linspace(0,2*np.pi / nfp, N_phi)
+        B0  = np.zeros(N_phi)
+        B1s = np.zeros(N_phi)
+        B1c = np.zeros(N_phi)
+        B20 = np.zeros(N_phi)
+        B2s = np.zeros(N_phi)
+        B2c = np.zeros(N_phi)
+
+        # Perform fit
+        numRows=3
+        numCols=max_n_to_plot*2+1
+        fig=plt.figure(num=None, figsize=(16, 9), dpi=80, facecolor='w', edgecolor='k')
+        for jmn in range(len(ixm)):
+            m = ixm[jmn]
+            n = ixn[jmn] / nfp
+            if m>2:
+                continue
+            doplot = (np.abs(n) <= max_n_to_plot) & show
+            row = m
+            col = n+max_n_to_plot
+            if doplot:
+                plt.subplot(int(numRows),int(numCols),int(row*numCols + col + 1))
+                plt.plot(np.sqrt(s_half), bmnc[:,jmn],'.-')
+                # plt.xlabel(r'$\sqrt{s}$')
+                plt.title('bmnc(m='+str(m)+' n='+str(n)+')')
+            if m==0:
+                # For m=0, fit a polynomial in s (not sqrt(s)) that does not need to go through the origin.
+                degree = 4
+                p = np.polyfit(s_half[mask], bmnc[mask,jmn], degree)
+                B0 += p[-1] * np.cos(n*nfp*phi)
+                B20 += p[-2] * np.cos(2*n*nfp*phi)
+                if doplot:
+                    plt.plot(np.sqrt(s_fine), np.polyval(p, s_fine),'r')
+            if m==1:
+                # For m=1, fit a polynomial in sqrt(s) to an odd function
+                x1 = np.sqrt(s_half[mask])
+                y1 = bmnc[mask,jmn]
+                x2 = np.concatenate((-x1,x1))
+                y2 = np.concatenate((-y1,y1))
+                degree = 5
+                p = np.polyfit(x2,y2, degree)
+                B1c += p[-2] * (np.sin(n*nfp*phi) * np.sin(nNormal*phi) + np.cos(n*nfp*phi) * np.cos(nNormal*phi))
+                B1s += p[-2] * (np.sin(n*nfp*phi) * np.cos(nNormal*phi) - np.cos(n*nfp*phi) * np.sin(nNormal*phi))
+                if doplot:
+                    plt.plot(sqrts_fine, np.polyval(p, sqrts_fine),'r')
+            if m==2:
+                # For m=2, fit a polynomial in s (not sqrt(s)) that does need to go through the origin.
+                x1 = s_half[mask]
+                y1 = bmnc[mask,jmn]
+                degree = 4
+                p = np.polyfit(x1,y1, degree)
+                B2c += p[-2] * (np.sin(2*n*nfp*phi) * np.sin(2*nNormal*phi) + np.cos(2*n*nfp*phi) * np.cos(2*nNormal*phi))
+                B2s += p[-2] * (np.sin(2*n*nfp*phi) * np.cos(2*nNormal*phi) - np.cos(2*n*nfp*phi) * np.sin(2*nNormal*phi))
+                if doplot:
+                    plt.plot(np.sqrt(s_fine), np.polyval(p, s_fine),'r')
+        if show:
+            plt.show()
+        # Convert expansion in sqrt(s) to an expansion in r
+        BBar = np.mean(B0)
+        sqrt_s_over_r = np.sqrt(np.pi * BBar / Psi_a)
+        B1s *= -sqrt_s_over_r
+        B1c *= -sqrt_s_over_r
+        B20 *= sqrt_s_over_r*sqrt_s_over_r
+        B2c *= sqrt_s_over_r*sqrt_s_over_r
+        B2s *= sqrt_s_over_r*sqrt_s_over_r
+        eta_bar = np.mean(B1c) / BBar
+
+        # NEEDS A WAY TO READ I2 FROM VMEC OR BOOZ_XFORM
+
+        if p2==0 and vmec_file!=None:
+            r  = np.sqrt(Psi_a/(np.pi*BBar))
+            p2 = - am[0]/r/r
+
+        if order=='r1':
+            q = cls(rc=rc,rs=rs,zc=zc,zs=zs,etabar=eta_bar,nphi=N_phi,nfp=nfp,B0=BBar,sigma0=sigma0, I2=I2)
+        else:
+            q = cls(rc=rc,rs=rs,zc=zc,zs=zs,etabar=eta_bar,nphi=N_phi,nfp=nfp,B0=BBar,sigma0=sigma0, I2=I2, B2c=np.mean(B2c), B2s=np.mean(B2s), order=order, p2=p2)
+
+        q.B0_boozxform_array=B0
+        q.B1c_boozxform_array=B1c
+        q.B1s_boozxform_array=B1s
+        q.B20_boozxform_array=B20
+        q.B2c_boozxform_array=B2c
+        q.B2s_boozxform_array=B2s
+
+        return q
