@@ -74,5 +74,8 @@ jobs:
     - name: Try importing vmec module
       run: python -c "print(dir()); import vmec; print(dir()); print(dir(vmec)); print('package:', vmec.__package__); print('spec:', vmec.__spec__); print('doc:', vmec.__doc__); print('file:', vmec.__file__); print('path:', vmec.__path__)"
 
+    - name: Install DESC
+      run: pip install desc-opt
+
     - name: Run unit tests
       run: python3 -m unittest -v
