@@ -9,3 +9,7 @@ threed*
 wout*
 mercier*
 parvmec*
+*.sp
+*.h5
+*.end
+xspec
