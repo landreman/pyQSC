@@ -121,6 +121,90 @@ class GradGradBTensorTests(unittest.TestCase):
                         np.testing.assert_allclose(s.grad_grad_B_alt[:,0,2,0], np.full(nphi, val), rtol=rtol, atol=atol)
                         np.testing.assert_allclose(s.grad_grad_B_alt[:,0,0,2], np.full(nphi, val), rtol=rtol, atol=atol)
                         
+class DirectionalDerivativeTests(unittest.TestCase):
+    """
+    This test computes the B(\phi), B'(\phi), and B''(\phi) on the magnetic
+    axis in two ways, where \phi is the standard cylindrical angle.  
+    
+    The first way uses the fact that B(\phi) = sG*B0*T(\phi), where T(\phi) is 
+    the tangent vector of the Frenet frame associated to the magnetic axis. Since
+    we have analytical expressions for the Frenet frame, we can differentiate them
+    with respect to \phi.
+
+    The second way relies on the gradB, and gradgradB tensors in pyqsc associated
+    to the NAE.  We know that hatB(\phi) = B(\Gamma(\phi)) where Bhat is the magnetic
+    field B evaluated on the magnetic axis, given by \Gamma(\phi).  Differentiating
+    this expression with respect to \phi and applying the chain rule, we obtain
+    a formula for hatB(\phi) that depends on derivative tensors of B.
+
+    With these two independent formulas for B, B', and B'', we can verify that
+    the two results are the same.
+    """
+    def test_B_Bprime_Bprimeprime(self):
+        rtol = 1e-8
+        atol = 1e-8
+        
+        np.random.seed(0)
+        for sG in [-1, 1]:
+            for spsi in [-1, 1]:
+                for config in [1, 2, 3, 4, 5]:
+                    print(sG, spsi, config)
+                    B0 = np.random.rand() * 0.4 + 0.8
+                    nphi = int(np.random.rand() * 50 + 61)
+                    s = Qsc.from_paper(config, sG=sG, spsi=spsi, B0=B0, nphi=nphi)
+                    s.calculate()
+
+                    # this test checks that the derivatives B'(\phi) and B''(\phi) 
+                    # when calculated by from the gradB and gradgradB tensors are correct
+                    axis_B0 = s.Bfield_cartesian(r=0, theta=0.)
+                    axis_B1 = s.grad_B_tensor_cartesian()
+                    axis_B2 = s.grad_grad_B_tensor_cartesian()
+                    
+                    from simsopt.geo import CurveRZFourier
+                    nfp=s.nfp
+                    G0 = CurveRZFourier(np.linspace(0, 1/nfp, s.phi.size, endpoint=False), s.rc.size-1, nfp, True)
+                    G0.rc[:] = s.rc[:]
+                    G0.zs[:] = s.zs[1:]
+                    G0.x = G0.get_dofs()
+                    
+                    dG0_dphi = G0.gammadash()
+                    d2G0_dphi2 = G0.gammadashdash()
+                    
+                    ds_dphi = np.linalg.norm(dG0_dphi, axis=1)
+                    d2s_dphi2 = np.sum(dG0_dphi*d2G0_dphi2, axis=1)/ds_dphi
+                    
+                    T, N, B = G0.frenet_frame()
+                    kappa = G0.kappa()
+                    dkappa_dphi = G0.kappadash()
+                    dkappa_ds = dkappa_dphi * (1/ds_dphi)
+                    torsion = G0.torsion()
+                    
+                    dT_ds = kappa[:, None] * N
+                    dN_ds = -kappa[:, None] * T + torsion[:, None]*B
+                    d2T_ds2 = dkappa_ds[:, None] * N + dN_ds*kappa[:, None]
+                    
+                    dT_dphi = dT_ds * ds_dphi[:, None]
+                    d2T_dphi2 = d2T_ds2*ds_dphi[:, None]**2 + d2s_dphi2[:, None]*dT_ds
+                    
+                    Bexact = np.transpose(axis_B0, axes=(1, 0))
+                    Bqsc = sG*B0*T
+                    
+                    #check B(\phi)
+                    np.testing.assert_allclose(Bexact, Bqsc, rtol=rtol, atol=atol)
+                    
+                    dG0_dphi = np.transpose(dG0_dphi, axes=(1, 0))
+                    dBqsc_dphi = np.einsum('ijk,ik->jk', axis_B1, dG0_dphi)
+                    dBexact_dphi = sG*B0*dT_dphi
+                    dBexact_dphi = np.transpose(dBexact_dphi, axes=(1, 0))
+                    #check B'(\phi)
+                    np.testing.assert_allclose(dBexact_dphi, dBqsc_dphi, rtol=rtol, atol=atol)
+                    
+                    d2G0_dphi2 = np.transpose(d2G0_dphi2, axes=(1, 0))
+                    d2Bqsc_dphi2 = np.einsum('ijkl,il,jl->kl', axis_B2, dG0_dphi, dG0_dphi)+np.einsum('ijl,jl->il', axis_B1, d2G0_dphi2)
+                    d2Bexact_dphi2 = sG*B0*d2T_dphi2
+                    d2Bexact_dphi2 = np.transpose(d2Bexact_dphi2, axes=(1, 0))
+                    #check B''(\phi)
+                    np.testing.assert_allclose(d2Bexact_dphi2, d2Bqsc_dphi2, rtol=rtol, atol=atol)
 
 class CylindricalCartesianTensorsTests(unittest.TestCase):
 

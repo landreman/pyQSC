@@ -1306,85 +1306,41 @@ def grad_B_tensor_cartesian(self):
     return grad_B_vector_cartesian
 
 def grad_grad_B_tensor_cylindrical(self):
-    '''
-    Function to calculate the gradient of of the gradient the magnetic field
-    vector B=(B_R,B_phi,B_Z) at every point along the axis (hence with nphi points)
-    where R, phi and Z are the standard cylindrical coordinates.
-    '''
-    return np.transpose(self.grad_grad_B,(1,2,3,0))
+     '''
+     Function to calculate the gradient of of the gradient the magnetic field
+     vector B=(B_R,B_phi,B_Z) at every point along the axis (hence with nphi points)
+     where R, phi and Z are the standard cylindrical coordinates.
+     '''
+     #     return np.transpose(self.grad_grad_B,(1,2,3,0))
+     t = self.tangent_cylindrical
+     n = self.normal_cylindrical
+     b = self.binormal_cylindrical
+     E = np.stack([n, b, t], axis=0)
+     grad_grad_B = self.grad_grad_B.transpose(1, 2, 3, 0)
+     grad_grad_B_tensor_cylindrical = np.einsum('ijkq,iqa,jqb,kqc->abcq', grad_grad_B, E, E, E)
+     return grad_grad_B_tensor_cylindrical
 
 def grad_grad_B_tensor_cartesian(self):
-    '''
-    Function to calculate the gradient of of the gradient the magnetic field
-    vector B=(B_x,B_y,B_z) at every point along the axis (hence with nphi points)
-    where x, y and z are the standard cartesian coordinates.
-    '''
-    nablanablaB = self.grad_grad_B_tensor_cylindrical()
+    """
+    Transform the second derivative tensor of the magnetic field from cylindrical to Cartesian coordinates.
+    Shape: (nphi, 3, 3, 3)
+    """
+    grad_grad_B_cyl = self.grad_grad_B_tensor_cylindrical().transpose(3, 0, 1, 2)  # shape (nphi, 3, 3, 3)
     cosphi = np.cos(self.phi)
     sinphi = np.sin(self.phi)
 
-    grad_grad_B_vector_cartesian = np.array([[
-[cosphi**3*nablanablaB[0, 0, 0] - cosphi**2*sinphi*(nablanablaB[0, 0, 1] + 
-      nablanablaB[0, 1, 0] + nablanablaB[1, 0, 0]) + 
-    cosphi*sinphi**2*(nablanablaB[0, 1, 1] + nablanablaB[1, 0, 1] + 
-      nablanablaB[1, 1, 0]) - sinphi**3*nablanablaB[1, 1, 1], 
-   cosphi**3*nablanablaB[0, 0, 1] + cosphi**2*sinphi*(nablanablaB[0, 0, 0] - 
-      nablanablaB[0, 1, 1] - nablanablaB[1, 0, 1]) + sinphi**3*nablanablaB[1, 1, 0] - 
-    cosphi*sinphi**2*(nablanablaB[0, 1, 0] + nablanablaB[1, 0, 0] - 
-      nablanablaB[1, 1, 1]), cosphi**2*nablanablaB[0, 0, 2] - 
-    cosphi*sinphi*(nablanablaB[0, 1, 2] + nablanablaB[1, 0, 2]) + 
-    sinphi**2*nablanablaB[1, 1, 2]], [cosphi**3*nablanablaB[0, 1, 0] + 
-    sinphi**3*nablanablaB[1, 0, 1] + cosphi**2*sinphi*(nablanablaB[0, 0, 0] - 
-      nablanablaB[0, 1, 1] - nablanablaB[1, 1, 0]) - 
-    cosphi*sinphi**2*(nablanablaB[0, 0, 1] + nablanablaB[1, 0, 0] - 
-      nablanablaB[1, 1, 1]), cosphi**3*nablanablaB[0, 1, 1] - 
-    sinphi**3*nablanablaB[1, 0, 0] + cosphi*sinphi**2*(nablanablaB[0, 0, 0] - 
-      nablanablaB[1, 0, 1] - nablanablaB[1, 1, 0]) + 
-    cosphi**2*sinphi*(nablanablaB[0, 0, 1] + nablanablaB[0, 1, 0] - 
-      nablanablaB[1, 1, 1]), cosphi**2*nablanablaB[0, 1, 2] - 
-    sinphi**2*nablanablaB[1, 0, 2] + cosphi*sinphi*(nablanablaB[0, 0, 2] - 
-      nablanablaB[1, 1, 2])], [cosphi**2*nablanablaB[0, 2, 0] - 
-    cosphi*sinphi*(nablanablaB[0, 2, 1] + nablanablaB[1, 2, 0]) + 
-    sinphi**2*nablanablaB[1, 2, 1], cosphi**2*nablanablaB[0, 2, 1] - 
-    sinphi**2*nablanablaB[1, 2, 0] + cosphi*sinphi*(nablanablaB[0, 2, 0] - 
-      nablanablaB[1, 2, 1]), cosphi*nablanablaB[0, 2, 2] - 
-    sinphi*nablanablaB[1, 2, 2]]], 
- [[sinphi**3*nablanablaB[0, 1, 1] + cosphi**3*nablanablaB[1, 0, 0] + 
-    cosphi**2*sinphi*(nablanablaB[0, 0, 0] - nablanablaB[1, 0, 1] - 
-      nablanablaB[1, 1, 0]) - cosphi*sinphi**2*(nablanablaB[0, 0, 1] + 
-      nablanablaB[0, 1, 0] - nablanablaB[1, 1, 1]), -(sinphi**3*nablanablaB[0, 1, 0]) + 
-    cosphi**3*nablanablaB[1, 0, 1] + cosphi*sinphi**2*(nablanablaB[0, 0, 0] - 
-      nablanablaB[0, 1, 1] - nablanablaB[1, 1, 0]) + 
-    cosphi**2*sinphi*(nablanablaB[0, 0, 1] + nablanablaB[1, 0, 0] - 
-      nablanablaB[1, 1, 1]), -(sinphi**2*nablanablaB[0, 1, 2]) + 
-    cosphi**2*nablanablaB[1, 0, 2] + cosphi*sinphi*(nablanablaB[0, 0, 2] - 
-      nablanablaB[1, 1, 2])], [-(sinphi**3*nablanablaB[0, 0, 1]) + 
-    cosphi*sinphi**2*(nablanablaB[0, 0, 0] - nablanablaB[0, 1, 1] - 
-      nablanablaB[1, 0, 1]) + cosphi**3*nablanablaB[1, 1, 0] + 
-    cosphi**2*sinphi*(nablanablaB[0, 1, 0] + nablanablaB[1, 0, 0] - 
-      nablanablaB[1, 1, 1]), sinphi**3*nablanablaB[0, 0, 0] + 
-    cosphi*sinphi**2*(nablanablaB[0, 0, 1] + nablanablaB[0, 1, 0] + 
-      nablanablaB[1, 0, 0]) + cosphi**2*sinphi*(nablanablaB[0, 1, 1] + 
-      nablanablaB[1, 0, 1] + nablanablaB[1, 1, 0]) + cosphi**3*nablanablaB[1, 1, 1], 
-   sinphi**2*nablanablaB[0, 0, 2] + cosphi*sinphi*(nablanablaB[0, 1, 2] + 
-      nablanablaB[1, 0, 2]) + cosphi**2*nablanablaB[1, 1, 2]], 
-  [-(sinphi**2*nablanablaB[0, 2, 1]) + cosphi**2*nablanablaB[1, 2, 0] + 
-    cosphi*sinphi*(nablanablaB[0, 2, 0] - nablanablaB[1, 2, 1]), 
-   sinphi**2*nablanablaB[0, 2, 0] + cosphi*sinphi*(nablanablaB[0, 2, 1] + 
-      nablanablaB[1, 2, 0]) + cosphi**2*nablanablaB[1, 2, 1], 
-   sinphi*nablanablaB[0, 2, 2] + cosphi*nablanablaB[1, 2, 2]]], 
- [[cosphi**2*nablanablaB[2, 0, 0] - cosphi*sinphi*(nablanablaB[2, 0, 1] + 
-      nablanablaB[2, 1, 0]) + sinphi**2*nablanablaB[2, 1, 1], 
-   cosphi**2*nablanablaB[2, 0, 1] - sinphi**2*nablanablaB[2, 1, 0] + 
-    cosphi*sinphi*(nablanablaB[2, 0, 0] - nablanablaB[2, 1, 1]), 
-   cosphi*nablanablaB[2, 0, 2] - sinphi*nablanablaB[2, 1, 2]], 
-  [-(sinphi**2*nablanablaB[2, 0, 1]) + cosphi**2*nablanablaB[2, 1, 0] + 
-    cosphi*sinphi*(nablanablaB[2, 0, 0] - nablanablaB[2, 1, 1]), 
-   sinphi**2*nablanablaB[2, 0, 0] + cosphi*sinphi*(nablanablaB[2, 0, 1] + 
-      nablanablaB[2, 1, 0]) + cosphi**2*nablanablaB[2, 1, 1], 
-   sinphi*nablanablaB[2, 0, 2] + cosphi*nablanablaB[2, 1, 2]], 
-  [cosphi*nablanablaB[2, 2, 0] - sinphi*nablanablaB[2, 2, 1], 
-   sinphi*nablanablaB[2, 2, 0] + cosphi*nablanablaB[2, 2, 1], nablanablaB[2, 2, 2]]
-      ]])
+    # Rotation matrix R from cylindrical (R, φ, Z) to Cartesian (x, y, z)
+    R = np.array([
+        [cosphi, -sinphi, np.zeros_like(cosphi)],
+        [sinphi,  cosphi, np.zeros_like(cosphi)],
+        [np.zeros_like(cosphi), np.zeros_like(cosphi), np.ones_like(cosphi)],
+    ])  # shape (3, 3, nphi)
 
-    return grad_grad_B_vector_cartesian
+    # Transpose to shape (nphi, 3, 3)
+    R = np.transpose(R, (2, 0, 1))
+
+    # Apply tensor transformation: R[i,a] * R[j,b] * R[k,c] * T[a,b,c]
+    T_cartesian = np.einsum('pia,pjb,pkc,pabc->pijk',
+                            R, R, R, grad_grad_B_cyl)
+
+    return T_cartesian.transpose(1,2,3,0)  # shape (nphi, 3, 3, 3)
